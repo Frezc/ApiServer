@@ -16,6 +16,4 @@ Route::get('/', function () {
 });
 
 
-
-Route::get('/user/{id}', 'UserController@show')
-->where('id', '[0-9]+');
+Route::resource('user', 'UserController');

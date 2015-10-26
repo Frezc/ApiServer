@@ -38,7 +38,7 @@
     <body>
         <div class="container">
             <div class="content">
-                <div class="title">This is a api sever.</div>
+                <div class="title">This is a api server.</div>
             </div>
         </div>
     </body>
