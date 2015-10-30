@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\User;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class UserController extends Controller
 {
@@ -40,8 +41,7 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $users = User::all();
-        dd($request->header());
+        $user = new User;
         return response()->json(['email'=>$request->input('email')]);
     }
 
@@ -53,7 +53,11 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        $user = User::findOrFail($id);
+        try{
+          $user = User::findOrFail($id);
+        } catch (ModelNotFoundException $e){
+          return $this->response->errorNotFound();
+        }
         return response()->json($user);
     }
 

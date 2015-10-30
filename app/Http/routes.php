@@ -27,8 +27,10 @@ $api -> version('v1',  function($api){
   //$api->get('users', 'App\Http\Controllers\AuthenticateController@index');
   $api->post('auth', 'App\Http\Controllers\AuthenticateController@authenticate');
   $api->get('user/{id}', 'App\Http\Controllers\UserController@show');
-  $api->get('resume', 'App\Http\Controllers\AuthenticateController@getResume');
-  $api->delete('resume', 'App\Http\Controllers\AuthenticateController@delResume');
-  $api->post('resume', 'App\Http\Controllers\AuthenticateController@addResume');
+  // $api->post('user', 'App\Http\Controllers\UserController@store');
+  $api->get('resume', 'App\Http\Controllers\ResumeController@get');
+  $api->post('resume/delete', 'App\Http\Controllers\ResumeController@delete');
+  $api->post('resume/add', 'App\Http\Controllers\ResumeController@add');
+  $api->post('resume/update', 'App\Http\Controllers\ResumeController@update');
   $api->post('avatar', 'App\Http\Controllers\AuthenticateController@updateAvatar');
 });
