@@ -16,8 +16,10 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::all();
-        return response()->json($users);
+        dd($request->header());
+
+        // return response()->json($users);
+        return $users;
     }
 
     /**
@@ -38,7 +40,9 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $users = User::all();
+        dd($request->header());
+        return response()->json(['email'=>$request->input('email')]);
     }
 
     /**
@@ -49,7 +53,8 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        return "User ".$id;
+        $user = User::findOrFail($id);
+        return response()->json($user);
     }
 
     /**

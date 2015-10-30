@@ -50,13 +50,13 @@ return [
 
         'ftp' => [
             'driver'   => 'ftp',
-            'host'     => 'ftp.example.com',
-            'username' => 'your-username',
-            'password' => 'your-password',
+            'host'     => 'qxu1194160100.my3w.com',
+            'username' => 'qxu1194160100',
+            'password' => 'a504021398',
 
             // Optional FTP Settings...
             // 'port'     => 21,
-            // 'root'     => '',
+            'root'     => '/htdocs/static',
             // 'passive'  => true,
             // 'ssl'      => true,
             // 'timeout'  => 30,

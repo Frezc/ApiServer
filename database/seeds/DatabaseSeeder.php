@@ -15,6 +15,19 @@ class DatabaseSeeder extends Seeder
         Model::unguard();
 
         // $this->call(UserTableSeeder::class);
+        // DB::table('users')->insert([
+        //     'nickname' => str_random(10),
+        //     'email' => str_random(10).'@gmail.com',
+        //     'password' => Hash::make('secret'),
+        // ]);
+
+        // DB::table('users')->update([
+        //     'password' => Hash::make('secret')
+        // ]);
+
+        DB::table('users')->update([
+            'avatar' => 'http://static.frezc.com/static/avatars/default'
+        ]);
 
         Model::reguard();
     }
