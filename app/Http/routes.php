@@ -33,4 +33,8 @@ $api -> version('v1',  function($api){
   $api->post('resume/add', 'App\Http\Controllers\ResumeController@add');
   $api->post('resume/update', 'App\Http\Controllers\ResumeController@update');
   $api->post('avatar', 'App\Http\Controllers\AuthenticateController@updateAvatar');
+  $api->get('job/query', 'App\Http\Controllers\JobController@query');
+  $api->get('job/{id}', 'App\Http\Controllers\JobController@get');
+  $api->get('company/query', 'App\Http\Controllers\CompanyController@query');
+  $api->get('company/{id}', 'App\Http\Controllers\CompanyController@get');
 });

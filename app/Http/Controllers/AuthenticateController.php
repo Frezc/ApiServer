@@ -25,32 +25,6 @@ class AuthenticateController extends Controller
       return $user = JWTAuth::parseToken()->authenticate();
   }
 
-  public function getResume(Request $request){
-      $user = JWTAuth::parseToken()->authenticate();
-      $resumes = $user->resumes();
-      if ($resume_id = $request->query('id')){
-        return $resumes->where('id', $resume_id)->get()->toArray();
-      } else {
-        return $resumes->get()->toArray();
-      }
-  }
-
-  public function delResume(Request $request){
-      $user = JWTAuth::parseToken()->authenticate();
-      $resumes = $user->resumes();
-      if ($resume_id = $request->query('id')){
-        $resume = $resumes->where('id', $resume_id)->first();
-        if ($resume){
-          $resume->delete();
-          return 'deleted';
-        } else {
-          return $this->response->error('resume not found', 404);
-        }
-      } else {
-        return $this->response->errorBadRequest();
-      }
-  }
-
   public function updateAvatar(Request $request){
     $user = JWTAuth::parseToken()->authenticate();
     if ($request->hasFile('avatar') && $request->file('avatar')->isValid()){
@@ -65,13 +39,6 @@ class AuthenticateController extends Controller
     } else {
         return $this->response->errorBadRequest();
     }
-  }
-
-  public function addResume(Request $request){
-      $user = JWTAuth::parseToken()->authenticate();
-      if ($request->hasFile('photo') && $request->file('photo')->isValid()){
-
-      }
   }
 
   public function authenticate(Request $request)
