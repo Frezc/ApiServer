@@ -14,7 +14,7 @@ class AuthenticateController extends Controller
 {
   public function __construct()
   {
-       $this->middleware('jwt.auth', ['except' => ['authenticate']]);
+       $this->middleware('jwt.auth', ['except' => ['authenticate', 'refreshToken']]);
   }
 
   public function index()
@@ -39,6 +39,11 @@ class AuthenticateController extends Controller
     } else {
         return $this->response->errorBadRequest();
     }
+  }
+  
+  public function refreshToken(Request $request){
+      $token = JWTAuth::refresh($request->query('token'));
+      return $token;
   }
 
   public function authenticate(Request $request)

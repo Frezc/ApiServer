@@ -35,4 +35,8 @@ class User extends Model implements AuthenticatableContract,
     public function resumes(){
       return $this->hasMany('App\Resume');
     }
+    
+    public function jobApplies(){
+        return $this->hasMany('App\JobApply');
+    }
 }

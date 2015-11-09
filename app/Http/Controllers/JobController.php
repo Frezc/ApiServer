@@ -20,7 +20,7 @@ class JobController extends Controller
   }
 
   public function query(Request $request){
-    if ($request->has('q') && $request->has('limit')){
+    if ($request->has('q') && $request->has('limit') && $request->query('limit') > 0){
       $q = $request->query('q');
       $q_array = explode(" ", trim($q));
 
