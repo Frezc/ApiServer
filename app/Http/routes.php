@@ -36,8 +36,11 @@ $api -> version('v1',  function($api){
   $api->post('avatar', 'App\Http\Controllers\AuthenticateController@updateAvatar');
   $api->get('job/query', 'App\Http\Controllers\JobController@query');
   $api->get('job/apply', 'App\Http\Controllers\UserController@getJobApply');
-  $api->get('job/{id}', 'App\Http\Controllers\JobController@get');
+  $api->get('job/completed', 'App\Http\Controllers\UserController@getJobCompleted');
+  $api->get('job/{id}', 'App\Http\Controllers\JobController@get')->where('id', '[0-9]+');
   $api->post('job/apply', 'App\Http\Controllers\UserController@postJobApply');
+  $api->get('job/evaluate', 'App\Http\Controllers\JobController@getJobEvaluate');
+  $api->post('job/evaluate', 'App\Http\Controllers\UserController@postJobEvaluate');
   $api->get('company/query', 'App\Http\Controllers\CompanyController@query');
-  $api->get('company/{id}', 'App\Http\Controllers\CompanyController@get');
+  $api->get('company/{id}', 'App\Http\Controllers\CompanyController@get')->where('id', '[0-9]+');
 });

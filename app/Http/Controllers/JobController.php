@@ -6,17 +6,40 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\Job;
+use App\User;
+use App\JobEvaluate;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class JobController extends Controller
 {
 
   public function get($id){
+
+
     try{
-      return response()->json(Job::findOrFail($id));
+      $job = Job::findOrFail($id);
+      $job->number_evaluate = JobEvaluate::where('job_id', $job->id)->count();
+      $job->average_score = JobEvaluate::where('job_id', $job->id)->avg('score');
+      return response()->json($job);
     } catch (ModelNotFoundException $e){
       return $this->response->errorNotFound();
     }
+  }
+
+  public function getJobEvaluate(Request $request){
+    if (!$request->has('limit') || $request->query('limit') <= 0 || !$request->has('job_id')){
+      return $this->response->errorBadRequest();
+    }
+
+    $evaluates = JobEvaluate::where('job_id', $request->query('job_id'))->get();
+    foreach($evaluates as $evaluate){
+      $eva_user = User::find($evaluate->user_id);
+      $evaluate->user_nickname = $eva_user->nickname;
+      $evaluate->user_avatar = $eva_user->avatar;
+      $evaluate->setHidden(['id', 'job_id']);
+    }
+
+    return $evaluates->toArray();
   }
 
   public function query(Request $request){
@@ -46,9 +69,14 @@ class JobController extends Controller
         $builder->skip($request->input('offset'));
       }
       $builder->limit($request->input('limit'));
-      
+
       // dd($builder->get());
-      return $builder->get()->toArray();
+      $jobs = $builder->get();
+      foreach($jobs as $job){
+        $job->number_evaluate = JobEvaluate::where('job_id', $job->id)->count();
+        $job->average_score = JobEvaluate::where('job_id', $job->id)->avg('score');
+      }
+      return $jobs->toArray();
     } else {
       return $this->response->errorBadRequest();
     }
