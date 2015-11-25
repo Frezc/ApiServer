@@ -13,6 +13,7 @@ use App\JobCompleted;
 use App\JobEvaluate;
 use JWTAuth;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Validator;
 
 class UserController extends Controller
 {
@@ -192,5 +193,29 @@ class UserController extends Controller
       }
 
       return $this->response->errorInternal('evaluate save failed');
+    }
+
+    public function update(Request $request){
+      $user = JWTAuth::parseToken()->authenticate();
+
+      $params = $request->only('nickname', 'sex', 'sign', 'birthday',
+        'location', 'phone');
+
+      $v = Validator::make($params,[
+        'nickname' => 'max:32',
+        'sex' => 'boolean',
+        'birthday' => 'date_format:Y-m-d',
+      ]);
+
+      if ($v->fails())
+      {
+          return $this->response->error($v->messages(), 400);
+      }
+
+      if (!$user->update($params)){
+          $this->response->errorInternal();
+      }
+
+      return response()->json($user);
     }
 }

@@ -9,12 +9,14 @@ use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use App\User;
 use Storage;
+use Validator;
+use Hash;
 
 class AuthenticateController extends Controller
 {
   public function __construct()
   {
-       $this->middleware('jwt.auth', ['except' => ['authenticate', 'refreshToken']]);
+       $this->middleware('jwt.auth', ['except' => ['authenticate', 'refreshToken', 'register']]);
        $this->middleware('jwt.refresh', ['only' => ['refreshToken']]);
   }
 
@@ -41,7 +43,7 @@ class AuthenticateController extends Controller
         return $this->response->errorBadRequest();
     }
   }
-  
+
   public function refreshToken(Request $request){
       return 'success';
   }
@@ -67,5 +69,29 @@ class AuthenticateController extends Controller
         'user' => User::where('email', $request->Input('email'))->first(),
         'token' => $token
       ]);
+  }
+
+  public function register(Request $request){
+    $v = Validator::make($request->all(), [
+        'email' => 'required|email|unique:users,email',
+        'password' => 'required|between:6,32',
+        'nickname' => 'required|max:32'
+    ]);
+
+    if ($v->fails())
+    {
+        return $this->response->error($v->errors(), 400);
+    }
+
+
+    $user = new User;
+    $user->email = $request->input('email');
+    $user->nickname = $request->input('nickname');
+    $user->password = Hash::make($request->input('password'));
+    $user->save();
+
+    //发邮件验证
+
+    return 'success';
   }
 }

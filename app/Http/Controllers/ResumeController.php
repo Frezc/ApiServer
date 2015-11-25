@@ -56,7 +56,8 @@ class ResumeController extends Controller
         return $this->response->errorBadRequest();
       }
 
-      $array = $request->except('token');
+      $array = $request->only(['title', 'name', 'school', 'introduction',
+        'birthday', 'contact', 'expect_location']);
       $array['user_id'] = $user->id;
       $resume = Resume::create($array);
 
@@ -89,7 +90,8 @@ class ResumeController extends Controller
         $resume->save();
       }
 
-      $resume->update($request->except('token'));
+      $resume->update($request->only(['title', 'name', 'school', 'introduction',
+        'birthday', 'contact', 'expect_location']));
       return response()->json($resume);
   }
 }
