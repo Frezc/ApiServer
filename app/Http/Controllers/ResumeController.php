@@ -8,11 +8,12 @@ use App\Http\Controllers\Controller;
 use JWTAuth;
 use App\Resume;
 use Storage;
+use Response;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ResumeController extends Controller
 {
-  public $default_photo = 'http://static.frezc.com/static/resume_photos/default';
+  public $default_photo = 'resume_photos\default';
 
   public function __construct()
   {
@@ -29,6 +30,20 @@ class ResumeController extends Controller
       }
   }
 
+  public function photo(Request $request){
+    $user = JWTAuth::parseToken()->authenticate();
+    $resumes = $user->resumes();
+    if ($resume_id = $request->query('id')){
+      $resume = $resumes->where('id', $resume_id)->first();
+      if ($resume != null){
+        $file = storage_path('app/'.$resume->photo);
+        return Response::download($file, 'photo');
+      }
+    }
+
+    return $this->response->error('resume not found', 404);
+  }
+
   public function delete(Request $request){
       $user = JWTAuth::parseToken()->authenticate();
       $resumes = $user->resumes();
@@ -36,7 +51,7 @@ class ResumeController extends Controller
         $resume = $resumes->where('id', $resume_id)->first();
         if ($resume){
           if ($resume->photo != $this->default_photo){
-            Storage::disk('ftp')->delete(
+            Storage::delete(
                 'resume_photos/'.$resume->id
             );
           }
@@ -62,11 +77,11 @@ class ResumeController extends Controller
       $resume = Resume::create($array);
 
       if ($request->hasFile('photo') && $request->file('photo')->isValid()){
-        Storage::disk('ftp')->put(
+        Storage::put(
             'resume_photos/'.$resume->id,
             file_get_contents($request->file('photo')->getRealPath())
         );
-        $resume->photo = 'http://static.frezc.com/static/resume_photos/'.$resume->id;
+        $resume->photo = 'resume_photos/'.$resume->id;
         $resume->save();
       }
 
@@ -82,11 +97,11 @@ class ResumeController extends Controller
       }
 
       if ($request->hasFile('photo') && $request->file('photo')->isValid()){
-        Storage::disk('ftp')->put(
+        Storage::put(
             'resume_photos/'.$resume->id,
             file_get_contents($request->file('photo')->getRealPath())
         );
-        $resume->photo = 'http://static.frezc.com/static/resume_photos/'.$resume->id;
+        $resume->photo = 'resume_photos/'.$resume->id;
         $resume->save();
       }
 

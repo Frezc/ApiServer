@@ -27,6 +27,7 @@ $api -> version('v1',  function($api){
   $api->get('user/{id}', 'App\Http\Controllers\UserController@show');
   // $api->post('user', 'App\Http\Controllers\UserController@store');
   $api->get('resume', 'App\Http\Controllers\ResumeController@get');
+  $api->get('resume/photo', 'App\Http\Controllers\ResumeController@photo');
   $api->post('resume/delete', 'App\Http\Controllers\ResumeController@delete');
   $api->post('resume/add', 'App\Http\Controllers\ResumeController@add');
   $api->post('resume/update', 'App\Http\Controllers\ResumeController@update');

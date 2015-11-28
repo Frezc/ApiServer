@@ -50,13 +50,13 @@ return [
 
         'ftp' => [
             'driver'   => 'ftp',
-            'host'     => 'qxu1194160100.my3w.com',
-            'username' => 'qxu1194160100',
-            'password' => 'a504021398',
+            'host'     => env('FTP_HOST', ''),
+            'username' => env('FTP_USERNAME', ''),
+            'password' => env('FTP_PASSWORD', ''),
 
             // Optional FTP Settings...
             // 'port'     => 21,
-            'root'     => '/htdocs/static',
+            'root'     => env('FTP_ROOT', '/htdocs/static'),
             // 'passive'  => true,
             // 'ssl'      => true,
             // 'timeout'  => 30,

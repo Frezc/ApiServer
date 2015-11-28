@@ -54,10 +54,10 @@ return [
 
         'mysql' => [
             'driver'    => 'mysql',
-            'host'      => env('DB_HOST', 'qdm156731607.my3w.com'),
-            'database'  => env('DB_DATABASE', 'qdm156731607_db'),
-            'username'  => env('DB_USERNAME', 'qdm156731607'),
-            'password'  => env('DB_PASSWORD', 'a7777777'),
+            'host'      => env('DB_HOST', 'localhost'),
+            'database'  => env('DB_DATABASE', 'TaoJianZhi'),
+            'username'  => env('DB_USERNAME', 'root'),
+            'password'  => env('DB_PASSWORD', ''),
             'charset'   => 'utf8',
             'collation' => 'utf8_unicode_ci',
             'prefix'    => '',

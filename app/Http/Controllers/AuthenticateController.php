@@ -31,14 +31,13 @@ class AuthenticateController extends Controller
   public function updateAvatar(Request $request){
     $user = JWTAuth::parseToken()->authenticate();
     if ($request->hasFile('avatar') && $request->file('avatar')->isValid()){
-        Storage::disk('ftp')->put(
-            'avatars/'.$user->id,
-            file_get_contents($request->file('avatar')->getRealPath())
-        );
-        $url = 'http://static.frezc.com/static/avatars/'.$user->id;
-        $user->avatar = $url;
+        // file_put_contents(public_path().'images/avatars/'.$user->id.'.png',
+        //   file_get_contents($request->file('avatar')->getRealPath()));
+        copy($request->file('avatar')->getRealPath(), public_path('images/avatars/'.$user->id));
+        $avatar = '/images/avatars/'.$user->id;
+        $user->avatar = $avatar;
         $user->save();
-        return $url;
+        return $avatar;
     } else {
         return $this->response->errorBadRequest();
     }
