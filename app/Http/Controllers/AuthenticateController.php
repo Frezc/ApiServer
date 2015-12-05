@@ -16,7 +16,7 @@ class AuthenticateController extends Controller
 {
   public function __construct()
   {
-       $this->middleware('jwt.auth', ['except' => ['authenticate', 'refreshToken', 'register']]);
+       $this->middleware('jwt.auth', ['except' => ['emailAuth', 'phoneAuth', 'refreshToken', 'register']]);
        $this->middleware('jwt.refresh', ['only' => ['refreshToken']]);
   }
 
@@ -47,10 +47,60 @@ class AuthenticateController extends Controller
       return 'success';
   }
 
-  public function authenticate(Request $request)
+  public function emailAuth(Request $request)
   {
+      $v = Validator::make($request->all(), [
+          'email' => 'required|email',
+          'password' => 'required'
+      ]);
+
+      if ($v->fails())
+      {
+          return $this->response->error($v->errors(), 400);
+      }
+
+      $user = User::where('email', $request->Input('email'))->first();
+      if ($user != null){
+          if ($user->email_verified == 0){
+              return $this->response->error('email need to be verified.', 430);
+          }
+      }
+
       // grab credentials from the request
       $credentials = $request->only('email', 'password');
+
+      try {
+          // attempt to verify the credentials and create a token for the user
+          if (! $token = JWTAuth::attempt($credentials)) {
+              return $this->response->errorUnauthorized();
+          }
+      } catch (JWTException $e) {
+          // something went wrong whilst attempting to encode the token
+          return response()->json(['error' => 'could_not_create_token'], 500);
+      }
+
+      // all good so return the token
+
+      return response()->json([
+        'user' => User::where('email', $request->Input('email'))->first(),
+        'token' => $token
+      ]);
+  }
+
+  public function phoneAuth(Request $request)
+  {
+      $v = Validator::make($request->all(), [
+          'phone' => 'required|regex:/[0-9]+/',
+          'password' => 'required'
+      ]);
+
+      if ($v->fails())
+      {
+          return $this->response->error($v->errors(), 400);
+      }
+
+      // grab credentials from the request
+      $credentials = $request->only('phone', 'password');
 
       try {
           // attempt to verify the credentials and create a token for the user
@@ -65,7 +115,7 @@ class AuthenticateController extends Controller
       // all good so return the token
 
       return response()->json([
-        'user' => User::where('email', $request->Input('email'))->first(),
+        'user' => User::where('phone', $request->Input('phone'))->first(),
         'token' => $token
       ]);
   }
@@ -92,5 +142,34 @@ class AuthenticateController extends Controller
     //发邮件验证
 
     return 'success';
+  }
+
+  public function registerByPhone(Request $request){
+    $v = Validator::make($request->all(), [
+        'phone' => 'required|regex:/[0-9]+/|unique:users,phone',
+        'password' => 'required|between:6,32',
+        'nickname' => 'required|between:1,16',
+        'verification_code' => 'required'
+    ]);
+
+    if ($v->fails())
+    {
+        return $this->response->error($v->errors(), 400);
+    }
+
+
+    //验证短信验证码
+
+    $user = new User;
+    $user->phone = $request->input('phone');
+    $user->nickname = $request->input('nickname');
+    $user->password = Hash::make($request->input('password'));
+    $user->save();
+
+    return 'success';
+  }
+
+  public function getSmsCode(Request $request){
+    
   }
 }
