@@ -143,33 +143,4 @@ class AuthenticateController extends Controller
 
     return 'success';
   }
-
-  public function registerByPhone(Request $request){
-    $v = Validator::make($request->all(), [
-        'phone' => 'required|regex:/[0-9]+/|unique:users,phone',
-        'password' => 'required|between:6,32',
-        'nickname' => 'required|between:1,16',
-        'verification_code' => 'required'
-    ]);
-
-    if ($v->fails())
-    {
-        return $this->response->error($v->errors(), 400);
-    }
-
-
-    //验证短信验证码
-
-    $user = new User;
-    $user->phone = $request->input('phone');
-    $user->nickname = $request->input('nickname');
-    $user->password = Hash::make($request->input('password'));
-    $user->save();
-
-    return 'success';
-  }
-
-  public function getSmsCode(Request $request){
-    
-  }
 }

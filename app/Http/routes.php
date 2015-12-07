@@ -20,12 +20,13 @@ $api = app('Dingo\Api\Routing\Router');
 
 $api -> version('v1',  function($api){
   //$api->get('users', 'App\Http\Controllers\AuthenticateController@index');
+  $api->get('test', 'App\Http\Controllers\SmsController@test');
   $api->post('auth', 'App\Http\Controllers\AuthenticateController@emailAuth');
   $api->post('authPhone', 'App\Http\Controllers\AuthenticateController@phoneAuth');
   $api->get('refresh', 'App\Http\Controllers\AuthenticateController@refreshToken');
   $api->post('register', 'App\Http\Controllers\AuthenticateController@register');
-  $api->post('registerByPhone', 'App\Http\Controllers\AuthenticateController@registerByPhone');
-  $api->get('getSmsCode', 'App\Http\Controllers\AuthenticateController@getSmsCode');
+  $api->post('registerByPhone', 'App\Http\Controllers\SmsController@registerByPhone');
+  $api->get('getSmsCode', 'App\Http\Controllers\SmsController@getSmsCode');
   $api->post('user/update', 'App\Http\Controllers\UserController@update');
   $api->get('user/{id}', 'App\Http\Controllers\UserController@show');
   // $api->post('user', 'App\Http\Controllers\UserController@store');
