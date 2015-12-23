@@ -11,6 +11,11 @@ use Validator;
 
 class SmsController extends Controller
 {
+  public function __construct()
+  {
+      $this->middleware('sms', ['only' => ['registerByPhone']]);
+  }
+
   public function getSmsCode(Request $request){
     $v = Validator::make($request->all(), [
         'phone' => 'required|regex:/[0-9]+/'
@@ -39,27 +44,13 @@ class SmsController extends Controller
 
   public function registerByPhone(Request $request){
     $v = Validator::make($request->all(), [
-        'phone' => 'required|regex:/[0-9]+/|unique:users,phone',
         'password' => 'required|between:6,32',
-        'nickname' => 'required|between:1,16',
-        'verification_code' => 'required|regex:/[0-9]+/'
+        'nickname' => 'required|between:1,16'
     ]);
 
     if ($v->fails())
     {
       return $this->response->error($v->errors(), 400);
-    }
-
-    //验证短信验证码
-    $curl = new Curl();
-    $curl->setHeader('Content-Type', 'application/json');
-    $curl->setHeader('X-LC-Id', env('SMS_APPID', ''));
-    $curl->setHeader('X-LC-Key', env('SMS_APPKEY', ''));
-
-    $curl->post('https://api.leancloud.cn/1.1/verifySmsCode/'.$request->input('verification_code').'?mobilePhoneNumber='.$request->input('phone'));
-    // dd($curl->response);
-    if (isset($curl->response->code)){
-      return $this->response->error('无效的验证码', 400);
     }
 
     $user = new User;
