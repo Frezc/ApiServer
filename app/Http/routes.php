@@ -28,8 +28,10 @@ $api -> version('v1',  function($api){
   $api->post('register', 'App\Http\Controllers\AuthenticateController@register');
   $api->post('registerByPhone', 'App\Http\Controllers\SmsController@registerByPhone');
   $api->get('getSmsCode', 'App\Http\Controllers\SmsController@getSmsCode');
+  $api->post('bindPhone', 'App\Http\Controllers\SmsController@bindPhone');
   $api->post('sendVerifyEmail', 'App\Http\Controllers\EmailController@sendVerifyEmail');
   $api->post('verifyEmail', 'App\Http\Controllers\EmailController@verifyEmail');
+  $api->post('bindEmail', 'App\Http\Controllers\EmailController@bindEmail');
 
   $api->post('user/update', 'App\Http\Controllers\UserController@update');
   $api->get('user/{id}', 'App\Http\Controllers\UserController@show');

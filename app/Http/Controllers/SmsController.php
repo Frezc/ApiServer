@@ -13,7 +13,8 @@ class SmsController extends Controller
 {
   public function __construct()
   {
-      $this->middleware('sms', ['only' => ['registerByPhone']]);
+      $this->middleware('jwt.auth', ['only' => ['bindPhone']]);
+      $this->middleware('sms', ['only' => ['registerByPhone', 'bindPhone']]);
   }
 
   public function getSmsCode(Request $request){
@@ -60,6 +61,17 @@ class SmsController extends Controller
     $user->save();
 
     return 'success';
+  }
+
+  public function bindPhone(Request $request){
+    $user = JWTAuth::parseToken()->authenticate();
+    if ($user->phone != null) {
+      return $this->response->error('phone has binded', 400);
+    } else {
+      $user->phone = $request->input('phone');
+      $user->save();
+      return 'success';
+    }
   }
 
   public function test(Request $request){

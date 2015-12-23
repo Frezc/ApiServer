@@ -21,7 +21,7 @@ class EmailMiddleware
     {
       $v = Validator::make($request->all(), [
           'email' => 'required|email|exists:email_verifications,email',
-          'token' => 'required|string'
+          'verification_code' => 'required|string'
       ]);
 
       if ($v->fails()){
@@ -30,12 +30,12 @@ class EmailMiddleware
 
       $veri = DB::table('email_verifications')->where('email', $request->input('email'))->first();
 
-      if ($veri == null || $veri->token != $request->input('token')){
-        return $this->response->error('wrong token', 400);
+      if ($veri == null || $veri->token != $request->input('verification_code')){
+        return $this->response->error('wrong code', 430);
       }
 
       if (abs(time() - strtotime($veri->send_at)) > 3600) {
-        return $this->response->error('time exceed', 400);
+        return $this->response->error('time exceed', 431);
       }
 
       $this->clearVerification($request->input('email'));

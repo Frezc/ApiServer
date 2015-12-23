@@ -11,13 +11,14 @@ use Validator;
 use Mail;
 use DB;
 use Hash;
+use JWTAuth;
 
 class EmailController extends Controller
 {
   public function __construct()
   {
-      $this->middleware('email', ['only' => ['verifyEmail']]);
       $this->middleware('jwt.auth', ['only' => ['bindEmail']]);
+      $this->middleware('email', ['only' => ['verifyEmail', 'bindEmail']]);
   }
 
   public function sendVerifyEmail(Request $request){
@@ -61,11 +62,30 @@ class EmailController extends Controller
     return 'success';
   }
 
+  public function bindEmail(Request $request){
+    $user = JWTAuth::parseToken()->authenticate();
+    if ($user->email != null) {
+      return $this->response->error('email has binded', 400);
+    } else {
+      $user->email = $request->input('email');
+      $user->email_verified = 1;
+      $user->save();
+      return 'success';
+    }
+  }
+
   private function generateToken($email){
     // return Hash::make($email.date('Ymd').str_random(16));
     return str_random(6);
   }
 
+  private function clearVerification($email){
+    DB::delete('delete from email_verifications where email = ?', [$email]);
+  }
+
+  /**
+  *  测试用方法
+  */
   public function emailSend(Request $request){
     $email = $request->input('email');
     Mail::send('emails.verification', ['token' => 'ftTf43', 'avalible_before' => '2014-5-13 13:00:22'], function ($message) use($email) {

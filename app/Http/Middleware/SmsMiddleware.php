@@ -37,7 +37,7 @@ class SmsMiddleware
       $curl->post('https://api.leancloud.cn/1.1/verifySmsCode/'.$request->input('verification_code').'?mobilePhoneNumber='.$request->input('phone'));
       // dd($curl->response);
       if (isset($curl->response->code)){
-        return $this->response->error('无效的验证码', 400);
+        return $this->response->error('无效的验证码', 430);
       }
 
       return $next($request);
