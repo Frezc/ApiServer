@@ -14,7 +14,7 @@ class SmsController extends Controller
   public function __construct()
   {
       $this->middleware('jwt.auth', ['only' => ['bindPhone']]);
-      $this->middleware('sms', ['only' => ['registerByPhone', 'bindPhone']]);
+      $this->middleware('sms', ['only' => ['registerByPhone', 'bindPhone', 'resetPassword']]);
   }
 
   public function getSmsCode(Request $request){
@@ -72,6 +72,23 @@ class SmsController extends Controller
       $user->save();
       return 'success';
     }
+  }
+
+  public function resetPassword(Request $request) {
+    $v = Validator::make($request->all(), [
+        'password' => 'required|between:6,32'
+    ]);
+
+    if ($v->fails())
+    {
+      return $this->response->error($v->errors(), 400);
+    }
+
+    $user = User::where('phone', $request->input('phone'))->first();
+    $user->password = Hash::make($request->input('password'));
+    $user->save();
+
+    return 'success';
   }
 
   public function test(Request $request){

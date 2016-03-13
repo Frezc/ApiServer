@@ -27,6 +27,7 @@ $api -> version('v1',  function($api){
   $api->get('refresh', 'App\Http\Controllers\AuthenticateController@refreshToken');
   $api->post('register', 'App\Http\Controllers\AuthenticateController@register');
   $api->post('registerByPhone', 'App\Http\Controllers\SmsController@registerByPhone');
+  $api->post('resetPassword', 'App\Http\Controllers\SmsController@resetPassword');
   $api->get('getSmsCode', 'App\Http\Controllers\SmsController@getSmsCode');
   $api->post('bindPhone', 'App\Http\Controllers\SmsController@bindPhone');
   $api->post('sendVerifyEmail', 'App\Http\Controllers\EmailController@sendVerifyEmail');
