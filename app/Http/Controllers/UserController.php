@@ -198,12 +198,12 @@ class UserController extends Controller
     public function update(Request $request){
       $user = JWTAuth::parseToken()->authenticate();
 
-      $params = $request->only('nickname', 'sex', 'sign', 'birthday',
-        'location', 'phone');
-
+      $params = $request->only(['nickname', 'sex', 'sign', 'birthday',
+        'location', 'phone']);
+      
       $v = Validator::make($params,[
         'nickname' => 'max:32',
-        'sex' => 'boolean',
+        'sex' => 'integer',
         'birthday' => 'date_format:Y-m-d',
       ]);
 
@@ -212,6 +212,11 @@ class UserController extends Controller
           return $this->response->error($v->messages(), 400);
       }
 
+      foreach ($params as $key => $value) {
+        if ($value == null) {
+          unset($params[$key]);
+        }        
+      }
       if (!$user->update($params)){
           $this->response->errorInternal();
       }
