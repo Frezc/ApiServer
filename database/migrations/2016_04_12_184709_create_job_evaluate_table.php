@@ -14,7 +14,14 @@ class CreateJobEvaluateTable extends Migration
     {
         Schema::create('job_evaluate', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('user_id')->unsigned();
+            $table->integer('job_id')->unsigned();
+            $table->tinyInteger('score');
+            $table->string('comment')->nullable();
             $table->timestamps();
+
+            $table->index('user_id');
+            $table->index('job_id');
         });
     }
 

@@ -14,7 +14,14 @@ class CreateJobCompletedTable extends Migration
     {
         Schema::create('job_completed', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('user_id')->unsigned();
+            $table->integer('job_id')->unsigned();
+            $table->integer('resume_id')->unsigned();
+            $table->string('description')->nullable();
             $table->timestamps();
+
+            $table->index('user_id');
+            $table->index('job_id');
         });
     }
 
