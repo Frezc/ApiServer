@@ -9,5 +9,5 @@ class Verification extends Model
     //
     protected $table = 'verifications';
 
-    
+
 }

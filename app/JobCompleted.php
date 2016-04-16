@@ -9,7 +9,6 @@ class JobCompleted extends Model
     //
     protected $table = 'job_completed';
     protected $hidden = ['job_evaluate_id', 'user_evaluate_id'];
-
     protected $guarded = ['id'];
 
     public function jobEvaluated(){
@@ -19,4 +18,5 @@ class JobCompleted extends Model
     public function userEvaluated(){
       return $this->user_evaluate_id != null;
     }
+
 }

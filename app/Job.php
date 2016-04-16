@@ -8,6 +8,5 @@ class Job extends Model
 {
     //
     protected $table = 'jobs';
-
     protected $guarded = ['id'];
 }
