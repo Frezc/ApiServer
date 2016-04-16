@@ -83,7 +83,7 @@ $factory->define(App\Job::class, function ($faker) {
 
     $company =\App\Company::findOrNew($faker->numberBetween($min = 0, $max = 39));
     //dd($company);
-    while ($company->Id==null)
+    while ($company->id==null)
     {
         echo 'failed once','<br>';
         $company =\App\Company::findOrNew($faker->numberBetween($min = 0, $max = 39));
