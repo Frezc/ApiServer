@@ -31,8 +31,7 @@ class User extends Model implements AuthenticatableContract,
     protected $hidden = ['password', 'remember_token'];
 
 
-    protected $guarded = ['id','avatar', 'email','phone',
-    'nickname','sign','birthday','location','sex','company_id','email_verified'];
+    protected $guarded = ['id'];
 
     public function resumes(){
       return $this->hasMany('App\Resume');

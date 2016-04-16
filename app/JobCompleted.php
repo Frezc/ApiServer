@@ -9,7 +9,7 @@ class JobCompleted extends Model
     //
     protected $table = 'job_completed';
     protected $hidden = ['job_evaluate_id', 'user_evaluate_id'];
-    protected $guarded = ['id','job_id', 'user_id'];
+    protected $guarded = ['id'];
 
     public function jobEvaluated(){
       return $this->job_evaluate_id != null;
@@ -19,10 +19,4 @@ class JobCompleted extends Model
       return $this->user_evaluate_id != null;
     }
 
-    function getJobId(){
-        return $this->getAttribute('job_id');
-    }
-    function getUserId(){
-        return $this->getAttribute('user_id');
-    }
 }

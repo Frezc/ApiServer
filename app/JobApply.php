@@ -9,8 +9,7 @@ class JobApply extends Model
     //
     protected $table = 'job_apply';
 
-    protected $guarded = ['id','user_id', 'job_id','resume_id',
-        'description','status'];
+    protected $guarded = ['id'];
 
     public function user(){
         return $this->belongsTo('App\User');

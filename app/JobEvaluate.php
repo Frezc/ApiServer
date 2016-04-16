@@ -10,5 +10,5 @@ class JobEvaluate extends Model
 
     protected $table = 'job_evaluate';
 
-    protected $guarded = ['id','user_id','job_id','score','comment'];
+    protected $guarded = ['id'];
 }

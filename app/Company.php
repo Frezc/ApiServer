@@ -9,7 +9,7 @@ class Company extends Model
     //
     protected $table = 'companys';
 
-    protected $guarded = ['id','name', 'url', 'address','logo','description','contact_person','contact'];
+    protected $guarded = ['id'];
 
     public function jobs(){
       return $this->hasMany('App\Job');

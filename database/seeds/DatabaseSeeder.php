@@ -28,13 +28,13 @@ class DatabaseSeeder extends Seeder
         // DB::table('users')->update([
         //     'avatar' => 'http://static.frezc.com/static/avatars/default'
         // ]);
-        //        factory(App\models\Company::class,20)->create();
-        //        factory(App\models\Jobs::class,20)->create();
-        //        factory(App\models\User::class,20)->create();
-        //        factory(App\models\Resumes::class,10)->create();
-        //        factory(App\models\JobCompleted::class,80)->create();
-        //        factory(App\models\JobApply::class,80)->create();
-                // factory(App\models\JobEvaluate::class,20)->create();
+               factory(App\models\Company::class,20)->create();
+               factory(App\models\Job::class,20)->create();
+               factory(App\models\User::class,20)->create();
+               factory(App\models\Resume::class,10)->create();
+               factory(App\models\JobCompleted::class,80)->create();
+               factory(App\models\JobApply::class,80)->create();
+                factory(App\models\JobEvaluate::class,20)->create();
         DB::table('resumes')->update([
             'photo' => 'http://static.frezc.com/static/resume_photos/default'
         ]);
