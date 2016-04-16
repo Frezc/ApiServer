@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Validator;
 use Dingo\Api\Routing\Helpers;
+use Curl\Curl;
 
 class SmsMiddleware
 {
