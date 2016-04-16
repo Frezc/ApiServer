@@ -8,9 +8,18 @@ class Resume extends Model
 {
     //
     protected $table = 'resumes';
-     protected $fillable = ['user_id', 'name'];
     //在用Resume::create创建时不能填充的项
-    protected $guarded = ['photo', 'id'];
+    protected $guarded = ['id',
+        'user_id',
+        'title',
+        'name',
+        'photo',
+        'school',
+        'birthday',
+        'contact',
+        'sex',
+        'expect_location',
+        'introduction',];
     function getUserId(){
         return $this->getAttribute('user_id');
     }

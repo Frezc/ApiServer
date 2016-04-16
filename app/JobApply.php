@@ -9,9 +9,7 @@ class JobApply extends Model
     //
     protected $table = 'job_apply';
 
-    protected $guarded = ['id'];
-
-    protected $fillable = ['user_id', 'job_id','resume_id',
+    protected $guarded = ['id','user_id', 'job_id','resume_id',
         'description','status'];
 
     public function user(){
