@@ -8,6 +8,9 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use Curl\Curl;
 use Validator;
+use App\User;
+use Hash;
+use JWTAuth;
 
 class SmsController extends Controller
 {
