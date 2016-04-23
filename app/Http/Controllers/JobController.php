@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Job;
 use App\User;
 use App\JobEvaluate;
+use App\JobTime;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class JobController extends Controller
@@ -18,8 +19,10 @@ class JobController extends Controller
 
     try{
       $job = Job::findOrFail($id);
-      $job->number_evaluate = JobEvaluate::where('job_id', $job->id)->count();
-      $job->average_score = JobEvaluate::where('job_id', $job->id)->avg('score');
+      $jobEva = JobEvaluate::where('job_id', $job->id);
+      $job->number_evaluate = $jobEva->count();
+      $job->average_score = $jobEva->avg('score');
+      $job->time = JobTime::where('job_id', $job->id)->get();
       return response()->json($job);
     } catch (ModelNotFoundException $e){
       return $this->response->errorNotFound();
