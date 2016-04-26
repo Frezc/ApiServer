@@ -5,8 +5,10 @@ namespace App\Exceptions;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Illuminate\Auth\Access\AuthorizationException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Validation\ValidationException;
 
 class Handler extends ExceptionHandler
 {
@@ -16,8 +18,10 @@ class Handler extends ExceptionHandler
      * @var array
      */
     protected $dontReport = [
+        AuthorizationException::class,
         HttpException::class,
         ModelNotFoundException::class,
+        ValidationException::class,
     ];
 
     /**
@@ -43,7 +47,14 @@ class Handler extends ExceptionHandler
     public function render($request, Exception $e)
     {
         if ($e instanceof ModelNotFoundException) {
-            $e = new NotFoundHttpException($e->getMessage(), $e);
+            return response()->json(['error' => $request->path().' not found.'], 404);
+        } elseif ($e instanceof NotFoundHttpException) {
+            return response()->json(['error' => $request->path().' not found.'], 404);
+        } elseif ($e instanceof ValidationException) {
+            // todo
+            return response()->json(['error' => $e->getMessage()], 400);
+        } elseif ($e instanceof AuthorizationException) {
+            return response()->json(['error' => 'Unauthorized'], 401);
         }
 
         return parent::render($request, $e);

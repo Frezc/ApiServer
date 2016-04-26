@@ -11,58 +11,63 @@ use App\User;
 use Storage;
 use Validator;
 use Hash;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class AuthenticateController extends Controller
 {
   public function __construct()
   {
-       $this->middleware('jwt.auth', ['except' => ['emailAuth', 'phoneAuth', 'refreshToken', 'register']]);
-       $this->middleware('jwt.refresh', ['only' => ['refreshToken']]);
+      $this->middleware('jwt.auth', ['except' => ['emailAuth', 'phoneAuth', 'refreshToken', 'register']]);
   }
 
   public function index()
   {
       $users = User::all();
-      // return $users;
-      // return $this->response->errorNotFound();
-      return $user = JWTAuth::parseToken()->authenticate();
+      return $users;
   }
 
-  public function updateAvatar(Request $request){
-    $user = JWTAuth::parseToken()->authenticate();
-    if ($request->hasFile('avatar') && $request->file('avatar')->isValid()){
-        // file_put_contents(public_path().'images/avatars/'.$user->id.'.png',
-        //   file_get_contents($request->file('avatar')->getRealPath()));
-        copy($request->file('avatar')->getRealPath(), public_path('images/avatars/'.$user->id));
-        $avatar = '/images/avatars/'.$user->id;
-        $user->avatar = $avatar;
-        $user->save();
-        return $avatar;
-    } else {
-        return $this->response->errorBadRequest();
-    }
+  // 以后实现
+  public function updateAvatar(Request $request) {
+      $user = JWTAuth::parseToken()->authenticate();
+      if ($request->hasFile('avatar') && $request->file('avatar')->isValid()){
+          // file_put_contents(public_path().'images/avatars/'.$user->id.'.png',
+          //   file_get_contents($request->file('avatar')->getRealPath()));
+          copy($request->file('avatar')->getRealPath(), public_path('images/avatars/'.$user->id));
+          $avatar = '/images/avatars/'.$user->id;
+          $user->avatar = $avatar;
+          $user->save();
+          return $avatar;
+      } else {
+          return $this->response->errorBadRequest();
+      }
   }
 
+  // todo 更新文档
   public function refreshToken(Request $request){
-      return 'success';
+      $this->validate($request, [
+          'token' => 'required'
+      ]);
+
+      $token = JWTAuth::refresh($request->input('token'));
+      $user = JWTAuth::authenticate($token);
+
+      return response()->json(['user' => $user, 'token' => $token]);
   }
 
   public function emailAuth(Request $request)
   {
-      $v = Validator::make($request->all(), [
+      // 1.验证输入参数
+      $this->validate($request, [
           'email' => 'required|email',
           'password' => 'required'
       ]);
 
-      if ($v->fails())
-      {
-          return $this->response->error($v->errors(), 400);
-      }
-
-      $user = User::where('email', $request->Input('email'))->first();
+      // 2.处理逻辑
+      // todo
+      $user = User::where('email', $request->input('email'))->firstOrFail();
       if ($user != null){
           if ($user->email_verified == 0){
-              return $this->response->error('email need to be verified.', 430);
+              return reponse()->json(['error' => 'email need to be verified.'], 430);
           }
       }
 
@@ -72,7 +77,7 @@ class AuthenticateController extends Controller
       try {
           // attempt to verify the credentials and create a token for the user
           if (! $token = JWTAuth::attempt($credentials)) {
-              return $this->response->errorUnauthorized();
+              throw new AuthorizationException();
           }
       } catch (JWTException $e) {
           // something went wrong whilst attempting to encode the token
@@ -81,6 +86,7 @@ class AuthenticateController extends Controller
 
       // all good so return the token
 
+      // 3.返回json
       return response()->json([
         'user' => User::where('email', $request->Input('email'))->first(),
         'token' => $token

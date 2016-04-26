@@ -24,11 +24,7 @@ class UserController extends Controller
 
     public function show($id)
     {
-        try{
-          $user = User::findOrFail($id);
-        } catch (ModelNotFoundException $e){
-          return $this->response->errorNotFound();
-        }
+        $user = User::findOrFail($id);
         return response()->json($user);
     }
 
