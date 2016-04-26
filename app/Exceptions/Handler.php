@@ -52,11 +52,18 @@ class Handler extends ExceptionHandler
             return response()->json(['error' => $request->path().' not found.'], 404);
         } elseif ($e instanceof ValidationException) {
             // todo
-            return response()->json(['error' => $e->getMessage()], 400);
+            return response()->json(['error' => $e->validator->messages()], 400);
         } elseif ($e instanceof AuthorizationException) {
             return response()->json(['error' => 'Unauthorized'], 401);
+        } elseif ($e instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException) {
+            return response()->json(['error' => 'token_expired'], $e->getStatusCode());
+        } elseif ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
+            return response()->json(['error' => 'token_invalid'], $e->getStatusCode());
         }
 
+        // production
+        // return response()->json(['error' => 'internal_error'], 500);
+        // development
         return parent::render($request, $e);
     }
 }

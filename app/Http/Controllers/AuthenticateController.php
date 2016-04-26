@@ -27,6 +27,8 @@ class AuthenticateController extends Controller
   }
 
   // 以后实现
+  // 对比
+  /*
   public function updateAvatar(Request $request) {
       $user = JWTAuth::parseToken()->authenticate();
       if ($request->hasFile('avatar') && $request->file('avatar')->isValid()){
@@ -41,8 +43,23 @@ class AuthenticateController extends Controller
           return $this->response->errorBadRequest();
       }
   }
+  */
+  public function updateAvatar(Request $request) {
+      $this->validate($request, [
+          'avatar' => 'required|image'
+      ]);
+      $user = JWTAuth::parseToken()->authenticate();
+      // file_put_contents(public_path().'images/avatars/'.$user->id.'.png',
+      //   file_get_contents($request->file('avatar')->getRealPath()));
+      
+      // todo
+      copy($request->file('avatar')->getRealPath(), public_path('images/avatars/'.$user->id));
+      $avatar = '/images/avatars/'.$user->id;
+      $user->avatar = $avatar;
+      $user->save();
+      return $avatar;
+  }
 
-  // todo 更新文档
   public function refreshToken(Request $request){
       $this->validate($request, [
           'token' => 'required'
@@ -63,14 +80,7 @@ class AuthenticateController extends Controller
       ]);
 
       // 2.处理逻辑
-      // todo
-      $user = User::where('email', $request->input('email'))->firstOrFail();
-      if ($user != null){
-          if ($user->email_verified == 0){
-              return reponse()->json(['error' => 'email need to be verified.'], 430);
-          }
-      }
-
+      // 验证email和password是否对应
       // grab credentials from the request
       $credentials = $request->only('email', 'password');
 
@@ -84,26 +94,27 @@ class AuthenticateController extends Controller
           return response()->json(['error' => 'could_not_create_token'], 500);
       }
 
-      // all good so return the token
+      // 登陆信息无误，确认email是否已经通过邮箱验证
+      $user = User::where('email', $request->input('email'))->firstOrFail();
+      if ($user != null){
+          if ($user->email_verified == 0){
+              return reponse()->json(['error' => 'email need to be verified.'], 430);
+          }
+      }
 
-      // 3.返回json
+      // 3.登陆成功，返回json
       return response()->json([
-        'user' => User::where('email', $request->Input('email'))->first(),
+        'user' => $user,
         'token' => $token
       ]);
   }
 
   public function phoneAuth(Request $request)
   {
-      $v = Validator::make($request->all(), [
+      $this->validate($request, [
           'phone' => 'required|regex:/[0-9]+/',
           'password' => 'required'
       ]);
-
-      if ($v->fails())
-      {
-          return $this->response->error($v->errors(), 400);
-      }
 
       // grab credentials from the request
       $credentials = $request->only('phone', 'password');
@@ -118,35 +129,27 @@ class AuthenticateController extends Controller
           return response()->json(['error' => 'could_not_create_token'], 500);
       }
 
-      // all good so return the token
-
       return response()->json([
-        'user' => User::where('phone', $request->Input('phone'))->first(),
+        'user' => User::where('phone', $request->input('phone'))->firstOrFail(),
         'token' => $token
       ]);
   }
 
   public function register(Request $request){
-    $v = Validator::make($request->all(), [
-        'email' => 'required|email|unique:users,email',
-        'password' => 'required|between:6,32',
-        'nickname' => 'required|max:32'
-    ]);
+      $this->validate($request, [
+          'email' => 'required|email|unique:users,email',
+          'password' => 'required|between:6,32',
+          'nickname' => 'required|max:32'
+      ]);
 
-    if ($v->fails())
-    {
-        return $this->response->error($v->errors(), 400);
-    }
+      $user = new User;
+      $user->email = $request->input('email');
+      $user->nickname = $request->input('nickname');
+      $user->password = Hash::make($request->input('password'));
+      $user->save();
 
+      //todo 发邮件验证
 
-    $user = new User;
-    $user->email = $request->input('email');
-    $user->nickname = $request->input('nickname');
-    $user->password = Hash::make($request->input('password'));
-    $user->save();
-
-    //发邮件验证
-
-    return 'success';
+      return 'success';
   }
 }
