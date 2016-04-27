@@ -44,7 +44,8 @@ class AuthenticateController extends Controller
       }
   }
   */
-  public function updateAvatar(Request $request) {
+  public function updateAvatar(Request $request)
+  {
       $this->validate($request, [
           'avatar' => 'required|image'
       ]);
@@ -60,7 +61,8 @@ class AuthenticateController extends Controller
       return $avatar;
   }
 
-  public function refreshToken(Request $request){
+  public function refreshToken(Request $request)
+  {
       $this->validate($request, [
           'token' => 'required'
       ]);
@@ -108,8 +110,8 @@ class AuthenticateController extends Controller
 
       // 4.登陆成功，返回json
       return response()->json([
-        'user' => $user,
-        'token' => $token
+          'user' => $user,
+          'token' => $token
       ]);
   }
 
@@ -134,12 +136,13 @@ class AuthenticateController extends Controller
       }
 
       return response()->json([
-        'user' => User::where('phone', $request->input('phone'))->firstOrFail(),
-        'token' => $token
+          'user' => User::where('phone', $request->input('phone'))->firstOrFail(),
+          'token' => $token
       ]);
   }
 
-  public function register(Request $request){
+  public function register(Request $request)
+  {
       $this->validate($request, [
           'email' => 'required|email|unique:users,email',
           'password' => 'required|between:6,32',

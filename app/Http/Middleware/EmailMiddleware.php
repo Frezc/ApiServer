@@ -5,11 +5,9 @@ namespace App\Http\Middleware;
 use Closure;
 use Validator;
 use DB;
-use Dingo\Api\Routing\Helpers;
 
 class EmailMiddleware
 {
-    use Helpers;
     /**
      * Handle an incoming request.
      *
@@ -24,18 +22,18 @@ class EmailMiddleware
           'verification_code' => 'required|string'
       ]);
 
-      if ($v->fails()){
-          return $this->response->error($v->errors(), 400);
+      if ($v->fails()) {
+          return response()->json(['error' => $v->errors()], 400);
       }
 
       $veri = DB::table('email_verifications')->where('email', $request->input('email'))->first();
 
       if ($veri == null || $veri->token != $request->input('verification_code')){
-        return $this->response->error('wrong code', 430);
+        return response()->json(['error' => 'wrong code'], 430);
       }
 
       if (abs(time() - strtotime($veri->send_at)) > 3600) {
-        return $this->response->error('time exceed', 431);
+        return response()->json(['error' => 'time exceed'], 430);
       }
 
       $this->clearVerification($request->input('email'));

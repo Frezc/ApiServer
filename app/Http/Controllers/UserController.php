@@ -28,7 +28,9 @@ class UserController extends Controller
         return response()->json($user);
     }
 
-    public function getJobApply(Request $request){
+    // refactor
+    public function getJobApply(Request $request)
+    {
         if (!$request->has('limit') || $request->input('limit') <= 0){
             return $this->response->errorBadRequest();
         }
@@ -72,7 +74,9 @@ class UserController extends Controller
         return $job_applies->toArray();
     }
 
-    public function getJobCompleted(Request $request){
+    // refactor
+    public function getJobCompleted(Request $request)
+    {
         if (!$request->has('limit') || $request->input('limit') <= 0){
             return $this->response->errorBadRequest();
         }
@@ -124,7 +128,9 @@ class UserController extends Controller
         return $job_completeds->toArray();
     }
 
-    public function postJobApply(Request $request){
+    // refactor
+    public function postJobApply(Request $request)
+    {
         if (!$request->has('job_id') || !$request->has('resume_id')){
             return $this->response->errorBadRequest();
         }
@@ -151,7 +157,9 @@ class UserController extends Controller
         return 'Success';
     }
 
-    public function postJobEvaluate(Request $request){
+    // refactor
+    public function postJobEvaluate(Request $request)
+    {
       if (!$request->has('job_completed_id') || !$request->has('score')){
         return $this->response->errorBadRequest();
       }
@@ -191,30 +199,29 @@ class UserController extends Controller
       return $this->response->errorInternal('evaluate save failed');
     }
 
-    public function update(Request $request){
+    public function update(Request $request)
+    {
+      $this->validate($params,[
+        'nickname' => 'max:32',
+        'sex' => 'in:0,1',
+        'birthday' => 'date_format:Y-m-d',
+      ]);
+
+
       $user = JWTAuth::parseToken()->authenticate();
 
       $params = $request->only(['nickname', 'sex', 'sign', 'birthday',
         'location', 'phone']);
       
-      $v = Validator::make($params,[
-        'nickname' => 'max:32',
-        'sex' => 'integer',
-        'birthday' => 'date_format:Y-m-d',
-      ]);
-
-      if ($v->fails())
-      {
-          return $this->response->error($v->messages(), 400);
-      }
-
+      // 修复会将值为null的项赋值进去的问题
       foreach ($params as $key => $value) {
         if ($value == null) {
           unset($params[$key]);
         }        
       }
+
       if (!$user->update($params)){
-          $this->response->errorInternal();
+          throw new Exception('update fail.');
       }
 
       return response()->json($user);

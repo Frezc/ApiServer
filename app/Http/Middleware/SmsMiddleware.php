@@ -4,12 +4,10 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Validator;
-use Dingo\Api\Routing\Helpers;
 use Curl\Curl;
 
 class SmsMiddleware
 {
-    use Helpers;
     /**
      * Handle an incoming request.
      *
@@ -24,9 +22,8 @@ class SmsMiddleware
           'verification_code' => 'required|regex:/[0-9]+/'
       ]);
 
-      if ($v->fails())
-      {
-        return $this->response->error($v->errors(), 400);
+      if ($v->fails()) {
+        return response()->json(['error' => $v->errors()], 400);
       }
 
       //验证短信验证码
@@ -37,8 +34,8 @@ class SmsMiddleware
 
       $curl->post('https://api.leancloud.cn/1.1/verifySmsCode/'.$request->input('verification_code').'?mobilePhoneNumber='.$request->input('phone'));
       // dd($curl->response);
-      if (isset($curl->response->code)){
-        return $this->response->error('无效的验证码', 430);
+      if (isset($curl->response->code)) {
+        return response()->json(['error' => '无效的验证码'], 430);
       }
 
       return $next($request);

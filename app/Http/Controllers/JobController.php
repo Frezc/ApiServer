@@ -14,7 +14,8 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class JobController extends Controller
 {
 
-  public function get($id){
+  public function get($id)
+  {
       $job = Job::findOrFail($id);
       $jobEva = JobEvaluate::where('job_id', $job->id);
       $job->number_evaluate = $jobEva->count();
@@ -23,18 +24,22 @@ class JobController extends Controller
       return response()->json($job);
   }
 
-  public function getJobEvaluate(Request $request){
+  public function getJobEvaluate(Request $request)
+  {
       $this->validate($request, [
-          'offset' => 'required',
-          'limit' => 'required',
+          'offset' => 'integer|min:0',
+          'limit' => 'required|min:0|integer',
           'job_id' => 'required'
       ]);
-      if ($request->input('limit') < 0){
-          return $this->response->errorBadRequest();
-      }
 
-      $evaluates = JobEvaluate::where('job_id', $request->query('job_id'))
-          ->skip($request->input('offset'))->limit($request->input('limit'))->get();
+      // 第二个参数为默认值
+      $offset = $request->input('offset', 0);
+      $job_id = $request->query('job_id');
+      $limit = $request->input('limit');
+
+      $evaluates = JobEvaluate::where('job_id', $job_id)
+          ->skip($offset)->limit($limit)->get();
+          
       foreach($evaluates as $evaluate){
           $eva_user = User::find($evaluate->user_id);
           $evaluate->user_nickname = $eva_user->nickname;
@@ -45,8 +50,9 @@ class JobController extends Controller
       return response()->json($evaluates);
   }
 
-  // todo
-  public function query(Request $request){
+  // refactor
+  public function query(Request $request)
+  {
     if ($request->has('q') && $request->has('limit') && $request->query('limit') > 0){
       $q = $request->query('q');
       $q_array = explode(" ", trim($q));

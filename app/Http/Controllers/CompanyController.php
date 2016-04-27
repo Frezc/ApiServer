@@ -10,15 +10,14 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class CompanyController extends Controller
 {
-  public function get($id){
-    try{
+  public function get($id)
+  {
       return response()->json(Company::findOrFail($id));
-    } catch (ModelNotFoundException $e){
-      return $this->response->errorNotFound();
-    }
   }
 
-  public function query(Request $request){
+  // refactor
+  public function query(Request $request)
+  {
     if ($request->has('q') && $request->has('limit')){
       $q = $request->query('q');
       $q_array = explode(" ", trim($q));

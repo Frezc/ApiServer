@@ -20,15 +20,13 @@ class SmsController extends Controller
       $this->middleware('sms', ['only' => ['registerByPhone', 'bindPhone', 'resetPassword']]);
   }
 
-  public function getSmsCode(Request $request){
-    $v = Validator::make($request->all(), [
+  public function getSmsCode(Request $request)
+  {
+    $this->validate($request, [
         'phone' => 'required|regex:/[0-9]+/'
     ]);
 
-    if ($v->fails())
-    {
-        return $this->response->error($v->errors(), 400);
-    }
+    $phoneNumber = $request->input('phone');
 
     $curl = new Curl();
     $curl->setHeader('Content-Type', 'application/json');
@@ -36,7 +34,7 @@ class SmsController extends Controller
     $curl->setHeader('X-LC-Key', env('SMS_APPKEY', ''));
 
     $body = json_encode([
-      'mobilePhoneNumber' => $request->query('phone'),
+      'mobilePhoneNumber' => $phoneNumber,
       'ttl' => 60
     ]);
 
@@ -46,30 +44,31 @@ class SmsController extends Controller
   }
 
 
-  public function registerByPhone(Request $request){
-    $v = Validator::make($request->all(), [
+  public function registerByPhone(Request $request)
+  {
+    $this->validate($request, [
         'password' => 'required|between:6,32',
         'nickname' => 'required|between:1,16'
     ]);
 
-    if ($v->fails())
-    {
-      return $this->response->error($v->errors(), 400);
-    }
+    $nickname = $request->input('nickname');
+    $password = $request->input('password');
+    $phone = $request->input('phone');
 
     $user = new User;
-    $user->phone = $request->input('phone');
-    $user->nickname = $request->input('nickname');
-    $user->password = Hash::make($request->input('password'));
+    $user->phone = $phone;
+    $user->nickname = $nickname;
+    $user->password = Hash::make($password);
     $user->save();
 
     return 'success';
   }
 
-  public function bindPhone(Request $request){
+  public function bindPhone(Request $request)
+  {
     $user = JWTAuth::parseToken()->authenticate();
     if ($user->phone != null) {
-      return $this->response->error('phone has binded', 400);
+      return response()->json(['error' => 'phone has binded'], 400);
     } else {
       $user->phone = $request->input('phone');
       $user->save();
@@ -77,24 +76,24 @@ class SmsController extends Controller
     }
   }
 
-  public function resetPassword(Request $request) {
-    $v = Validator::make($request->all(), [
+  public function resetPassword(Request $request) 
+  {
+    $this->validate($request, [
         'password' => 'required|between:6,32'
     ]);
 
-    if ($v->fails())
-    {
-      return $this->response->error($v->errors(), 400);
-    }
+    $phone = $request->input('phone');
+    $password = $request->input('password');
 
-    $user = User::where('phone', $request->input('phone'))->first();
-    $user->password = Hash::make($request->input('password'));
+    $user = User::where('phone', $phone)->firstOrFail();
+    $user->password = Hash::make($password);
     $user->save();
 
     return 'success';
   }
 
-  public function test(Request $request){
+  public function test(Request $request)
+  {
     $curl = new Curl();
 
     $curl->post('http://tjz.frezc.com/auth', [

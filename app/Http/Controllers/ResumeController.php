@@ -17,20 +17,33 @@ class ResumeController extends Controller
 
   public function __construct()
   {
-    $this->middleware('jwt.auth');
+      $this->middleware('jwt.auth');
   }
 
-  public function get(Request $request){
+  public function get(Request $request)
+  {
+      $this->validate($request, [
+          'id' => 'integer'
+      ]);
+
+      $resume_id = $request->input('id');
+
       $user = JWTAuth::parseToken()->authenticate();
       $resumes = $user->resumes();
-      if ($resume_id = $request->query('id')){
-        return $resumes->where('id', $resume_id)->get()->toArray();
+      if ($resume_id){
+        // return $resumes->where('id', $resume_id)->get()->toArray();
+        // 改为
+        $rResumes = $resumes->where('id', $resume_id)->get();
+        return response()->json($rResumes);
       } else {
-        return $resumes->get()->toArray();
+        // return $resumes->get()->toArray();
+        $rResumes = $resumes->get();
+        return response()->json($rResumes);
       }
   }
 
-  public function photo(Request $request){
+  public function photo(Request $request)
+  {
     $user = JWTAuth::parseToken()->authenticate();
     $resumes = $user->resumes();
     if ($resume_id = $request->query('id')){
@@ -44,7 +57,8 @@ class ResumeController extends Controller
     return $this->response->error('resume not found', 404);
   }
 
-  public function delete(Request $request){
+  public function delete(Request $request)
+  {
       $user = JWTAuth::parseToken()->authenticate();
       $resumes = $user->resumes();
       if ($resume_id = $request->query('id')){
@@ -65,7 +79,8 @@ class ResumeController extends Controller
       }
   }
 
-  public function add(Request $request){
+  public function add(Request $request)
+  {
       $user = JWTAuth::parseToken()->authenticate();
       if (!($request->has('title')&&$request->has('name'))){
         return $this->response->errorBadRequest();
@@ -88,7 +103,8 @@ class ResumeController extends Controller
       return response()->json($resume);
   }
 
-  public function update(Request $request){
+  public function update(Request $request)
+  {
       $user = JWTAuth::parseToken()->authenticate();
       try{
         $resume = $user->resumes()->findOrFail($request->query('id'));
