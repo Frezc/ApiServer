@@ -15,36 +15,37 @@ class JobController extends Controller
 {
 
   public function get($id){
-
-
-    try{
       $job = Job::findOrFail($id);
       $jobEva = JobEvaluate::where('job_id', $job->id);
       $job->number_evaluate = $jobEva->count();
       $job->average_score = $jobEva->avg('score');
       $job->time = JobTime::where('job_id', $job->id)->get();
       return response()->json($job);
-    } catch (ModelNotFoundException $e){
-      return $this->response->errorNotFound();
-    }
   }
 
   public function getJobEvaluate(Request $request){
-    if (!$request->has('limit') || $request->query('limit') <= 0 || !$request->has('job_id')){
-      return $this->response->errorBadRequest();
-    }
+      $this->validate($request, [
+          'offset' => 'required',
+          'limit' => 'required',
+          'job_id' => 'required'
+      ]);
+      if ($request->input('limit') < 0){
+          return $this->response->errorBadRequest();
+      }
 
-    $evaluates = JobEvaluate::where('job_id', $request->query('job_id'))->get();
-    foreach($evaluates as $evaluate){
-      $eva_user = User::find($evaluate->user_id);
-      $evaluate->user_nickname = $eva_user->nickname;
-      $evaluate->user_avatar = $eva_user->avatar;
-      $evaluate->setHidden(['id', 'job_id']);
-    }
+      $evaluates = JobEvaluate::where('job_id', $request->query('job_id'))
+          ->skip($request->input('offset'))->limit($request->input('limit'))->get();
+      foreach($evaluates as $evaluate){
+          $eva_user = User::find($evaluate->user_id);
+          $evaluate->user_nickname = $eva_user->nickname;
+          $evaluate->user_avatar = $eva_user->avatar;
+          $evaluate->setHidden(['id', 'job_id']);
+      }
 
-    return $evaluates->toArray();
+      return response()->json($evaluates);
   }
 
+  // todo
   public function query(Request $request){
     if ($request->has('q') && $request->has('limit') && $request->query('limit') > 0){
       $q = $request->query('q');

@@ -42,16 +42,17 @@ class AuthenticateController extends Controller
       }
   }
 
-  // todo 更新文档
   public function refreshToken(Request $request){
       $this->validate($request, [
           'token' => 'required'
       ]);
 
-      $token = JWTAuth::refresh($request->input('token'));
-      $user = JWTAuth::authenticate($token);
+      $token = $request->input('token');
 
-      return response()->json(['user' => $user, 'token' => $token]);
+      $newToken = JWTAuth::refresh($token);
+      $user = JWTAuth::authenticate($newToken);
+
+      return response()->json(['user' => $user, 'token' => $newToken]);
   }
 
   public function emailAuth(Request $request)
@@ -62,10 +63,13 @@ class AuthenticateController extends Controller
           'password' => 'required'
       ]);
 
+      // 2.获得输入的参数(如果要在这个方法里使用)
+      $email = $request->input('email');
+
       // 2.处理逻辑
-      // todo
-      $user = User::where('email', $request->input('email'))->firstOrFail();
-      if ($user != null){
+      // 在手机上不做验证邮箱的处理，如果未验证不给予登录权限
+      $user = User::where('email', $email)->firstOrFail();
+      if ($user){
           if ($user->email_verified == 0){
               return reponse()->json(['error' => 'email need to be verified.'], 430);
           }
@@ -84,8 +88,6 @@ class AuthenticateController extends Controller
           return response()->json(['error' => 'could_not_create_token'], 500);
       }
 
-      // all good so return the token
-
       // 3.返回json
       return response()->json([
         'user' => User::where('email', $request->Input('email'))->first(),
@@ -95,15 +97,10 @@ class AuthenticateController extends Controller
 
   public function phoneAuth(Request $request)
   {
-      $v = Validator::make($request->all(), [
+      $this->validate($request->all(), [
           'phone' => 'required|regex:/[0-9]+/',
           'password' => 'required'
       ]);
-
-      if ($v->fails())
-      {
-          return $this->response->error($v->errors(), 400);
-      }
 
       // grab credentials from the request
       $credentials = $request->only('phone', 'password');
@@ -111,14 +108,12 @@ class AuthenticateController extends Controller
       try {
           // attempt to verify the credentials and create a token for the user
           if (! $token = JWTAuth::attempt($credentials)) {
-              return response()->json(['error' => 'invalid_credentials'], 401);
+              throw new AuthorizationException();
           }
       } catch (JWTException $e) {
           // something went wrong whilst attempting to encode the token
           return response()->json(['error' => 'could_not_create_token'], 500);
       }
-
-      // all good so return the token
 
       return response()->json([
         'user' => User::where('phone', $request->Input('phone'))->first(),
