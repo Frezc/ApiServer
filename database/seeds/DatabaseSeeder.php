@@ -2,6 +2,14 @@
 
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Eloquent\Model;
+use Faker\Factory as Faker;
+use App\Company;
+use App\Job;
+use App\User;
+use App\Resume;
+use App\JobCompleted;
+use App\JobApply;
+use App\JobEvaluate;
 
 class DatabaseSeeder extends Seeder
 {
@@ -12,33 +20,108 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        Model::unguard();
-
-        // $this->call(UserTableSeeder::class);
-        // DB::table('users')->insert([
-        //     'nickname' => str_random(10),
-        //     'email' => str_random(10).'@gmail.com',
-        //     'password' => Hash::make('secret'),
+        // factory(App\Company::class,20)->create();
+        // factory(App\Job::class,20)->create();
+        // factory(App\User::class,20)->create();
+        // factory(App\Resume::class,10)->create();
+        // factory(App\JobCompleted::class,80)->create();
+        // factory(App\JobApply::class,80)->create();
+        // factory(App\JobEvaluate::class,20)->create();
+        // DB::table('resumes')->update([
+        //     'photo' => 'http://static.frezc.com/static/resume_photos/default'
         // ]);
 
-        // DB::table('users')->update([
-        //     'password' => Hash::make('secret')
-        // ]);
+        $faker = Faker::create('zh_CN');
+        foreach (range(1, 20) as $index) {
+            User::create([
+                'avatar' => '/images/avatars/default',
+                'email' => $faker->unique()->freeEmail,
+                'phone' => $faker->unique()->phoneNumber,
+                'password' => Hash::make('secret'),
+                'nickname' => $faker->name,
+                'sign' => $faker->sentence(6,false),
+                'birthday' => $faker->date($format = 'Y-m-d', $max = 'now'),
+                'location'=> $faker->address,
+                'sex'=> $faker->numberBetween($min = 0, $max = 1),
+                'email_verified'=> $faker->numberBetween($min = 0, $max = 1)
+            ]);
+        }
 
-        // DB::table('users')->update([
-        //     'avatar' => 'http://static.frezc.com/static/avatars/default'
-        // ]);
-               factory(App\models\Company::class,20)->create();
-               factory(App\models\Job::class,20)->create();
-               factory(App\models\User::class,20)->create();
-               factory(App\models\Resume::class,10)->create();
-               factory(App\models\JobCompleted::class,80)->create();
-               factory(App\models\JobApply::class,80)->create();
-                factory(App\models\JobEvaluate::class,20)->create();
-        DB::table('resumes')->update([
-            'photo' => 'http://static.frezc.com/static/resume_photos/default'
-        ]);
+        foreach (range(1, 20) as $index) {
+            Company::create([
+                'name' => $faker->unique()->company,
+                'url'  => $faker->url,
+                'address'=> $faker->address,
+                'logo' =>  $faker->url,
+                'description' => $faker->catchPhrase,
+                'contact_person' => $faker->name,
+                'contact' => $faker->phoneNumber,
+            ]);
+        }
 
-        Model::reguard();
+        foreach (range(1, 20) as $index) {
+            $company = Company::findOrNew($faker->numberBetween($min = 1, $max = 20));
+
+            Job::create([
+                'salary' => ($faker->numberBetween($min = 4, $max = 100)*10).'元/天',
+                'description' => $faker->catchPhrase,
+                'number' => $faker->numberBetween($min = 1, $max = 1000),
+                'number_applied' => 0,
+                'visited'=> $faker->numberBetween($min = 0, $max = 1000),
+                'time'=> $faker->randomElement($array = array ('一年','一个月','六个月')),
+                'name'=> $faker->jobTitle,
+                'company_id'=> $company->id,
+                'active'=> 1,
+                'company_name'=> $company ->name,
+            ]);
+        }
+
+        foreach (range(1, 10) as $index) {
+            Resume::create([
+                'user_id' => $faker->numberBetween($min = 1, $max = 20),
+                'title'  => $faker->jobTitle,
+                'name'=> $faker->name,
+                'photo' => 'http://static.frezc.com/static/resume_photos/default',
+                'school' => $faker->randomElement($array = array ('杭州电子科技大学','春田花花幼稚园','断罪小学')),
+                'birthday' =>  $faker->date($format = 'Y-m-d', $max = 'now'),
+                'sex' => $faker->numberBetween($min = 0, $max = 1),
+                'expect_location'=> $faker->address,
+                'introduction'=> $faker->sentence(4,false),
+            ]);
+        }
+
+        foreach (range(1, 80) as $index) {
+            $resume = Resume::findOrNew($faker->numberBetween($min = 1, $max = 10));
+
+            JobCompleted::create([
+                'user_id' => $resume->user_id ,
+                'job_id'  => $faker->numberBetween($min = 1, $max = 47),
+                'resume_id'=> $resume->id,
+                'description' =>  $faker->sentence(4,false),
+            ]);
+        }
+
+        foreach (range(1, 80) as $index) {
+            $resume = Resume::findOrNew($faker->numberBetween($min = 1, $max = 10));
+
+            JobApply::create([
+                'user_id' => $resume->user_id ,
+                'job_id'  => $faker->numberBetween($min = 1, $max = 47),
+                'resume_id'=> $resume->id,
+                'description' =>  $faker->sentence(4,false),
+                'status' => $faker->numberBetween($min = 0, $max = 1),
+            ]);
+        }
+
+        foreach (range(1, 20) as $index) {
+            $jc = JobCompleted::findOrNew($faker->numberBetween($min = 1, $max = 80));
+
+            JobEvaluate::create([
+                'user_id' => $jc->user_id,
+                'job_id'  => $jc->job_id,
+                'comment' =>  $faker->catchPhrase,
+                'score' => $faker->numberBetween($min = 0, $max = 5),
+            ]);
+        }
     }
 }
