@@ -9,7 +9,6 @@ use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use App\User;
 use Storage;
-use Validator;
 use Hash;
 use Illuminate\Auth\Access\AuthorizationException;
 
