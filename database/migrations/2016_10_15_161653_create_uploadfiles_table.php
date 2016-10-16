@@ -16,7 +16,7 @@ class CreateUploadfilesTable extends Migration
             $table->increments('id');
             $table->string('path');
             $table->integer('uploader_id')->unsigned();
-            $table->tinyInteger('used')->default(0);  // 是否被使用，如果没有被使用，一天后就会被清理
+            $table->tinyInteger('used')->default(0);  // 文件使用次数，如果没有被使用，一天后就会被清理
             $table->tinyInteger('exist')->default(1);  // 文件是否还存在，被删除后置0
             $table->timestamps();
 

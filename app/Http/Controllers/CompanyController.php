@@ -32,11 +32,11 @@ class CompanyController extends Controller {
         $q_array = explode(" ", trim($q));
 
         $builder = Company::query();
-        foreach($q_array as $qi){
-            $builder->where(function($query) use ($qi){
-                $query->orWhere('name', 'like', '%'.$qi.'%')
-                      ->orWhere('description', 'like', '%'.$qi.'%')
-                      ->orWhere('contact_person', 'like', '%'.$qi.'%');
+        foreach ($q_array as $qi) {
+            $builder->where(function ($query) use ($qi) {
+                $query->orWhere('name', 'like', '%' . $qi . '%')
+                    ->orWhere('description', 'like', '%' . $qi . '%')
+                    ->orWhere('contact_person', 'like', '%' . $qi . '%');
             });
         }
 
