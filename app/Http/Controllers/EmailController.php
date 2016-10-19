@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\MsgException;
 use App\User;
 use DB;
 use Hash;
@@ -61,12 +62,11 @@ class EmailController extends Controller {
         return 'success';
     }
 
-    // 	refactor
     public function bindEmail(Request $request) {
         /* validate at middleware */
         $user = JWTAuth::parseToken()->authenticate();
         if ($user->email != null) {
-            return $this->response->error('email has binded', 400);
+            throw new MsgException('email has binded', 400);
         } else {
             $user->email = $request->input('email');
             $user->email_verified = 1;

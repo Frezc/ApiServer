@@ -16,7 +16,7 @@ Route::get('resume/photo', 'ResumeController@photo');
 Route::post('resume/delete', 'ResumeController@delete');
 Route::post('resume/add', 'ResumeController@add');
 Route::post('resume/update', 'ResumeController@update');
-Route::post('avatar', 'AuthenticateController@updateAvatar');
+//Route::post('avatar', 'AuthenticateController@updateAvatar');
 Route::get('job/query', 'JobController@query');
 Route::get('job/apply', 'UserController@getJobApply');
 Route::get('job/completed', 'UserController@getJobCompleted');

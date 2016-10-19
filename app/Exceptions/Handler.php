@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Exception;
+use App\Exceptions\MsgException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -56,9 +57,11 @@ class Handler extends ExceptionHandler
         } elseif ($e instanceof AuthorizationException) {
             return response()->json(['error' => 'Unauthorized'], 401);
         } elseif ($e instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException) {
-            return response()->json(['error' => 'token_expired'], $e->getStatusCode());
+            return response()->json(['error' => $e->getMessage()], $e->getStatusCode());
         } elseif ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
             return response()->json(['error' => 'token_invalid'], $e->getStatusCode());
+        } elseif ($e instanceof MsgException) {
+            return response()->json(['error' => $e->getMessage()], $e->getCode());
         } elseif (!env('LOCAL', false)) {
             return response()->json(['error' => $e->getMessage()], 500);
         }

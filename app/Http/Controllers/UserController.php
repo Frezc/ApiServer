@@ -7,6 +7,7 @@ use App\JobApply;
 use App\JobCompleted;
 use App\JobEvaluate;
 use App\Resume;
+use App\Uploadfile;
 use App\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -14,6 +15,7 @@ use JWTAuth;
 use Validator;
 
 class UserController extends Controller {
+
     public function __construct() {
         $this->middleware('jwt.auth', ['except' => ['show']]);
     }
@@ -25,9 +27,16 @@ class UserController extends Controller {
 
     // refactor
     public function getJobApply(Request $request) {
-        if (!$request->has('limit') || $request->input('limit') <= 0) {
-            return $this->response->errorBadRequest();
-        }
+        $this->validate($request, [
+            'q' => 'required',
+            'limit' => 'integer|min:0',
+            'direction' => 'in:asc,desc',
+            'offset' => 'integer|min:0'
+        ]);
+
+        $direction = $request->input('direction', 'desc');
+        $offset = $request->input('offset', 0);
+        $limit = $request->input('limit', 20);
 
         $user = JWTAuth::parseToken()->authenticate();
         $builder = $user->jobApplies();
@@ -41,16 +50,12 @@ class UserController extends Controller {
         }
 
         //排列
-        $builder->orderBy(
-            'created_at',
-            $request->input('direction', 'asc')
-        );
+        $builder->orderBy('created_at', $direction);
 
         //分页
-        if ($request->has('offset')) {
-            $builder->skip($request->input('offset'));
-        }
-        $builder->limit($request->input('limit'));
+        $builder->skip($offset);
+
+        $builder->limit($limit);
 
         $job_applies = $builder->get();
 
@@ -65,14 +70,21 @@ class UserController extends Controller {
             $job_apply->resume_name = Resume::find($job_apply->resume_id)->name;
         }
 
-        return $job_applies->toArray();
+        return response()->json($job_applies);
     }
 
     // refactor
     public function getJobCompleted(Request $request) {
-        if (!$request->has('limit') || $request->input('limit') <= 0) {
-            return $this->response->errorBadRequest();
-        }
+        $this->validate($request, [
+            'q' => 'required',
+            'limit' => 'integer|min:0',
+            'direction' => 'in:asc,desc',
+            'offset' => 'integer|min:0'
+        ]);
+
+        $direction = $request->input('direction', 'desc');
+        $offset = $request->input('offset', 0);
+        $limit = $request->input('limit', 20);
 
         $user = JWTAuth::parseToken()->authenticate();
         $builder = $user->jobCompleteds();
@@ -88,16 +100,12 @@ class UserController extends Controller {
         }
 
         //排列
-        $builder->orderBy(
-            'created_at',
-            $request->input('direction', 'asc')
-        );
+        $builder->orderBy('created_at', $direction);
 
         //分页
-        if ($request->has('offset')) {
-            $builder->skip($request->input('offset'));
-        }
-        $builder->limit($request->input('limit'));
+        $builder->skip($offset);
+
+        $builder->limit($limit);
 
         $job_completeds = $builder->get();
 
@@ -118,11 +126,19 @@ class UserController extends Controller {
             }
         }
 
-        return $job_completeds->toArray();
+        return response()->json($job_completeds);
     }
 
     // refactor
     public function postJobApply(Request $request) {
+        $this->validate($request, [
+            'job_id' => 'required|integer',
+            'resume_id' => 'required',
+            'limit' => 'integer|min:0',
+            'direction' => 'in:asc,desc',
+            'offset' => 'integer|min:0'
+        ]);
+
         if (!$request->has('job_id') || !$request->has('resume_id')) {
             return $this->response->errorBadRequest();
         }
@@ -194,25 +210,23 @@ class UserController extends Controller {
         $this->validate($request, [
             'nickname' => 'max:32',
             'sex' => 'in:0,1',
+            'sign' => 'string',
             'birthday' => 'date_format:Y-m-d',
+            'location' => 'string',
+            'avatar' => 'exists:uploadfiles,path'
         ]);
-
 
         $user = JWTAuth::parseToken()->authenticate();
 
-        $params = $request->only(['nickname', 'sex', 'sign', 'birthday',
-            'location', 'phone']);
-
-        // 修复会将值为null的项赋值进去的问题
-        foreach ($params as $key => $value) {
-            if ($value == null) {
-                unset($params[$key]);
-            }
+        $avatar = $request->input('avatar');
+        if ($avatar) {
+            $uploadFile = Uploadfile::where('path', $avatar)->first();
+            $uploadFile->makeSureAccess($user);
         }
 
-        if (!$user->update($params)) {
-            throw new Exception('update fail.');
-        }
+        $user->update(array_only($request->all(),
+            ['nickname', 'sex', 'sign', 'birthday', 'location', 'avatar']));
+
 
         return response()->json($user);
     }

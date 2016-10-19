@@ -9,6 +9,7 @@ use JWTAuth;
 use Storage;
 
 class UploadController extends Controller {
+
     public function __construct() {
         $this->middleware('jwt.auth');
     }
@@ -35,6 +36,6 @@ class UploadController extends Controller {
             ]);
         }
 
-        return asset(Storage::url($path));
+        return response()->json(['file' => $path]);
     }
 }

@@ -22,40 +22,6 @@ class AuthenticateController extends Controller {
         return $users;
     }
 
-    // 以后实现
-    // 对比
-    /*
-    public function updateAvatar(Request $request) {
-        $user = JWTAuth::parseToken()->authenticate();
-        if ($request->hasFile('avatar') && $request->file('avatar')->isValid()){
-            // file_put_contents(public_path().'images/avatars/'.$user->id.'.png',
-            //   file_get_contents($request->file('avatar')->getRealPath()));
-            copy($request->file('avatar')->getRealPath(), public_path('images/avatars/'.$user->id));
-            $avatar = '/images/avatars/'.$user->id;
-            $user->avatar = $avatar;
-            $user->save();
-            return $avatar;
-        } else {
-            return $this->response->errorBadRequest();
-        }
-    }
-    */
-    public function updateAvatar(Request $request) {
-        $this->validate($request, [
-            'avatar' => 'required|image'
-        ]);
-        $user = JWTAuth::parseToken()->authenticate();
-        // file_put_contents(public_path().'images/avatars/'.$user->id.'.png',
-        //   file_get_contents($request->file('avatar')->getRealPath()));
-
-        // todo
-        copy($request->file('avatar')->getRealPath(), public_path('images/avatars/' . $user->id));
-        $avatar = '/images/avatars/' . $user->id;
-        $user->avatar = $avatar;
-        $user->save();
-        return $avatar;
-    }
-
     public function refreshToken(Request $request) {
         $this->validate($request, [
             'token' => 'required'
@@ -64,8 +30,8 @@ class AuthenticateController extends Controller {
         $token = $request->input('token');
 
         $newToken = JWTAuth::refresh($token);
+        
         $user = JWTAuth::authenticate($newToken);
-
         return response()->json(['user' => $user, 'token' => $newToken]);
     }
 
@@ -73,7 +39,7 @@ class AuthenticateController extends Controller {
         // 1.验证输入参数
         $this->validate($request, [
             'email' => 'required|email',
-            'password' => 'required'
+            'password' => 'required|string|min:6'
         ]);
 
         // 2.获得输入的参数(如果要在这个方法里使用)
@@ -111,7 +77,7 @@ class AuthenticateController extends Controller {
     public function phoneAuth(Request $request) {
         $this->validate($request, [
             'phone' => 'required|regex:/[0-9]+/',
-            'password' => 'required'
+            'password' => 'required|string|min:6'
         ]);
 
         // grab credentials from the request

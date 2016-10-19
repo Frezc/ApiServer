@@ -40,6 +40,7 @@ class SmsController extends Controller {
 
     public function registerByPhone(Request $request) {
         $this->validate($request, [
+            'phone' => 'required|regex:/[0-9]+/|unique:users,phone',
             'password' => 'required|between:6,32',
             'nickname' => 'required|between:1,16'
         ]);
@@ -58,6 +59,10 @@ class SmsController extends Controller {
     }
 
     public function bindPhone(Request $request) {
+        $this->validate($request, [
+            'phone' => 'required|regex:/[0-9]+/|unique:users,phone'
+        ]);
+
         $user = JWTAuth::parseToken()->authenticate();
         if ($user->phone != null) {
             return response()->json(['error' => 'phone has binded'], 400);
