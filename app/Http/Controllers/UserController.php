@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\MsgException;
 use App\Job;
 use App\JobApply;
 use App\JobCompleted;
@@ -18,6 +19,8 @@ class UserController extends Controller {
 
     public function __construct() {
         $this->middleware('jwt.auth', ['except' => ['show']]);
+        $this->middleware('user.access', ['except' => ['show', 'query']]);
+        $this->middleware('role:admin', ['only' => ['query']]);
     }
 
     public function show($id) {
@@ -28,15 +31,15 @@ class UserController extends Controller {
     // refactor
     public function getJobApply(Request $request) {
         $this->validate($request, [
-            'q' => 'required',
-            'limit' => 'integer|min:0',
-            'direction' => 'in:asc,desc',
-            'offset' => 'integer|min:0'
+            'kw' => 'required',
+            'siz' => 'integer|min:0',
+            'dir' => 'in:asc,desc',
+            'off' => 'integer|min:0'
         ]);
 
-        $direction = $request->input('direction', 'desc');
-        $offset = $request->input('offset', 0);
-        $limit = $request->input('limit', 20);
+        $direction = $request->input('dir', 'desc');
+        $offset = $request->input('off', 0);
+        $limit = $request->input('siz', 20);
 
         $user = JWTAuth::parseToken()->authenticate();
         $builder = $user->jobApplies();
@@ -76,15 +79,15 @@ class UserController extends Controller {
     // refactor
     public function getJobCompleted(Request $request) {
         $this->validate($request, [
-            'q' => 'required',
-            'limit' => 'integer|min:0',
-            'direction' => 'in:asc,desc',
-            'offset' => 'integer|min:0'
+            'kw' => 'required',
+            'siz' => 'integer|min:0',
+            'dir' => 'in:asc,desc',
+            'off' => 'integer|min:0'
         ]);
 
-        $direction = $request->input('direction', 'desc');
-        $offset = $request->input('offset', 0);
-        $limit = $request->input('limit', 20);
+        $direction = $request->input('dir', 'desc');
+        $offset = $request->input('off', 0);
+        $limit = $request->input('siz', 20);
 
         $user = JWTAuth::parseToken()->authenticate();
         $builder = $user->jobCompleteds();
@@ -133,10 +136,7 @@ class UserController extends Controller {
     public function postJobApply(Request $request) {
         $this->validate($request, [
             'job_id' => 'required|integer',
-            'resume_id' => 'required',
-            'limit' => 'integer|min:0',
-            'direction' => 'in:asc,desc',
-            'offset' => 'integer|min:0'
+            'resume_id' => 'required'
         ]);
 
         if (!$request->has('job_id') || !$request->has('resume_id')) {
@@ -229,5 +229,40 @@ class UserController extends Controller {
 
 
         return response()->json($user);
+    }
+
+    public function query(Request $request) {
+        $this->validate($request, [
+            'kw' => 'string',
+            'siz' => 'integer|min:0',
+            'dir' => 'in:asc,desc',
+            'off' => 'integer|min:0'
+        ]);
+
+        $q = $request->input('kw', '');
+        $direction = $request->input('dir', 'desc');
+        $offset = $request->input('off', 0);
+        $limit = $request->input('siz', 20);
+
+        $q_array = $q ? explode(" ", trim($q)) : [];
+        $builder = User::query();
+        foreach ($q_array as $qi) {
+            $builder->where(function ($query) use ($qi) {
+                $query->orWhere('nickname', 'like', '%' . $qi . '%')
+                    ->orWhere('email', 'like', '%' . $qi . '%');
+            });
+        }
+
+        $builder->orderBy('id', $direction);
+        $builder->skip($offset);
+        $builder->limit($limit);
+
+        $users = $builder->get();
+
+        $users->each(function ($user) {
+            $user->setHidden(['password']);
+        });
+
+        return response()->json($users);
     }
 }

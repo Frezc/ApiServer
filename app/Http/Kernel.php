@@ -47,6 +47,8 @@ class Kernel extends HttpKernel
         'jwt.auth' => \Tymon\JWTAuth\Middleware\GetUserFromToken::class,
         'jwt.refresh' => \Tymon\JWTAuth\Middleware\RefreshToken::class,
         'email' => \App\Http\Middleware\EmailMiddleware::class,
-        'sms' => \App\Http\Middleware\SmsMiddleware::class
+        'sms' => \App\Http\Middleware\SmsMiddleware::class,
+        'user.access' => \App\Http\Middleware\UserAccess::class,
+        'role' => \App\Http\Middleware\RoleCheck::class
     ];
 }

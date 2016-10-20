@@ -10,6 +10,7 @@ use App\Resume;
 use App\JobCompleted;
 use App\JobApply;
 use App\JobEvaluate;
+use App\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -40,6 +41,19 @@ class DatabaseSeeder extends Seeder
         $jobEvaluate = 20;
 
         $faker = Faker::create('zh_CN');
+
+        Role::create([
+            'name' => 'user',
+            'mode' => '1',
+            'public' => 1
+        ]);
+        Role::create([
+            'name' => 'admin',
+            'mode' => '11',
+            'public' => 1,
+            'admin' => 1
+        ]);
+
         User::create([
             'avatar' => '/images/avatars/default',
             'email' => '504021398@qq.com',
@@ -50,7 +64,8 @@ class DatabaseSeeder extends Seeder
             'birthday' => $faker->date($format = 'Y-m-d', $max = 'now'),
             'location'=> $faker->address,
             'sex'=> $faker->numberBetween($min = 0, $max = 1),
-            'email_verified'=> 1
+            'email_verified'=> 1,
+            'role_id' => 2
         ]);
         foreach (range(1, $userNum - 1) as $index) {
             User::create([

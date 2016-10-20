@@ -16,20 +16,20 @@ class CompanyController extends Controller {
 
     public function query(Request $request) {
         $this->validate($request, [
-            'q' => 'required',
-            'limit' => 'integer|min:0',
+            'kw' => 'required',
+            'siz' => 'integer|min:0',
             'orderby' => 'in:id,created_at',
-            'direction' => 'in:asc,desc',
-            'offset' => 'integer|min:0'
+            'dir' => 'in:asc,desc',
+            'off' => 'integer|min:0'
         ]);
 
-        $q = $request->input('q');
-        $limit = $request->input('limit', 20);
+        $keywords = $request->input('kw');
+        $limit = $request->input('siz', 20);
         $orderby = $request->input('orderby', 'id');
-        $direction = $request->input('direction', 'asc');
-        $offset = $request->input('offset', 0);
+        $direction = $request->input('dir', 'asc');
+        $offset = $request->input('off', 0);
 
-        $q_array = explode(" ", trim($q));
+        $q_array = explode(" ", trim($keywords));
 
         $builder = Company::query();
         foreach ($q_array as $qi) {

@@ -8,24 +8,24 @@ Route::post('bindPhone', 'SmsController@bindPhone');
 Route::post('verifyEmail', 'EmailController@verifyEmail');
 Route::post('bindEmail', 'EmailController@bindEmail');
 
-Route::post('user/update', 'UserController@update');
-Route::get('user/{id}', 'UserController@show');
+Route::post('users/{id}', 'UserController@update');
+Route::get('users/{id}', 'UserController@show');
 // Route::post('user', 'UserController@store');
-Route::get('resume', 'ResumeController@get');
-Route::get('resume/photo', 'ResumeController@photo');
-Route::post('resume/delete', 'ResumeController@delete');
-Route::post('resume/add', 'ResumeController@add');
-Route::post('resume/update', 'ResumeController@update');
+Route::get('users/{id}/resumes', 'ResumeController@get');
+//Route::get('resume/photo', 'ResumeController@photo');
+Route::delete('users/{id}/resumes/{resumeId}', 'ResumeController@delete');
+Route::post('users/{id}/resumes', 'ResumeController@add');
+Route::post('users/{id}/resumes/{resumeId}', 'ResumeController@update');
 //Route::post('avatar', 'AuthenticateController@updateAvatar');
-Route::get('job/query', 'JobController@query');
+Route::get('jobs', 'JobController@query');
 Route::get('job/apply', 'UserController@getJobApply');
 Route::get('job/completed', 'UserController@getJobCompleted');
-Route::get('job/{id}', 'JobController@get')->where('id', '[0-9]+');
+Route::get('jobs/{id}', 'JobController@get')->where('id', '[0-9]+');
 Route::post('job/apply', 'UserController@postJobApply');
 Route::get('job/evaluate', 'JobController@getJobEvaluate');
 Route::post('job/evaluate', 'UserController@postJobEvaluate');
-Route::get('company/query', 'CompanyController@query');
-Route::get('company/{id}', 'CompanyController@get')->where('id', '[0-9]+');
+Route::get('companies', 'CompanyController@query');
+Route::get('companies/{id}', 'CompanyController@get')->where('id', '[0-9]+');
 
 // 需要限制次数的请求
 // 每分钟三次
@@ -50,6 +50,9 @@ Route::group(['middleware' => 'throttle:2'], function ($api) {
   Route::get('getSmsCode', 'SmsController@getSmsCode');
   Route::post('sendVerifyEmail', 'EmailController@sendVerifyEmail');
 });
+
+// boss
+Route::get('users', 'UserController@query');
 
 Route::get('/', function () {
     return view('welcome');

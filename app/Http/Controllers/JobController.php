@@ -21,15 +21,15 @@ class JobController extends Controller {
 
     public function getJobEvaluate(Request $request) {
         $this->validate($request, [
-            'offset' => 'integer|min:0',
-            'limit' => 'required|min:0|integer',
+            'off' => 'integer|min:0',
+            'siz' => 'required|min:0|integer',
             'job_id' => 'required'
         ]);
 
         // 第二个参数为默认值
-        $offset = $request->input('offset', 0);
+        $offset = $request->input('off', 0);
         $job_id = $request->query('job_id');
-        $limit = $request->input('limit');
+        $limit = $request->input('siz');
 
         $evaluates = JobEvaluate::where('job_id', $job_id)
             ->skip($offset)->limit($limit)->get();
@@ -46,18 +46,18 @@ class JobController extends Controller {
 
     public function query(Request $request) {
         $this->validate($request, [
-            'q' => 'required',
-            'limit' => 'integer|min:0',
+            'kw' => 'required',
+            'siz' => 'integer|min:0',
             'orderby' => 'in:id,created_at',
-            'direction' => 'in:asc,desc',
-            'offset' => 'integer|min:0'
+            'dir' => 'in:asc,desc',
+            'off' => 'integer|min:0'
         ]);
 
-        $q = $request->input('q');
-        $limit = $request->input('limit', 20);
+        $q = $request->input('kw');
+        $limit = $request->input('siz', 20);
         $orderby = $request->input('orderby', 'id');
-        $direction = $request->input('direction', 'asc');
-        $offset = $request->input('offset', 0);
+        $direction = $request->input('dir', 'asc');
+        $offset = $request->input('off', 0);
 
         $q_array = explode(" ", trim($q));
 

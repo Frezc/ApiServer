@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\MsgException;
 use App\Resume;
+use App\User;
 use Illuminate\Http\Request;
 use JWTAuth;
 use Response;
@@ -15,10 +16,12 @@ class ResumeController extends Controller {
 
     public function __construct() {
         $this->middleware('jwt.auth');
+        $this->middleware('user.access');
     }
 
     public function get() {
         $user = JWTAuth::parseToken()->authenticate();
+
         $resumes = $user->resumes()->get();
         foreach ($resumes as $resume) {
             $resume->photo = asset(Storage::url($resume->photo));
@@ -26,26 +29,18 @@ class ResumeController extends Controller {
         return response()->json($resumes);
     }
 
-    public function delete(Request $request) {
-        $this->validate($request, [
-            'id' => 'required|integer|exists:resumes,id'
-        ]);
-
+    public function delete($userId, $resumeId) {
         $user = JWTAuth::parseToken()->authenticate();
-        $resume_id = $request->input('id');
 
-        $resume = Resume::findOrFail($resume_id);
-        if ($resume->user_id == $user->id) {
-            if ($resume->photo) {
-                $file = Uploadfile::where('path', $resume->photo)->first();
-                $file->used--;
-                $file->save();
-            }
-            $resume->delete();
-            return 'deleted';
-        } else {
-            throw new MsgException('你没有权限删除该简历。', 401);
+        $resume = $user->resumes()->findOrFail($resumeId);
+
+        if ($resume->photo) {
+            $file = Uploadfile::where('path', $resume->photo)->first();
+            $file->used--;
+            $file->save();
         }
+        $resume->delete();
+        return response()->json($resume);
     }
 
     public function add(Request $request) {
@@ -77,7 +72,7 @@ class ResumeController extends Controller {
         return response()->json($resume);
     }
 
-    public function update(Request $request) {
+    public function update(Request $request, $userId, $resumeId) {
         $this->validate($request, [
             'title' => 'string',
             'name' => 'string',
@@ -87,12 +82,11 @@ class ResumeController extends Controller {
             'birthday' => 'string',
             'contact' => 'string',
             'expect_location' => 'string',
-            'id' => 'required|integer',
             'sex' => 'in:0,1'
         ]);
 
         $user = JWTAuth::parseToken()->authenticate();
-        $resume = $user->resumes()->findOrFail($request->input('id'));
+        $resume = $user->resumes()->findOrFail($resumeId);
 
         $photo = $request->input('photo');
         if ($photo) {
