@@ -2,94 +2,86 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Http\Requests;
-use App\Http\Controllers\Controller;
 use App\Job;
-use App\User;
 use App\JobEvaluate;
 use App\JobTime;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\User;
+use Illuminate\Http\Request;
 
-class JobController extends Controller
-{
+class JobController extends Controller {
 
-  public function get($id)
-  {
-      $job = Job::findOrFail($id);
-      $jobEva = JobEvaluate::where('job_id', $job->id);
-      $job->number_evaluate = $jobEva->count();
-      $job->average_score = $jobEva->avg('score');
-      $job->time = JobTime::where('job_id', $job->id)->get();
-      return response()->json($job);
-  }
-
-  public function getJobEvaluate(Request $request)
-  {
-      $this->validate($request, [
-          'offset' => 'integer|min:0',
-          'limit' => 'required|min:0|integer',
-          'job_id' => 'required'
-      ]);
-
-      // 第二个参数为默认值
-      $offset = $request->input('offset', 0);
-      $job_id = $request->query('job_id');
-      $limit = $request->input('limit');
-
-      $evaluates = JobEvaluate::where('job_id', $job_id)
-          ->skip($offset)->limit($limit)->get();
-          
-      foreach($evaluates as $evaluate){
-          $eva_user = User::find($evaluate->user_id);
-          $evaluate->user_nickname = $eva_user->nickname;
-          $evaluate->user_avatar = $eva_user->avatar;
-          $evaluate->setHidden(['id', 'job_id']);
-      }
-
-      return response()->json($evaluates);
-  }
-
-
-  public function query(Request $request)
-  {
-    if ($request->has('q') && $request->has('limit') && $request->query('limit') > 0){
-      $q = $request->query('q');
-      $q_array = explode(" ", trim($q));
-
-      $builder = Job::query();
-      foreach($q_array as $qi){
-        $builder->where(function($query) use ($qi){
-          $query->orWhere('name', 'like', '%'.$qi.'%')
-                ->orWhere('description', 'like', '%'.$qi.'%')
-                ->orWhere('company_name', 'like', '%'.$qi.'%');
-        });
-      }
-
-      //筛选
-
-      //排列
-      $builder->orderBy(
-        $request->input('orderby', 'id'),
-        $request->input('direction', 'asc')
-      );
-
-      //分页
-      if ($request->has('offset')){
-        $builder->skip($request->input('offset'));
-      }
-        $builder->limit($request->input('limit'));
-          
-
-      // dd($builder->get());
-      $jobs = $builder->get();
-      foreach($jobs as $job){
-        $job->number_evaluate = JobEvaluate::where('job_id', $job->id)->count();
-        $job->average_score = JobEvaluate::where('job_id', $job->id)->avg('score');
-      }
-      return $jobs->toArray();
-    } else {
-      return $this->response->errorBadRequest();
+    public function get($id) {
+        $job = Job::findOrFail($id);
+        $jobEva = JobEvaluate::where('job_id', $job->id);
+        $job->number_evaluate = $jobEva->count();
+        $job->average_score = $jobEva->avg('score');
+        $job->time = JobTime::where('job_id', $job->id)->get();
+        return response()->json($job);
     }
-  }
+
+    public function getJobEvaluate(Request $request) {
+        $this->validate($request, [
+            'off' => 'integer|min:0',
+            'siz' => 'required|min:0|integer',
+            'job_id' => 'required'
+        ]);
+
+        // 第二个参数为默认值
+        $offset = $request->input('off', 0);
+        $job_id = $request->query('job_id');
+        $limit = $request->input('siz');
+
+        $evaluates = JobEvaluate::where('job_id', $job_id)
+            ->skip($offset)->limit($limit)->get();
+
+        foreach ($evaluates as $evaluate) {
+            $eva_user = User::find($evaluate->user_id);
+            $evaluate->user_nickname = $eva_user->nickname;
+            $evaluate->user_avatar = $eva_user->avatar;
+            $evaluate->setHidden(['id', 'job_id']);
+        }
+
+        return response()->json($evaluates);
+    }
+
+    public function query(Request $request) {
+        $this->validate($request, [
+            'kw' => 'required',
+            'siz' => 'integer|min:0',
+            'orderby' => 'in:id,created_at',
+            'dir' => 'in:asc,desc',
+            'off' => 'integer|min:0'
+        ]);
+
+        $q = $request->input('kw');
+        $limit = $request->input('siz', 20);
+        $orderby = $request->input('orderby', 'id');
+        $direction = $request->input('dir', 'asc');
+        $offset = $request->input('off', 0);
+
+        $q_array = explode(" ", trim($q));
+
+        $builder = Job::query();
+        foreach ($q_array as $qi) {
+            $builder->where(function ($query) use ($qi) {
+                $query->orWhere('name', 'like', '%' . $qi . '%')
+                    ->orWhere('description', 'like', '%' . $qi . '%')
+                    ->orWhere('company_name', 'like', '%' . $qi . '%');
+            });
+        }
+
+        //排列
+        $builder->orderBy($orderby, $direction);
+
+        //分页
+        $builder->skip($offset);
+        $builder->limit($limit);
+
+        $jobs = $builder->get();
+        foreach ($jobs as $job) {
+            $job->number_evaluate = JobEvaluate::where('job_id', $job->id)->count();
+            $job->average_score = JobEvaluate::where('job_id', $job->id)->avg('score');
+        }
+        return response()->json($jobs);
+    }
 }

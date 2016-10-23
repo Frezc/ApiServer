@@ -28,10 +28,10 @@ class User extends Model implements AuthenticatableContract,
      *
      * @var array
      */
-    protected $hidden = ['password', 'remember_token'];
+    protected $hidden = ['password', 'remember_token', 'role_id', 'email_verified', 'updated_at'];
 
 
-    protected $guarded = ['id'];
+    protected $guarded = ['id', 'role_id'];
 
     public function resumes(){
       return $this->hasMany('App\Resume');

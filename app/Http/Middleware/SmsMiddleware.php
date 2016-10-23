@@ -18,7 +18,7 @@ class SmsMiddleware
     public function handle($request, Closure $next)
     {
       $v = Validator::make($request->all(), [
-          'phone' => 'required|regex:/[0-9]+/|unique:users,phone',
+          'phone' => 'required|regex:/[0-9]+/',
           'verification_code' => 'required|regex:/[0-9]+/'
       ]);
 

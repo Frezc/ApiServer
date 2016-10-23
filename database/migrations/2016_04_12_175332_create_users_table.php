@@ -33,6 +33,8 @@ class CreateUsersTable extends Migration
             $table->integer('company_id')->unsigned()->nullable();
             // 是否通过邮箱，0：未通过 1：已通过
             $table->tinyInteger('email_verified')->default(0);
+            // 角色的id
+            $table->tinyInteger('role_id')->default(1);
 
             // $table->rememberToken();
             $table->timestamps();

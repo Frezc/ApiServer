@@ -2,127 +2,101 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Http\Requests;
-use App\Http\Controllers\Controller;
-use JWTAuth;
+use App\Exceptions\MsgException;
 use App\Resume;
-use Storage;
+use App\User;
+use Illuminate\Http\Request;
+use JWTAuth;
 use Response;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Storage;
+use App\Uploadfile;
 
-class ResumeController extends Controller
-{
-  public $default_photo = 'resume_photos\default';
+class ResumeController extends Controller {
+    public $default_photo = 'resume_photos\default';
 
-  public function __construct()
-  {
-      $this->middleware('jwt.auth');
-  }
-
-  public function get(Request $request)
-  {
-      $this->validate($request, [
-          'id' => 'integer'
-      ]);
-
-      $resume_id = $request->input('id');
-
-      $user = JWTAuth::parseToken()->authenticate();
-      $resumes = $user->resumes();
-      if ($resume_id){
-        // return $resumes->where('id', $resume_id)->get()->toArray();
-        // 改为
-        $rResumes = $resumes->where('id', $resume_id)->get();
-        return response()->json($rResumes);
-      } else {
-        // return $resumes->get()->toArray();
-        $rResumes = $resumes->get();
-        return response()->json($rResumes);
-      }
-  }
-
-  public function photo(Request $request)
-  {
-    $user = JWTAuth::parseToken()->authenticate();
-    $resumes = $user->resumes();
-    if ($resume_id = $request->query('id')){
-      $resume = $resumes->where('id', $resume_id)->first();
-      if ($resume != null){
-        $file = storage_path('app/'.$resume->photo);
-        return Response::download($file, 'photo');
-      }
+    public function __construct() {
+        $this->middleware('jwt.auth');
+        $this->middleware('user.access');
     }
 
-    return $this->response->error('resume not found', 404);
-  }
+    public function get() {
+        $user = JWTAuth::parseToken()->authenticate();
 
-  public function delete(Request $request)
-  {
-      $user = JWTAuth::parseToken()->authenticate();
-      $resumes = $user->resumes();
-      if ($resume_id = $request->query('id')){
-        $resume = $resumes->where('id', $resume_id)->first();
-        if ($resume){
-          if ($resume->photo != $this->default_photo){
-            Storage::delete(
-                'resume_photos/'.$resume->id
-            );
-          }
-          $resume->delete();
-          return 'deleted';
-        } else {
-          return $this->response->error('resume not found', 404);
+        $resumes = $user->resumes()->get();
+        foreach ($resumes as $resume) {
+            $resume->photo = asset(Storage::url($resume->photo));
         }
-      } else {
-        return $this->response->errorBadRequest();
-      }
-  }
+        return response()->json($resumes);
+    }
 
-  public function add(Request $request)
-  {
-      $user = JWTAuth::parseToken()->authenticate();
-      if (!($request->has('title')&&$request->has('name'))){
-        return $this->response->errorBadRequest();
-      }
+    public function delete($userId, $resumeId) {
+        $user = JWTAuth::parseToken()->authenticate();
 
-      $array = $request->only(['title', 'name', 'school', 'introduction',
-        'birthday', 'contact', 'expect_location']);
-      $array['user_id'] = $user->id;
-      $resume = Resume::create($array);
+        $resume = $user->resumes()->findOrFail($resumeId);
 
-      if ($request->hasFile('photo') && $request->file('photo')->isValid()){
-        Storage::put(
-            'resume_photos/'.$resume->id,
-            file_get_contents($request->file('photo')->getRealPath())
-        );
-        $resume->photo = 'resume_photos/'.$resume->id;
-        $resume->save();
-      }
+        if ($resume->photo) {
+            $file = Uploadfile::where('path', $resume->photo)->first();
+            $file->used--;
+            $file->save();
+        }
+        $resume->delete();
+        return response()->json($resume);
+    }
 
-      return response()->json($resume);
-  }
+    public function add(Request $request) {
+        $this->validate($request, [
+            'title' => 'required',
+            'name' => 'required',
+            'school' => 'string',
+            'introduction' => 'string',
+            'photo' => 'exists:uploadfiles,path',
+            'birthday' => 'string',
+            'contact' => 'string',
+            'expect_location' => 'string',
+            'sex' => 'in:0,1'
+        ]);
 
-  public function update(Request $request)
-  {
-      $user = JWTAuth::parseToken()->authenticate();
-      try{
-        $resume = $user->resumes()->findOrFail($request->query('id'));
-      } catch (ModelNotFoundException $e){
-        return $this->response->errorNotFound();
-      }
+        $user = JWTAuth::parseToken()->authenticate();
 
-      if ($request->hasFile('photo') && $request->file('photo')->isValid()){
-        Storage::put(
-            'resume_photos/'.$resume->id,
-            file_get_contents($request->file('photo')->getRealPath())
-        );
-        $resume->photo = 'resume_photos/'.$resume->id;
-        $resume->save();
-      }
+        $photo = $request->input('photo');
+        if ($photo) {
+            $uploadFile = Uploadfile::where('path', $photo)->first();
+            $uploadFile->makeSureAccess($user);
+        }
 
-      $resume->update($request->only(['title', 'name', 'school', 'introduction',
-        'birthday', 'contact', 'expect_location']));
-      return response()->json($resume);
-  }
+        $array = array_only($request->all(), ['title', 'name', 'school', 'introduction',
+            'birthday', 'contact', 'expect_location', 'photo', 'sex']);
+        $array['user_id'] = $user->id;
+        $resume = Resume::create($array);
+
+        return response()->json($resume);
+    }
+
+    public function update(Request $request, $userId, $resumeId) {
+        $this->validate($request, [
+            'title' => 'string',
+            'name' => 'string',
+            'school' => 'string',
+            'introduction' => 'string',
+            'photo' => 'exists:uploadfiles,path',
+            'birthday' => 'string',
+            'contact' => 'string',
+            'expect_location' => 'string',
+            'sex' => 'in:0,1'
+        ]);
+
+        $user = JWTAuth::parseToken()->authenticate();
+        $resume = $user->resumes()->findOrFail($resumeId);
+
+        $photo = $request->input('photo');
+        if ($photo) {
+            $uploadFile = Uploadfile::where('path', $photo)->first();
+            $uploadFile->makeSureAccess($user);
+        }
+
+        $resume->update(array_only($request->all(), ['title', 'name', 'school', 'introduction',
+            'birthday', 'contact', 'expect_location', 'photo', 'sex']));
+
+        return response()->json($resume);
+    }
 }
