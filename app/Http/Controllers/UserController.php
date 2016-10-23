@@ -180,7 +180,7 @@ class UserController extends Controller
         if (!$request->has('job_id') || !$request->has('resume_id')){
             return $this->response->errorBadRequest();
         }
-
+        
         $user = JWTAuth::parseToken()->authenticate();
 
         try{

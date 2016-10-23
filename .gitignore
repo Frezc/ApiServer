@@ -5,3 +5,4 @@ public/u.php
 sh.exe.stackdump
 phpspec.yml
 composer.lock
+composer.phar
