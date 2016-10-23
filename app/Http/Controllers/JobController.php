@@ -50,7 +50,7 @@ class JobController extends Controller
       return response()->json($evaluates);
   }
 
-  // refactor
+
   public function query(Request $request)
   {
     if ($request->has('q') && $request->has('limit') && $request->query('limit') > 0){
@@ -78,7 +78,8 @@ class JobController extends Controller
       if ($request->has('offset')){
         $builder->skip($request->input('offset'));
       }
-      $builder->limit($request->input('limit'));
+        $builder->limit($request->input('limit'));
+          
 
       // dd($builder->get());
       $jobs = $builder->get();

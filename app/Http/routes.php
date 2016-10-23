@@ -44,12 +44,12 @@ $api -> version('v1',  function($api){
 //Route::get('users', 'AuthenticateController@index');
 //Route::get('test', 'SmsController@test');
 //Route::post('testEmail', 'EmailController@emailSend');
-Route::post('resetPassword', 'SmsController@resetPassword');
+Route::post('resetPassword', 'SmsController@resetPassword');//重置密码
 Route::post('bindPhone', 'SmsController@bindPhone');
 Route::post('verifyEmail', 'EmailController@verifyEmail');
 Route::post('bindEmail', 'EmailController@bindEmail');
-
 Route::post('user/update', 'UserController@update');
+Route::post('user/idCardVerify', 'UserController@idCardVerify');
 Route::get('user/{id}', 'UserController@show');
 // Route::post('user', 'UserController@store');
 Route::get('resume', 'ResumeController@get');
@@ -67,7 +67,7 @@ Route::get('job/evaluate', 'JobController@getJobEvaluate');
 Route::post('job/evaluate', 'UserController@postJobEvaluate');
 Route::get('company/query', 'CompanyController@query');
 Route::get('company/{id}', 'CompanyController@get')->where('id', '[0-9]+');
-
+Route::get('getAllJob','UserController@mainPage');
 // 需要限制次数的请求
 // 每分钟三次
 Route::group(['middleware' => 'throttle:3'], function ($api) {

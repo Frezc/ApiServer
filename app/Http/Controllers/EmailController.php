@@ -17,8 +17,8 @@ class EmailController extends Controller
 {
   public function __construct()
   {
-      $this->middleware('jwt.auth', ['only' => ['bindEmail']]);
-      $this->middleware('email', ['only' => ['verifyEmail', 'bindEmail']]);
+       $this->middleware('jwt.auth', ['only' => ['bindEmail']]);
+     // $this->middleware('email', ['only' => ['verifyEmail', 'bindEmail']]);
   }
 
   // refactor
@@ -61,19 +61,18 @@ class EmailController extends Controller
     return 'success';
   }
 
-  // refactor
   public function verifyEmail(Request $request)
   {
-    $user = User::where('email', $request->input('email'))->firstOrFail();
-    $user->email_verified = 1;
-    $user->save();
-    return 'success';
+     $user = User::where('email', $request->input('email'))->firstOrFail();
+     $user->email_verified = 1;
+     $user->save();
+     return 'success';
   }
 
-  // refactor
+
   public function bindEmail(Request $request)
   {
-    $user = JWTAuth::parseToken()->authenticate();
+    $user = JWTAuth::parseToken()->authenticate();//返回的是一个token,可可以通过token访问用户
     if ($user->email != null) {
       return $this->response->error('email has binded', 400);
     } else {

@@ -19,7 +19,8 @@ class UserController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('jwt.auth', ['except' => ['show']]);
+       $this->middleware('jwt.auth', ['except' => ['show','idCardVerify','mainPage']]);
+        
     }
 
     public function show($id)
@@ -28,12 +29,56 @@ class UserController extends Controller
         return response()->json($user);
     }
 
+
+     public  function mainPage(Request $request){
+         $builder=Job::query();
+         $builder->orderBy(
+             $request->input('orderBytime','created_at'),
+             $request->input('order','asc')
+
+         );
+
+         if($request->has('offset')){
+             $builder->skip($request->input('offset'));
+         }
+         $builder->limit($request->input('limit'));
+         
+         return $builder->get()->toArray();
+         
+}
+    
+    
+    public function  idCardVerify(Request $request)
+    {
+        $this->validate($request,[
+              'name'=>'require' ,
+              'idcard'=>'require'
+               ]);
+        $idcard = $request->input('idcard');
+        $name = $request->input('name');
+        $AppKey = "32df1901c543487dbd900e027dbc919b";
+        $url = "http://api.avatardata.cn/IdCardCertificate/Verify?" . "key=" . $AppKey . "&realname=" . $name . "&idcard=" . $idcard;
+        $result = json_decode(file_get_contents($url), true);
+        $result = $result['result'];
+        if (!$result && $result == "一致") {
+            $user = JWTAuth::parseToken()->authenticate();
+            $user->idcard=$idcard;
+            $user->idcard_verify=1;
+            return 'Success';
+        }
+         else{
+             echo $result['reason'];
+         }
+    }
+
     // refactor
     public function getJobApply(Request $request)
     {
-        if (!$request->has('limit') || $request->input('limit') <= 0){
-            return $this->response->errorBadRequest();
-        }
+//        if (!$request->has('limit') || $request->input('limit') <= 0){
+//        return $this->response->errorBadRequest();
+//    }
+
+       
 
         $user = JWTAuth::parseToken()->authenticate();
         $builder = $user->jobApplies();
@@ -104,6 +149,7 @@ class UserController extends Controller
         if ($request->has('offset')){
             $builder->skip($request->input('offset'));
         }
+
         $builder->limit($request->input('limit'));
 
         $job_completeds = $builder->get();
@@ -156,8 +202,7 @@ class UserController extends Controller
 
         return 'Success';
     }
-
-    // refactor
+    
     public function postJobEvaluate(Request $request)
     {
       if (!$request->has('job_completed_id') || !$request->has('score')){
@@ -201,7 +246,7 @@ class UserController extends Controller
 
     public function update(Request $request)
     {
-      $this->validate($params,[
+      $this->validate($request,[
         'nickname' => 'max:32',
         'sex' => 'in:0,1',
         'birthday' => 'date_format:Y-m-d',

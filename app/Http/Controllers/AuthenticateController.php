@@ -49,7 +49,7 @@ class AuthenticateController extends Controller
       $this->validate($request, [
           'avatar' => 'required|image'
       ]);
-      $user = JWTAuth::parseToken()->authenticate();
+      $user = JWTAuth::parseToken()->authenticate();//放回当前登录用户
       // file_put_contents(public_path().'images/avatars/'.$user->id.'.png',
       //   file_get_contents($request->file('avatar')->getRealPath()));
       
@@ -84,7 +84,7 @@ class AuthenticateController extends Controller
       ]);
 
       // 2.获得输入的参数(如果要在这个方法里使用)
-      $email = $request->input('email');
+     // $email = $request->input('email');
 
       // 3.处理逻辑
       // 验证email和password是否对应
