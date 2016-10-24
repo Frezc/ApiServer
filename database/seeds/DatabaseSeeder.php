@@ -11,6 +11,7 @@ use App\JobCompleted;
 use App\JobApply;
 use App\JobEvaluate;
 use App\Role;
+use App\JobTime;
 
 class DatabaseSeeder extends Seeder
 {
@@ -35,6 +36,7 @@ class DatabaseSeeder extends Seeder
         $userNum = 30;
         $companyNum = 10;
         $jobNum = 50;
+        $jobTimeNum = 100;
         $resumeNum = 10;
         $jobCompletedNum = 60;
         $jobApplyNum = 60;
@@ -59,7 +61,7 @@ class DatabaseSeeder extends Seeder
             'email' => '504021398@qq.com',
             'phone' => $faker->unique()->phoneNumber,
             'password' => Hash::make('secret'),
-            'nickname' => $faker->name,
+            'nickname' => 'admin',
             'sign' => $faker->sentence(6,false),
             'birthday' => $faker->date($format = 'Y-m-d', $max = 'now'),
             'location'=> $faker->address,
@@ -98,16 +100,26 @@ class DatabaseSeeder extends Seeder
             $company = Company::findOrNew($faker->numberBetween($min = 1, $max = $companyNum));
 
             Job::create([
-                'salary' => ($faker->numberBetween($min = 4, $max = 100)*10).'元/天',
+                'salary_type' => 1,
+                'salary' => '100',
                 'description' => $faker->catchPhrase,
-                'number' => $faker->numberBetween($min = 1, $max = 1000),
-                'number_applied' => 0,
                 'visited'=> $faker->numberBetween($min = 0, $max = 1000),
-                'time'=> $faker->randomElement($array = array ('一年','一个月','六个月')),
                 'name'=> $faker->jobTitle,
                 'company_id'=> $company->id,
                 'active'=> 1,
                 'company_name'=> $company ->name,
+            ]);
+        }
+
+        foreach (range(1, $jobTimeNum) as $i) {
+            $number = $faker->numberBetween($min = 1, $max = 100);
+            $start_at = time() + 60 * 60 * 24 * $faker->numberBetween($min = 1, $max = 180);
+            JobTime::create([
+                'job_id' => $faker->numberBetween($min = 1, $max = $jobNum),
+                'number' => $number,
+                'number_applied' => $faker->numberBetween($min = 0, $max = $number),
+                'start_at' => $start_at,
+                'end_at' => $faker->numberBetween($min = $start_at, $max = $start_at + 60 * 60 * 3)
             ]);
         }
 

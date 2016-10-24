@@ -22,11 +22,13 @@ class ResumeController extends Controller {
     public function get() {
         $user = JWTAuth::parseToken()->authenticate();
 
-        $resumes = $user->resumes()->get();
+        $builder = $user->resumes();
+        $total = $builder->count();
+        $resumes = $builder->get();
         foreach ($resumes as $resume) {
             $resume->photo = asset(Storage::url($resume->photo));
         }
-        return response()->json($resumes);
+        return response()->json(['total' => $total, 'list' => $resumes]);
     }
 
     public function delete($userId, $resumeId) {

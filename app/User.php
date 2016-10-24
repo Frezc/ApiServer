@@ -2,18 +2,18 @@
 
 namespace App;
 
+use App\Exceptions\MsgException;
 use Illuminate\Auth\Authenticatable;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Auth\Passwords\CanResetPassword;
-use Illuminate\Foundation\Auth\Access\Authorizable;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\Access\Authorizable;
 
 class User extends Model implements AuthenticatableContract,
-                                    AuthorizableContract,
-                                    CanResetPasswordContract
-{
+    AuthorizableContract,
+    CanResetPasswordContract {
     use Authenticatable, Authorizable, CanResetPassword;
 
     /**
@@ -33,15 +33,27 @@ class User extends Model implements AuthenticatableContract,
 
     protected $guarded = ['id', 'role_id'];
 
-    public function resumes(){
-      return $this->hasMany('App\Resume');
+    public function resumes() {
+        return Resume::where('user_id', $this->id);
+//        return $this->hasMany('App\Resume');
     }
 
-    public function jobApplies(){
+    public function jobApplies() {
         return $this->hasMany('App\JobApply');
     }
 
-    public function jobCompleteds(){
-      return $this->hasMany('App\JobCompleted');
+    public function jobCompleteds() {
+        return $this->hasMany('App\JobCompleted');
+    }
+
+    public function checkAccess($owner_id) {
+        if ($this->id != $owner_id) {
+            $role = Role::find($this->role_id);
+            if ($role && $role->name == 'admin') {
+                return true;
+            }
+            throw new MsgException('You have no access to this user.', 401);
+        }
+        return true;
     }
 }

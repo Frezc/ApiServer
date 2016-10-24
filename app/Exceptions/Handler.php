@@ -48,7 +48,7 @@ class Handler extends ExceptionHandler
     public function render($request, Exception $e)
     {
         if ($e instanceof ModelNotFoundException) {
-            return response()->json(['error' => $request->path().' not found.'], 404);
+            return response()->json(['error' => $e->getModel().' not found.'], 404);
         } elseif ($e instanceof NotFoundHttpException) {
             return response()->json(['error' => $request->path().' not found.'], 404);
         } elseif ($e instanceof ValidationException) {
@@ -60,13 +60,10 @@ class Handler extends ExceptionHandler
             return response()->json(['error' => $e->getMessage()], $e->getStatusCode());
         } elseif ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
             return response()->json(['error' => 'token_invalid'], $e->getStatusCode());
-<<<<<<< HEAD
-=======
         } elseif ($e instanceof MsgException) {
             return response()->json(['error' => $e->getMessage()], $e->getCode());
         } elseif (!env('LOCAL', false)) {
             return response()->json(['error' => $e->getMessage()], 500);
->>>>>>> 1757addfa1e73acca8abd108f686ad4540aa7e16
         }
 
         // production

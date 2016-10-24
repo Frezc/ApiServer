@@ -52,6 +52,8 @@ class UserController extends Controller {
             }
         }
 
+        $total = $builder->count();
+
         //排列
         $builder->orderBy('created_at', $direction);
 
@@ -73,7 +75,7 @@ class UserController extends Controller {
             $job_apply->resume_name = Resume::find($job_apply->resume_id)->name;
         }
 
-        return response()->json($job_applies);
+        return response()->json(['total' => $total, 'list' => $job_applies]);
     }
 
     // refactor
@@ -102,6 +104,8 @@ class UserController extends Controller {
             }
         }
 
+        $total = $builder->count();
+
         //排列
         $builder->orderBy('created_at', $direction);
 
@@ -129,7 +133,7 @@ class UserController extends Controller {
             }
         }
 
-        return response()->json($job_completeds);
+        return response()->json(['total' => $total, 'list' => $job_completeds]);
     }
 
     // refactor
@@ -240,7 +244,7 @@ class UserController extends Controller {
         ]);
 
         $q = $request->input('kw', '');
-        $direction = $request->input('dir', 'desc');
+        $direction = $request->input('dir', 'asc');
         $offset = $request->input('off', 0);
         $limit = $request->input('siz', 20);
 
@@ -253,6 +257,8 @@ class UserController extends Controller {
             });
         }
 
+        $total = $builder->count();
+
         $builder->orderBy('id', $direction);
         $builder->skip($offset);
         $builder->limit($limit);
@@ -263,6 +269,6 @@ class UserController extends Controller {
             $user->setHidden(['password']);
         });
 
-        return response()->json($users);
+        return response()->json(['total' => $total, 'list' => $users]);
     }
 }
