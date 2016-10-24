@@ -27,6 +27,8 @@ Route::post('job/apply', 'UserController@postJobApply');
 Route::get('job/evaluate', 'JobController@getJobEvaluate');
 Route::post('job/evaluate', 'UserController@postJobEvaluate');
 Route::post('expect_jobs', 'ExpectJobController@create');
+Route::get('expect_jobs', 'ExpectJobController@query');
+Route::post('expect_jobs/{id}/apply', 'ExpectJobController@apply');
 Route::get('getAllJob','UserController@mainPage');
 Route::get('companies', 'CompanyController@query');
 Route::get('companies/{id}', 'CompanyController@get')->where('id', '[0-9]+');

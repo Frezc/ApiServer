@@ -36,6 +36,8 @@ class CreateExpectJobsTable extends Migration
 
             $table->index('user_id');
             $table->index('is_public');
+            $table->index('introduction');
+            $table->index('expect_location');
         });
     }
 

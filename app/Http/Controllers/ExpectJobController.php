@@ -44,4 +44,32 @@ class ExpectJobController extends Controller {
 
         return response()->json($expectJob);
     }
+
+    public function query(Request $request) {
+        $this->validate($request, [
+            'kw' => 'string',
+            'siz' => 'integer|min:0',
+            'orderby' => 'in:created_at',
+            'dir' => 'in:asc,desc',
+            'off' => 'integer|min:0'
+        ]);
+
+        $builder = ExpectJob::search($request->input('kw'));
+        $count = $builder->count();
+        $builder->orderBy($request->input('orderby', 'created_at'), $request->input('dir', 'desc'));
+        $builder->skip($request->input('off', 0));
+        $builder->limit($request->input('siz', 20));
+        $expectJobs = $builder->get();
+
+        $expectJobs->each(function ($expectJob) {
+            $expectJob->bindUserName();
+            $expectJob->bindExpectTime();
+        });
+
+        return response()->json(['total' => $count, 'list' => $expectJobs]);
+    }
+
+    public function apply(Request $request) {
+
+    }
 }

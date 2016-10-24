@@ -1,5 +1,7 @@
 <?php
 
+use App\ExpectJob;
+use App\ExpectTime;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Eloquent\Model;
 use Faker\Factory as Faker;
@@ -41,6 +43,8 @@ class DatabaseSeeder extends Seeder
         $jobCompletedNum = 60;
         $jobApplyNum = 60;
         $jobEvaluate = 20;
+        $expectJobNum = 50;
+        $expectTimeNum = 100;
 
         $faker = Faker::create('zh_CN');
 
@@ -120,6 +124,34 @@ class DatabaseSeeder extends Seeder
                 'number_applied' => $faker->numberBetween($min = 0, $max = $number),
                 'start_at' => $start_at,
                 'end_at' => $faker->numberBetween($min = $start_at, $max = $start_at + 60 * 60 * 3)
+            ]);
+        }
+
+        foreach (range(1, $expectJobNum) as $index) {
+            ExpectJob::create([
+                'user_id' => $faker->numberBetween($min = 1, $max = $userNum),
+                'name'=> $faker->name,
+                'photo' => null,
+                'school' => $faker->randomElement($array = array ('杭州电子科技大学','春田花花幼稚园','断罪小学')),
+                'birthday' =>  $faker->date($format = 'Y-m-d', $max = 'now'),
+                'sex' => $faker->numberBetween($min = 0, $max = 1),
+                'expect_location'=> $faker->address,
+                'introduction'=> $faker->sentence(4, false),
+                'is_public' => 1
+            ]);
+        }
+
+        foreach (range(1, $expectTimeNum) as $i) {
+            $time = time() + 60 * 60 * 24 * $faker->numberBetween($min = 1, $max = 180);
+            ExpectTime::create([
+                'expect_job_id' => $faker->numberBetween($min = 1, $max = $expectJobNum),
+                'year' => date('Y', $time),
+                'month' => date('n', $time),
+                'dayS' => date('j', $time),
+                'dayE' => date('j', $time + 60 * 60 * 24 * 7),
+                'hourS' => 8,
+                'hourE' => 20,
+                'minuteS' => 30
             ]);
         }
 

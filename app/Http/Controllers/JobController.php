@@ -56,7 +56,7 @@ class JobController extends Controller {
 
     public function query(Request $request) {
         $this->validate($request, [
-            'kw' => 'required',
+            'kw' => 'string',
             'siz' => 'integer|min:0',
             'orderby' => 'in:id,created_at',
             'dir' => 'in:asc,desc',
@@ -69,15 +69,18 @@ class JobController extends Controller {
         $direction = $request->input('dir', 'asc');
         $offset = $request->input('off', 0);
 
-        $q_array = explode(" ", trim($q));
-
         $builder = Job::query();
-        foreach ($q_array as $qi) {
-            $builder->where(function ($query) use ($qi) {
-                $query->orWhere('name', 'like', '%' . $qi . '%')
-                    ->orWhere('description', 'like', '%' . $qi . '%')
-                    ->orWhere('company_name', 'like', '%' . $qi . '%');
-            });
+
+        if ($q) {
+            $q_array = explode(" ", trim($q));
+
+            foreach ($q_array as $qi) {
+                $builder->where(function ($query) use ($qi) {
+                    $query->orWhere('name', 'like', '%' . $qi . '%')
+                        ->orWhere('description', 'like', '%' . $qi . '%')
+                        ->orWhere('company_name', 'like', '%' . $qi . '%');
+                });
+            }
         }
 
         $total = $builder->count();
