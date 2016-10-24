@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\MsgException;
 use App\Job;
 use App\JobApply;
 use App\JobCompleted;
@@ -26,6 +25,46 @@ class UserController extends Controller {
     public function show($id) {
         $user = User::findOrFail($id);
         return response()->json($user);
+    }
+
+
+    public function mainPage(Request $request) {
+        $builder = Job::query();
+        $builder->orderBy(
+            $request->input('orderBytime', 'created_at'),
+            $request->input('order', 'asc')
+
+        );
+
+        if ($request->has('offset')) {
+            $builder->skip($request->input('offset'));
+        }
+        $builder->limit($request->input('limit'));
+
+        return $builder->get()->toArray();
+
+    }
+
+
+    public function idCardVerify(Request $request) {
+        $this->validate($request, [
+            'name' => 'require',
+            'idcard' => 'require'
+        ]);
+        $idcard = $request->input('idcard');
+        $name = $request->input('name');
+        $AppKey = "32df1901c543487dbd900e027dbc919b";
+        $url = "http://api.avatardata.cn/IdCardCertificate/Verify?" . "key=" . $AppKey . "&realname=" . $name . "&idcard=" . $idcard;
+        $result = json_decode(file_get_contents($url), true);
+        $result = $result['result'];
+        if (!$result && $result == "一致") {
+            $user = JWTAuth::parseToken()->authenticate();
+            $user->idcard = $idcard;
+            $user->idcard_verify = 1;
+            return 'Success';
+        } else {
+            echo $result['reason'];
+        }
     }
 
     // refactor

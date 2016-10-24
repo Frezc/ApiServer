@@ -3,10 +3,11 @@
 //Route::get('users', 'AuthenticateController@index');
 //Route::get('test', 'SmsController@test');
 //Route::post('testEmail', 'EmailController@emailSend');
-Route::post('resetPassword', 'SmsController@resetPassword');
+Route::post('resetPassword', 'SmsController@resetPassword');//重置密码
 Route::post('bindPhone', 'SmsController@bindPhone');
 Route::post('verifyEmail', 'EmailController@verifyEmail');
 Route::post('bindEmail', 'EmailController@bindEmail');
+Route::post('user/idCardVerify', 'UserController@idCardVerify');
 
 Route::post('users/{id}', 'UserController@update');
 Route::get('users/{id}', 'UserController@show');
@@ -26,6 +27,7 @@ Route::post('job/apply', 'UserController@postJobApply');
 Route::get('job/evaluate', 'JobController@getJobEvaluate');
 Route::post('job/evaluate', 'UserController@postJobEvaluate');
 Route::post('expect_jobs', 'ExpectJobController@create');
+Route::get('getAllJob','UserController@mainPage');
 Route::get('companies', 'CompanyController@query');
 Route::get('companies/{id}', 'CompanyController@get')->where('id', '[0-9]+');
 

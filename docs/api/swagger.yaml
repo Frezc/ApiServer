@@ -1,0 +1,1523 @@
+swagger: '2.0'
+info:
+  version: 0.7.1
+  title: 淘兼职api
+  description: |
+    Admin标签代表只能管理员使用;  
+    Auth标签代表需要在请求里带上获得的token（见https://github.com/tymondesigns/jwt-auth/wiki/Authentication ）
+host: tjz.frezc.com
+basePath: /
+schemes:
+  - http
+consumes:
+  - application/x-www-form-urlencoded
+produces:
+  - application/json
+paths:
+  /auth:
+    post:
+      description: |
+        登陆，返回用户基本信息和验证TOKEN，注意邮箱需要验证后才能使用
+      tags:
+        - 基本验证
+      parameters:
+        - name: email
+          in: formData
+          description: 用户邮箱
+          required: true
+          type: string
+        - name: password
+          in: formData
+          description: 密码
+          required: true
+          type: string
+          format: password
+      responses:
+        '200':
+          description: 登陆成功
+          schema:
+            $ref: '#/definitions/Auth'
+        default:
+          description: 登陆失败, 邮箱未验证 状态码430
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /authPhone:
+    post:
+      description: |
+        登陆，返回用户基本信息和验证TOKEN, 通过手机号登陆，不需要验证邮箱
+      tags:
+        - 基本验证
+      parameters:
+        - name: phone
+          in: formData
+          description: 用户手机号
+          required: true
+          type: string
+        - name: password
+          in: formData
+          description: 密码
+          required: true
+          type: string
+          format: password
+      responses:
+        '200':
+          description: 登陆成功
+          schema:
+            $ref: '#/definitions/Auth'
+        default:
+          description: 登陆失败
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /refresh:
+    get:
+      description: token有时效性(24小时)所以要定时刷新token
+      tags:
+        - 基本验证
+      parameters:
+        - name: token
+          in: query
+          description: 旧token，刷新后就不再使用了
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 返回结果和/auth接口一样
+          schema:
+            $ref: '#/definitions/Auth'
+        default:
+          description: fail
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /register:
+    post:
+      description: 注册的api
+      tags:
+        - 基本验证
+      parameters:
+        - name: email
+          in: formData
+          description: 用户email
+          required: true
+          type: string
+        - name: password
+          in: formData
+          description: 用户密码，6~32位
+          required: true
+          type: string
+          format: password
+        - name: nickname
+          in: formData
+          description: 用户名，1~16位
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 注册成功(未验证)
+          schema:
+            type: string
+        default:
+          description: fail
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /registerByPhone:
+    post:
+      description: 使用手机号注册的api
+      tags:
+        - 基本验证
+      parameters:
+        - name: phone
+          in: formData
+          description: 用户手机号
+          required: true
+          type: string
+        - name: password
+          in: formData
+          description: 用户密码，6~32位
+          required: true
+          type: string
+          format: password
+        - name: nickname
+          in: formData
+          description: 用户名，1~16位
+          required: true
+          type: string
+        - name: verification_code
+          in: formData
+          description: 短信获取的验证码
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 注册成功
+          schema:
+            type: string
+        default:
+          description: fail(注意返回的状态码，430:手机号与验证码不符，431:验证码过期)
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /resetPassword:
+    post:
+      description: 重置密码，需要绑定手机
+      tags:
+        - 基本验证
+      parameters:
+        - name: phone
+          in: formData
+          description: 手机号
+          required: true
+          type: string
+        - name: password
+          in: formData
+          description: 用户密码，6~32位
+          required: true
+          type: string
+          format: password
+        - name: verification_code
+          in: formData
+          description: 短信获取的验证码
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 密码重置成功
+          schema:
+            type: string
+        default:
+          description: fail(注意返回的状态码，430:手机号与验证码不符，431:验证码过期)
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /getSmsCode:
+    get:
+      description: 得到手机验证码，一小时有效，一个手机号获取间隔至少1分钟，一天只能获得5次
+      tags:
+        - 基本验证
+      parameters:
+        - name: phone
+          in: query
+          description: 手机号
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 获取成功，验证码会在几秒后发送到手机
+          schema:
+            type: string
+        default:
+          description: fail
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /bindPhone:
+    post:
+      description: 绑定手机
+      tags:
+        - 基本验证
+        - Auth
+      parameters:
+        - name: phone
+          in: formData
+          description: 用户手机号
+          required: true
+          type: string
+        - name: verification_code
+          in: formData
+          description: 短信获取的验证码
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 绑定成功
+          schema:
+            type: string
+        default:
+          description: fail(注意返回的状态码，430:手机号与验证码不符，431:验证码过期)
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /sendVerifyEmail:
+    post:
+      description: 发送验证邮件
+      tags:
+        - 基本验证
+      parameters:
+        - name: email
+          in: formData
+          description: 邮箱
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 获取成功，邮件将会发送到你的邮箱
+          schema:
+            type: string
+        default:
+          description: fail
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /verifyEmail:
+    post:
+      description: 验证邮箱
+      tags:
+        - 基本验证
+      parameters:
+        - name: email
+          in: formData
+          description: 邮箱
+          required: true
+          type: string
+        - name: verification_code
+          in: formData
+          description: 验证码
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 验证成功
+          schema:
+            type: string
+        default:
+          description: fail(注意返回的状态码，430:邮箱与验证码不符，431:验证码过期)
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /bindEmail:
+    post:
+      description: 绑定邮箱
+      tags:
+        - 基本验证
+        - Auth
+      parameters:
+        - name: email
+          in: formData
+          description: 用户邮箱
+          required: true
+          type: string
+        - name: verification_code
+          in: formData
+          description: 邮箱获取的验证码
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 绑定成功
+          schema:
+            type: string
+        default:
+          description: fail(注意返回的状态码，430:邮箱与验证码不符，431:验证码过期)
+          schema:
+            $ref: '#/definitions/ErrorModel'
+
+  /users:
+    get:
+      description: 搜索对应的用户信息
+      tags:
+        - Admin
+      parameters:
+        - name: kw
+          in: query
+          description: 关键字
+          required: false
+          type: string
+        - name: dir
+          in: query
+          description: 升序('asc')or降序('desc'), 默认升序
+          required: false
+          type: string
+        - name: off
+          in: query
+          description: 查找结果的偏移量（用来分页）
+          required: false
+          type: integer
+        - name: siz
+          in: query
+          description: 最多返回的结果
+          required: false
+          type: integer
+      responses:
+        200:
+          description: 返回对应的用户列表
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              list:
+                type: array
+                items:
+                  $ref: '#/definitions/User'
+  /users/{id}:
+    get:
+      description: 得到某个用户的信息
+      tags:
+        - 用户模块
+      parameters:
+        - name: id
+          in: path
+          description: 用户的id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: 找到用户
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      description: 更新用户信息
+      tags:
+        - 用户模块
+        - Auth
+      parameters:
+        - name: id
+          in: path
+          description: 用户的id
+          required: true
+          type: integer
+          format: int64
+        - name: nickname
+          in: formData
+          description: 用户名
+          required: false
+          type: string
+        - name: sex
+          in: formData
+          description: 0:男(default) 1:女
+          required: false
+          type: integer
+        - name: sign
+          in: formData
+          description: 个性签名
+          required: false
+          type: string
+        - name: birthday
+          in: formData
+          description: 生日
+          required: false
+          type: string
+          format: date
+        - name: location
+          in: formData
+          description: 所在地
+          required: false
+          type: string
+        - name: avatar
+          in: formData
+          description: 头像
+          required: false
+          type: string
+      responses:
+        '200':
+          description: 更新成功
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /realNameApply:
+    post:
+      description: 申请实名验证
+      tags:
+        - 用户模块
+        - Auth
+      parameters:
+        - name: verification_code
+          in: formData
+          description: 短信获取的验证码
+          required: true
+          type: string
+        - name: real_name
+          in: formData
+          description: 真实姓名
+          required: true
+          type: string
+        - name: ID_number
+          in: formData
+          description: 身份证号
+          required: true
+          type: string
+        - name: verifi_pic
+          in: formData
+          description: 验证用的照片
+          required: true
+          type: string
+          format: byte
+      responses:
+        '200':
+          description: 提交申请成功，等待后台处理
+          schema:
+            type: string
+        default:
+          description: fail(注意返回的状态码，430:邮箱与验证码不符，431:验证码过期)
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /job/completed:
+    get:
+      description: 已完成的工作
+      tags:
+        - 用户模块
+        - Auth
+      parameters:
+        - name: is_evaluated
+          in: query
+          description: 是否已评价(0:未评价, 1:已评价)
+          required: false
+          type: integer
+        - name: dir
+          in: query
+          description: "按时间升序('asc')or降序('desc'), 默认升序"
+          required: false
+          type: string
+        - name: off
+          in: query
+          description: 查找结果的偏移量（用来分页）
+          required: false
+          type: integer
+        - name: siz
+          in: query
+          description: 最多返回的结果
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: 返回搜索的所有已完成岗位
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              list:
+                type: array
+                items:
+                  $ref: '#/definitions/JobCompleted'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /job/evaluate:
+    get: 
+      description: 得到岗位的评价
+      tags:
+        - 岗位模块
+      parameters:
+        - name: job_id
+          in: query
+          description: 岗位id
+          required: true
+          type: integer
+        - name: off
+          in: query
+          description: 查找结果的偏移量（用来分页）
+          required: false
+          type: integer
+        - name: siz
+          in: query
+          description: 最多返回的结果
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: 查找到的评价
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              list:
+                type: array
+                items:
+                  $ref: '#/definitions/Evaluate'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      description: 评价岗位
+      tags:
+        - 用户模块
+        - Auth
+      parameters:
+        - name: job_completed_id
+          in: query
+          description: 完成的工作id
+          required: true
+          type: integer
+        - name: score
+          in: formData
+          description: 评分(0~5)
+          required: true
+          type: integer
+        - name: comment
+          in: formData
+          description: 评论
+          required: false
+          type: string
+      responses:
+        '200':
+          description: 评价成功
+          schema:
+            type: string
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /users/{id}/resumes:
+    get:
+      description: 得到某份简历
+      tags:
+        - 用户模块
+        - Auth
+      parameters: 
+        - name: id
+          in: path
+          description: 用户的id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: 简历详情
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              list:
+                type: array
+                items:
+                  $ref: '#/definitions/Resume'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      description: 添加简历
+      consumes:
+        - multipart/form-data
+      tags:
+        - 用户模块
+        - Auth
+      parameters:
+        - name: id
+          in: path
+          description: 用户的id
+          required: true
+          type: integer
+        - name: title
+          in: formData
+          description: 简历标题
+          required: true
+          type: string
+        - name: name
+          in: formData
+          description: 简历里的姓名
+          required: true
+          type: string
+        - name: sex
+          in: formData
+          description: 性别（0：男，1：女），默认0
+          required: false
+          type: integer
+        - name: school
+          in: formData
+          description: 学校
+          required: false
+          type: string
+        - name: introduction
+          in: formData
+          description: 简介
+          required: false
+          type: string
+        - name: photo
+          in: formData
+          description: 简历的照片文件
+          required: false
+          type: string
+        - name: birthday
+          in: formData
+          description: 生日
+          required: false
+          type: string
+          format: date
+        - name: contact
+          in: formData
+          description: 联系方式
+          required: false
+          type: string
+        - name: expect_location
+          in: formData
+          description: 期望工作地点
+          required: false
+          type: string
+      responses:
+        '201':
+          description: resume created
+          schema:
+            $ref: '#/definitions/Resume'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /users/{id}/resumes/{resumeId}:
+    delete:
+      description: 删除简历
+      tags:
+        - 用户模块
+        - Auth
+      parameters:
+        - name: id
+          in: path
+          description: 用户id
+          required: true
+          type: integer
+        - name: resumeId
+          in: path
+          description: 简历id
+          required: true
+          type: integer
+      responses:
+        200:
+          description: deleted
+          schema:
+            $ref: '#/definitions/Resume'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      description: 修改简历
+      consumes:
+        - multipart/form-data
+      tags:
+        - 用户模块
+        - Auth
+      parameters:
+        - name: id
+          in: path
+          description: 用户id
+          required: true
+          type: integer
+        - name: resumeId
+          in: path
+          description: 简历id
+          required: true
+          type: integer
+        - name: title
+          in: formData
+          description: 简历标题
+          required: false
+          type: string
+        - name: name
+          in: formData
+          description: 简历里的姓名
+          required: false
+          type: string
+        - name: school
+          in: formData
+          description: 学校
+          required: false
+          type: string
+        - name: introduction
+          in: formData
+          description: 简介
+          required: false
+          type: string
+        - name: photo
+          in: formData
+          description: 简历的照片文件
+          required: false
+          type: string
+        - name: birthday
+          in: formData
+          description: 生日
+          required: false
+          type: string
+          format: date
+        - name: contact
+          in: formData
+          description: 联系方式
+          required: false
+          type: string
+        - name: expect_location
+          in: formData
+          description: 期望工作地点
+          required: false
+          type: string
+      responses:
+        '200':
+          description: resume updated
+          schema:
+            $ref: '#/definitions/Resume'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /users/{id}/orders:
+    get:
+      description: 得到该用户的订单信息
+      tags:
+        - 用户模块
+        - Auth
+      parameters:
+        - name: id
+          in: path
+          description: 用户id
+          required: true
+          type: integer
+        - name: orderby
+          in: query
+          description: 默认created_at
+          required: false
+          type: string
+        - name: dir
+          in: query
+          description: 升序('asc')or降序('desc'), 默认降序
+          required: false
+          type: string
+        - name: off
+          in: query
+          description: 查找结果的偏移量（用来分页）
+          required: false
+          type: integer
+        - name: siz
+          in: query
+          description: 最多返回的结果
+          required: false
+          type: integer
+        - name: status
+          in: query
+          description: 状态筛选，0：未确认，1：已确认，2：已完成，3：已取消
+          required: false
+          type: integer 
+        - name: applicant_check
+          in: query
+          description: 申请者是否确认，默认无视
+          required: false
+          type: integer
+          enum: [0, 1]
+        - name: recruiter_check
+          in: query
+          description: 招聘者是否确认，默认无视
+          required: false
+          type: integer
+          enum: [0, 1]
+      responses:
+        200:
+          description: 返回订单
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              list:
+                type: array
+                items:
+                  $ref: '#/definitions/Order'
+  
+  /jobs:
+    get:
+      description: 查找岗位
+      tags:
+        - 岗位模块
+      parameters:
+        - name: kw
+          in: query
+          description: 关键字(用空格分开)
+          required: true
+          type: string
+        - name: orderby
+          in: query
+          description: '按某列进行排序(id, created_at, number), 默认id'
+          required: false
+          type: string
+        - name: dir
+          in: query
+          description: "升序('asc')or降序('desc'), 默认升序"
+          required: false
+          type: string
+        - name: off
+          in: query
+          description: 查找结果的偏移量（用来分页）
+          required: false
+          type: integer
+        - name: siz
+          in: query
+          description: 最多返回的结果
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: 返回搜索的所有岗位
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              list:
+                type: array
+                items:
+                  $ref: '#/definitions/Job'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'          
+  /jobs/{id}:
+    get:
+      description: 查找岗位
+      tags:
+        - 岗位模块
+      parameters:
+        - name: id
+          in: path
+          description: 岗位id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: 返回岗位详情
+          schema:
+            $ref: '#/definitions/Job'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /jobs/{id}/apply:
+    post:
+      description: 申请岗位
+      tags:
+        - 岗位模块
+        - Auth
+      parameters:
+        - name: id
+          in: path
+          description: 岗位id
+          required: true
+          type: integer
+        - name: job_time_id
+          in: formData
+          description: job time的id
+          required: true
+          type: integer
+        - name: resume_id
+          in: formData
+          description: 使用的简历id
+          required: true
+          type: integer
+      responses:
+        200:
+          description: 返回创建成功的订单
+          schema:
+            $ref: '#/definitions/Order'
+  /job/apply:
+    get:
+      description: 申请中的岗位
+      tags:
+        - 岗位模块
+        - Auth
+      parameters:
+        - name: status
+          in: query
+          description: 根据申请状态进行筛选(0:申请中，1:申请成功，2:申请失败，该项为空或其他参数表示不筛选)
+          required: false
+          type: integer
+        - name: dir
+          in: query
+          description: "按时间升序('asc')or降序('desc'), 默认降序"
+          required: false
+          type: string
+        - name: off
+          in: query
+          description: 查找结果的偏移量（用来分页）
+          required: false
+          type: integer
+        - name: siz
+          in: query
+          description: 最多返回的结果
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: 返回搜索的所有岗位申请
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              list:
+                type: array
+                items:
+                  $ref: '#/definitions/JobApply'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      description: 创建申请
+      tags:
+        - 岗位模块
+        - Auth
+      parameters:
+        - name: job_id
+          in: formData
+          description: 申请的岗位id
+          required: true
+          type: integer
+        - name: resume_id
+          in: formData
+          description: 使用的简历id
+          required: true
+          type: integer
+        - name: description
+          in: formData
+          description: 申请时的描述
+          required: false
+          type: string
+      responses:
+        '200':
+          description: 申请成功
+          schema:
+            type: string
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /expect_jobs:
+    post:
+      description: 创建公开简历信息
+      tags:
+        - 岗位模块
+        - Auth
+      consumes:
+        - application/json
+      parameters:
+        - name: expect_job
+          in: body
+          description: 使用的简历id
+          required: true
+          schema:
+            type: object
+            properties:
+              resume_id:
+                type: integer
+              expect_times:
+                type: array
+                items:
+                  $ref: '#/definitions/Time'
+      responses:
+        '200':
+          description: 发布成功
+          schema:
+            $ref: '#/definitions/ExpectJob'
+    get:
+      description: 查找公开的求职信息
+      tags:
+        - 岗位模块
+        - Auth
+      parameters:
+        - name: kw
+          in: query
+          description: 关键字(用空格分开)
+          required: true
+          type: string
+        - name: orderby
+          in: query
+          description: 默认created_at
+          required: false
+          type: string
+        - name: dir
+          in: query
+          description: 升序('asc')or降序('desc'), 默认降序
+          required: false
+          type: string
+        - name: off
+          in: query
+          description: 查找结果的偏移量（用来分页）
+          required: false
+          type: integer
+        - name: siz
+          in: query
+          description: 最多返回的结果
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: 返回搜索的所有岗位
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              list:
+                type: array
+                items:
+                  $ref: '#/definitions/ExpectJob'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /expect_jobs/{id}/apply:
+    post:
+      description: 为求职者发送确认订单
+      tags:
+        - 岗位模块
+        - Auth
+      parameters:
+        - name: id
+          in: path
+          description: 求职申请id
+          required: true
+          type: integer
+        - name: job_id
+          in: formData
+          description: 岗位id（必须是自己发布或公司发布的岗位）
+          required: false
+          type: integer
+      responses:
+        200:
+          description: 返回创建成功的订单
+          schema:
+            $ref: '#/definitions/Order'
+  
+  /companies/{id}:
+    get:
+      description: 公司信息
+      tags:
+        - 商家模块
+      parameters:
+        - name: id
+          in: path
+          description: 岗位id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: 返回公司的详情信息
+          schema:
+            $ref: '#/definitions/Company'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /companies:
+    get:
+      description: 搜索公司
+      tags:
+        - 商家模块
+      parameters:
+        - name: kw
+          in: query
+          description: 关键字(用空格分开)
+          required: true
+          type: string
+        - name: orderby
+          in: query
+          description: '按某列进行排序(id, created_at), 默认id'
+          required: false
+          type: string
+        - name: dir
+          in: query
+          description: "升序('asc')or降序('desc'), 默认升序"
+          required: false
+          type: string
+        - name: off
+          in: query
+          description: '查找结果的偏移量(用来分页),'
+          required: false
+          type: integer
+        - name: siz
+          in: query
+          description: 最多返回的结果, 默认20
+          required: false
+          type: integer
+      responses:
+        '200':
+          description: 返回搜索的所有公司信息
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              list:
+                type: array
+                items:
+                  $ref: '#/definitions/Company'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      description: 创建公司（需审核）。
+      tags:
+        - 商家模块
+        - Auth
+      parameters:
+        - name: name
+          in: formData
+          description: 企业名称
+          required: true
+          type: string
+        - name: location
+          in: formData
+          description: 企业地址
+          required: true
+          type: string
+        - name: phone
+          in: formData
+          description: 电话
+          required: true
+          type: string
+        - name: business_license
+          in: formData
+          description: 营业执照
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 提交申请成功
+          schema:
+            type: string
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+            
+  /upload/image:
+    post: 
+      description: 上传图片
+      tags:
+        - 其他模块
+        - Auth
+      parameters:
+        - name: file
+          in: formData
+          required: true
+          type: file
+      responses:
+        '200':
+          description: 上传成功，返回图片对应的url
+          schema:
+            $ref: '#/definitions/UploadSuccess'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+            
+  
+            
+definitions:
+  User:
+    type: object
+    properties:
+      id:
+        type: integer
+      email:
+        type: string
+        format: email
+      nickname:
+        type: string
+      avatar:
+        type: string
+      sign:
+        type: string
+      birthday:
+        type: string
+        format: date
+      location:
+        type: string
+      sex:
+        type: integer
+      phone:
+        type: string
+      company_id:
+        type: integer
+      email_verified:
+        type: integer
+      created_at:
+        type: string
+        format: date
+      updated_at:
+        type: string
+        format: date
+  Auth:
+    type: object
+    properties:
+      user:
+        $ref: '#/definitions/User'
+      token:
+        type: string
+  Resume:
+    type: object
+    properties:
+      id:
+        type: integer
+      user_id:
+        type: integer
+      title:
+        type: string
+      name:
+        type: string
+      photo:
+        type: string
+      school:
+        type: string
+      introduction:
+        type: string
+      birthday:
+        type: string
+        format: date
+      expect_location:
+        type: string
+      sex:
+        type: integer
+      contact:
+        type: string
+      created_at:
+        type: string
+        format: date
+      updated_at:
+        type: string
+        format: date
+  Job:
+    type: object
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      salary:
+        type: string
+      description:
+        type: string
+      number:
+        type: integer
+      number_applied:
+        type: integer
+      visited:
+        type: integer
+      number_evaluate:
+        type: integer
+      average_score:
+        type: integer
+      time:
+        type: array
+        items:
+          $ref: '#/definitions/JobTime'
+      company_id:
+        type: integer
+      company_name:
+        type: string
+      active:
+        type: integer
+      created_at:
+        type: string
+        format: date
+      updated_at:
+        type: string
+        format: date
+  ExpectJob:
+    type: object
+    properties:
+      id:
+        type: integer
+      user_id:
+        type: integer
+      user_name:
+        type: string
+      name:
+        type: string
+      photo:
+        type: string
+      school:
+        type: string
+      introduction:
+        type: string
+      birthday:
+        type: string
+        format: date
+      expect_location:
+        type: string
+      sex:
+        type: integer
+      contact:
+        type: string
+      expect_time:
+        type: array
+        items: 
+          $ref: '#/definitions/Time'
+  Time:
+    type: object
+    properties:
+      year:
+        type: integer
+      month:
+        type: integer
+      dayS:
+        type: integer
+      dayE:
+        type: integer
+      hourS:
+        type: integer
+      hourE:
+        type: integer
+      minuteS:
+        type: integer
+      minuteE:
+        type: integer
+  JobTime:
+    type: object
+    properties:
+      id:
+        type: integer
+      job_id:
+        type: integer
+      number: 
+        type: integer
+      number_applied:
+        type: integer
+      start_at:
+        type: integer
+      end_at:
+        type: end_at
+  JobApply:
+    type: object
+    properties:
+      id:
+        type: integer
+      user_id:
+        type: integer
+      job_id:
+        type: integer
+      job_name:
+        type: string
+      resume_id:
+        type: integer
+      resume_name:
+        type: string
+      description:
+        type: string
+      status:
+        type: integer
+      created_at:
+        type: string
+        format: date
+      updated_at:
+        type: string
+        format: date
+  JobCompleted:
+    type: object
+    properties:
+      id:
+        type: integer
+      user_id:
+        type: integer
+      job_id:
+        type: integer
+      job_name:
+        type: string
+      resume_id:
+        type: integer
+      resume_name:
+        type: string
+      description:
+        type: string
+      is_evaluated:
+        type: integer
+      created_at:
+        type: string
+        format: date
+      updated_at:
+        type: string
+        format: date
+  Evaluate:
+    type: object
+    properties:
+      score:
+        type: integer
+      comment: 
+        type: string
+      user_id: 
+        type: integer
+      user_nickname:
+        type: string
+      user_avatar:
+        type: string
+      created_at:
+        type: string
+        format: date
+      updated_at:
+        type: string
+        format: date
+  Company:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      url:
+        type: string
+      address:
+        type: string
+      logo:
+        type: string
+      description:
+        type: string
+      leader:
+        type: string
+      created_at:
+        type: string
+        format: date
+      updated_at:
+        type: string
+        format: date
+  Order:
+    type: object
+    properties:
+      id:
+        type: integer
+      job_id:
+        type: integer
+      job_name:
+        type: string
+      expect_job:
+        $ref: '#/definitions/ExpectJob'
+      applicant_id:
+        type: integer
+      applicant_name:
+        type: string
+      recruiter_type:
+        type: integer
+      recruiter_id:
+        type: integer
+      recruiter_name:
+        type: string
+      status:
+        type: integer
+      applicant_check:
+        type: integer
+      recruiter_check:
+        type: integer
+      has_paid:
+        type: integer
+      created_at:
+        type: string
+        format: date
+      updated_at:
+        type: string
+        format: date
+  UploadSuccess:
+    type: object
+    properties:
+      file:
+        type: string
+  ErrorModel:
+    type: object
+    properties:
+      status_code:
+        type: integer
+      message:
+        type: string
+      error:
+        type: string

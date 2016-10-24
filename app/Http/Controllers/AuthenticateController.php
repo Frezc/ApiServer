@@ -12,6 +12,7 @@ use Storage;
 use Hash;
 use Illuminate\Auth\Access\AuthorizationException;
 
+
 class AuthenticateController extends Controller {
     public function __construct() {
         $this->middleware('jwt.auth', ['except' => ['emailAuth', 'phoneAuth', 'refreshToken', 'register']]);

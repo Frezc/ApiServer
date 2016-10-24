@@ -8,7 +8,8 @@
         "php": ">=5.5.9",
         "laravel/framework": "5.2.*",
         "tymon/jwt-auth": "0.5.*",
-        "php-curl-class/php-curl-class": "4.8.*"
+        "php-curl-class/php-curl-class": "4.8.*",
+        "barryvdh/laravel-ide-helper": "v2.1.1"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.6",

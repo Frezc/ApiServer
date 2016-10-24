@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Job;
 use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\Company;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Namshi\JOSE\JWS;
 
 class CompanyController extends Controller {
 
