@@ -31,7 +31,7 @@ Route::get('companies/{id}', 'CompanyController@get')->where('id', '[0-9]+');
 
 // 需要限制次数的请求
 // 每分钟三次
-Route::group(['middleware' => 'throttle:3'], function ($api) {
+  Route::group(['middleware' => 'throttle:3'], function ($api) {
   Route::post('auth', 'AuthenticateController@emailAuth');
   Route::post('authPhone', 'AuthenticateController@phoneAuth');
   Route::get('refresh', 'AuthenticateController@refreshToken');
@@ -48,7 +48,7 @@ Route::group(['middleware' => 'throttle:1'], function ($api) {
 });
 
 // 每分钟两次
-Route::group(['middleware' => 'throttle:2'], function ($api) {
+  Route::group(['middleware' => 'throttle:2'], function ($api) {
   Route::get('getSmsCode', 'SmsController@getSmsCode');
   Route::post('sendVerifyEmail', 'EmailController@sendVerifyEmail');
 });

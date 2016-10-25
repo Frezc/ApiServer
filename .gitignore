@@ -6,3 +6,5 @@ sh.exe.stackdump
 phpspec.yml
 composer.lock
 composer.phar
+_ide_helper.php
+config

@@ -18,9 +18,9 @@ use Validator;
 class UserController extends Controller {
 
     public function __construct() {
-        $this->middleware('jwt.auth', ['except' => ['show']]);
-        $this->middleware('user.access', ['except' => ['show', 'query']]);
-        $this->middleware('role:admin', ['only' => ['query']]);
+          $this->middleware('jwt.auth', ['except' => ['show','mainPage']]);
+          $this->middleware('user.access', ['except' => ['show', 'query','mainPage']]);//用户角色验证
+          $this->middleware('role:admin', ['only' => ['query']]);//管理员角色
     }
 
     public function show($id) {
