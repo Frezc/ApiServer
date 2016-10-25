@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\MsgException;
 use App\Job;
 use App\JobApply;
 use App\JobCompleted;
@@ -29,30 +28,29 @@ class UserController extends Controller {
     }
 
 
-     public  function mainPage(Request $request){
-         $builder=Job::query();
-         $builder->orderBy(
-             $request->input('orderBytime','created_at'),
-             $request->input('order','asc')
+    public function mainPage(Request $request) {
+        $builder = Job::query();
+        $builder->orderBy(
+            $request->input('orderBytime', 'created_at'),
+            $request->input('order', 'asc')
 
-         );
+        );
 
-         if($request->has('offset')){
-             $builder->skip($request->input('offset'));
-         }
-         $builder->limit($request->input('limit'));
-         
-         return $builder->get()->toArray();
-         
-}
-    
-    
-    public function  idCardVerify(Request $request)
-    {
-        $this->validate($request,[
-              'name'=>'require' ,
-              'idcard'=>'require'
-               ]);
+        if ($request->has('offset')) {
+            $builder->skip($request->input('offset'));
+        }
+        $builder->limit($request->input('limit'));
+
+        return $builder->get()->toArray();
+
+    }
+
+
+    public function idCardVerify(Request $request) {
+        $this->validate($request, [
+            'name' => 'require',
+            'idcard' => 'require'
+        ]);
         $idcard = $request->input('idcard');
         $name = $request->input('name');
         $AppKey = "32df1901c543487dbd900e027dbc919b";
@@ -61,13 +59,12 @@ class UserController extends Controller {
         $result = $result['result'];
         if (!$result && $result == "一致") {
             $user = JWTAuth::parseToken()->authenticate();
-            $user->idcard=$idcard;
-            $user->idcard_verify=1;
+            $user->idcard = $idcard;
+            $user->idcard_verify = 1;
             return 'Success';
+        } else {
+            echo $result['reason'];
         }
-         else{
-             echo $result['reason'];
-         }
     }
 
     // refactor
@@ -94,6 +91,8 @@ class UserController extends Controller {
             }
         }
 
+        $total = $builder->count();
+
         //排列
         $builder->orderBy('created_at', $direction);
 
@@ -115,7 +114,7 @@ class UserController extends Controller {
             $job_apply->resume_name = Resume::find($job_apply->resume_id)->name;
         }
 
-        return response()->json($job_applies);
+        return response()->json(['total' => $total, 'list' => $job_applies]);
     }
 
     // refactor
@@ -144,6 +143,8 @@ class UserController extends Controller {
             }
         }
 
+        $total = $builder->count();
+
         //排列
         $builder->orderBy('created_at', $direction);
 
@@ -171,7 +172,7 @@ class UserController extends Controller {
             }
         }
 
-        return response()->json($job_completeds);
+        return response()->json(['total' => $total, 'list' => $job_completeds]);
     }
 
     // refactor
@@ -184,7 +185,7 @@ class UserController extends Controller {
         if (!$request->has('job_id') || !$request->has('resume_id')) {
             return $this->response->errorBadRequest();
         }
-        
+
         $user = JWTAuth::parseToken()->authenticate();
 
         try {
@@ -282,7 +283,7 @@ class UserController extends Controller {
         ]);
 
         $q = $request->input('kw', '');
-        $direction = $request->input('dir', 'desc');
+        $direction = $request->input('dir', 'asc');
         $offset = $request->input('off', 0);
         $limit = $request->input('siz', 20);
 
@@ -295,6 +296,8 @@ class UserController extends Controller {
             });
         }
 
+        $total = $builder->count();
+
         $builder->orderBy('id', $direction);
         $builder->skip($offset);
         $builder->limit($limit);
@@ -305,6 +308,6 @@ class UserController extends Controller {
             $user->setHidden(['password']);
         });
 
-        return response()->json($users);
+        return response()->json(['total' => $total, 'list' => $users]);
     }
 }

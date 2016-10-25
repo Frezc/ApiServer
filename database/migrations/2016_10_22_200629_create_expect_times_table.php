@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateTimeTable extends Migration
+class CreateExpectTimesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -12,18 +12,19 @@ class CreateTimeTable extends Migration
      */
     public function up()
     {
-        Schema::create('job_times', function (Blueprint $table) {
+        Schema::create('expect_times', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('job_id')->unsigned();
+            $table->integer('expect_job_id')->unsigned();
+
             $table->smallInteger('year')->unsigned();
             $table->tinyInteger('month')->unsigned();
             $table->tinyInteger('dayS')->unsigned();
             $table->tinyInteger('dayE')->nullable()->unsigned();
-            $table->tinyInteger('hourS')->unsigned();
+            $table->tinyInteger('hourS')->nullable()->unsigned();
             $table->tinyInteger('hourE')->nullable()->unsigned();
+            $table->tinyInteger('minuteS')->nullable()->unsigned();
+            $table->tinyInteger('minuteE')->nullable()->unsigned();
             $table->timestamps();
-
-            $table->index(['job_id', 'year', 'month']);
         });
     }
 
@@ -34,6 +35,6 @@ class CreateTimeTable extends Migration
      */
     public function down()
     {
-        Schema::drop('job_times');
+        Schema::drop('expect_times');
     }
 }

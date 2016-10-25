@@ -5,10 +5,17 @@ namespace App\Http\Controllers;
 use App\Job;
 use App\JobEvaluate;
 use App\JobTime;
+use App\Order;
+use App\Resume;
 use App\User;
 use Illuminate\Http\Request;
+use JWTAuth;
 
 class JobController extends Controller {
+
+    public function __construct() {
+        $this->middleware('jwt.auth', ['only' => ['apply']]);
+    }
 
     public function get($id) {
         $job = Job::findOrFail($id);
@@ -31,8 +38,11 @@ class JobController extends Controller {
         $job_id = $request->query('job_id');
         $limit = $request->input('siz');
 
-        $evaluates = JobEvaluate::where('job_id', $job_id)
-            ->skip($offset)->limit($limit)->get();
+        $builder = JobEvaluate::where('job_id', $job_id);
+
+        $total = $builder->count();
+
+        $evaluates = $builder->skip($offset)->limit($limit)->get();
 
         foreach ($evaluates as $evaluate) {
             $eva_user = User::find($evaluate->user_id);
@@ -41,12 +51,12 @@ class JobController extends Controller {
             $evaluate->setHidden(['id', 'job_id']);
         }
 
-        return response()->json($evaluates);
+        return response()->json(['total' => $total, 'list' => $evaluates]);
     }
 
     public function query(Request $request) {
         $this->validate($request, [
-            'kw' => 'required',
+            'kw' => 'string',
             'siz' => 'integer|min:0',
             'orderby' => 'in:id,created_at',
             'dir' => 'in:asc,desc',
@@ -59,16 +69,21 @@ class JobController extends Controller {
         $direction = $request->input('dir', 'asc');
         $offset = $request->input('off', 0);
 
-        $q_array = explode(" ", trim($q));
-
         $builder = Job::query();
-        foreach ($q_array as $qi) {
-            $builder->where(function ($query) use ($qi) {
-                $query->orWhere('name', 'like', '%' . $qi . '%')
-                    ->orWhere('description', 'like', '%' . $qi . '%')
-                    ->orWhere('company_name', 'like', '%' . $qi . '%');
-            });
+
+        if ($q) {
+            $q_array = explode(" ", trim($q));
+
+            foreach ($q_array as $qi) {
+                $builder->where(function ($query) use ($qi) {
+                    $query->orWhere('name', 'like', '%' . $qi . '%')
+                        ->orWhere('description', 'like', '%' . $qi . '%')
+                        ->orWhere('company_name', 'like', '%' . $qi . '%');
+                });
+            }
         }
+
+        $total = $builder->count();
 
         //排列
         $builder->orderBy($orderby, $direction);
@@ -82,6 +97,39 @@ class JobController extends Controller {
             $job->number_evaluate = JobEvaluate::where('job_id', $job->id)->count();
             $job->average_score = JobEvaluate::where('job_id', $job->id)->avg('score');
         }
-        return response()->json($jobs);
+        return response()->json(['total' => $total, 'list' => $jobs]);
+    }
+
+    public function apply(Request $request, $id) {
+        $job = Job::findOrFail($id);
+
+        $this->validate($request, [
+            'job_time_id' => 'required|integer',
+            'resume_id' => 'required|integer'
+        ]);
+
+        $jobTime = $job->jobTime()->findOrFail($request->input('job_time_id'));
+
+        $resume = Resume::findOrFail($request->input('resume_id'));
+
+        $self = JWTAuth::parseToken()->authenticate();
+
+        $self->checkAccess($resume->user_id);
+        $expectJob = $resume->convertToExpectJob();
+
+        // create order
+        $order = Order::create([
+            'job_id' => $job->id,
+            'job_time_id' => $jobTime->id,
+            'expect_job_id' => $expectJob->id,
+            'applicant_id' => $resume->user_id,
+            'recruiter_type' => $job->company_id ? 1 : 0,
+            'recruiter_id' => $job->company_id ? $job->company_id : $job->creator_id,
+            'status' => 0,
+            'applicant_check' => 1,
+            'recruiter_check' => 0
+        ]);
+
+        return response()->json($order);
     }
 }

@@ -42,6 +42,8 @@ class CompanyController extends Controller {
             });
         }
 
+        $total = $builder->count();
+
         //排列
         $builder->orderBy($orderby, $direction);
 
@@ -49,7 +51,6 @@ class CompanyController extends Controller {
         $builder->skip($offset);
         $builder->limit($limit);
 
-        // dd($builder->get());
-        return response()->json($builder->get());
+        return response()->json(['total' => $total, 'list' => $builder->get()]);
     }
 }
