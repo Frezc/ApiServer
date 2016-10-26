@@ -147,6 +147,7 @@ return [
 
         Tymon\JWTAuth\Providers\JWTAuthServiceProvider::class,
         'Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider',
+
     ],
 
     /*
