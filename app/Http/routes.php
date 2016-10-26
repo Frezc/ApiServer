@@ -33,32 +33,32 @@ Route::post('expect_jobs', 'ExpectJobController@create');
 Route::get('expect_jobs', 'ExpectJobController@query');
 
 Route::post('expect_jobs/{id}/apply', 'ExpectJobController@apply');
-Route::get('getAllJob','UserController@mainPage');
+Route::get('getAllJob', 'UserController@mainPage');
 Route::get('companies', 'CompanyController@query');
 Route::get('companies/{id}', 'CompanyController@get')->where('id', '[0-9]+');
 
 // 需要限制次数的请求
 // 每分钟三次
-  Route::group(['middleware' => 'throttle:3'], function ($api) {
-  Route::post('auth', 'AuthenticateController@emailAuth');
-  Route::post('authPhone', 'AuthenticateController@phoneAuth');
-  Route::get('refresh', 'AuthenticateController@refreshToken');
+Route::group(['middleware' => 'throttle:3'], function ($api) {
+    Route::post('auth', 'AuthenticateController@emailAuth');
+    Route::post('authPhone', 'AuthenticateController@phoneAuth');
+    Route::get('refresh', 'AuthenticateController@refreshToken');
 
-  Route::post('register', 'AuthenticateController@register');
-  Route::post('registerByPhone', 'SmsController@registerByPhone');
+    Route::post('register', 'AuthenticateController@register');
+    Route::post('registerByPhone', 'SmsController@registerByPhone');
 
 });
-  Route::post('upload/image', 'UploadController@uploadImage');
+Route::post('upload/image', 'UploadController@uploadImage');
 
 // 每分钟一次
 Route::group(['middleware' => 'throttle:1'], function ($api) {
-  Route::get('getSmsCode', 'SmsController@getSmsCode');
+    Route::get('getSmsCode', 'SmsController@getSmsCode');
 });
 
 // 每分钟两次
-  Route::group(['middleware' => 'throttle:2'], function ($api) {
-  Route::get('getSmsCode', 'SmsController@getSmsCode');
-  Route::post('sendVerifyEmail', 'EmailController@sendVerifyEmail');
+Route::group(['middleware' => 'throttle:2'], function ($api) {
+    Route::get('getSmsCode', 'SmsController@getSmsCode');
+    Route::post('sendVerifyEmail', 'EmailController@sendVerifyEmail');
 });
 
 // boss
