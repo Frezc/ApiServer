@@ -16,10 +16,8 @@ class ExpectJob extends Model
         if ($q) {
             $keywords = explode(" ", trim($q));
             foreach ($keywords as $keyword) {
-                $builder->where(function ($query) use ($keyword) {
-                    $query->orWhere('expect_location', 'like', '%' . $keyword . '%')
-                        ->orWhere('introduction', 'like', '%' . $keyword . '%');
-                });
+                $builder->orWhere('expect_location', 'like', '%' . $keyword . '%')
+                    ->orWhere('introduction', 'like', '%' . $keyword . '%');
             }
         }
 

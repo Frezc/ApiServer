@@ -790,16 +790,22 @@ paths:
           type: integer 
         - name: applicant_check
           in: query
-          description: 申请者是否确认，默认无视
+          description: 申请者是否确认(0, 1)，默认无视
           required: false
           type: integer
           enum: [0, 1]
         - name: recruiter_check
           in: query
-          description: 招聘者是否确认，默认无视
+          description: 招聘者是否确认(0, 1)，默认无视
           required: false
           type: integer
           enum: [0, 1]
+        - name: role
+          in: query
+          description: 为申请者(applicant)或应聘者(recruiter)
+          required: false
+          type: string
+          default: applicant
       responses:
         200:
           description: 返回订单
@@ -812,7 +818,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/definitions/Order'
-  
+
   /jobs:
     get:
       description: 查找岗位
@@ -822,7 +828,7 @@ paths:
         - name: kw
           in: query
           description: 关键字(用空格分开)
-          required: true
+          required: false
           type: string
         - name: orderby
           in: query
@@ -842,7 +848,7 @@ paths:
         - name: siz
           in: query
           description: 最多返回的结果
-          required: true
+          required: false
           type: integer
       responses:
         '200':
@@ -859,7 +865,7 @@ paths:
         default:
           description: unexpected error
           schema:
-            $ref: '#/definitions/ErrorModel'          
+            $ref: '#/definitions/ErrorModel'
   /jobs/{id}:
     get:
       description: 查找岗位
@@ -1069,14 +1075,14 @@ paths:
         - name: job_id
           in: formData
           description: 岗位id（必须是自己发布或公司发布的岗位）
-          required: false
+          required: true
           type: integer
       responses:
         200:
           description: 返回创建成功的订单
           schema:
             $ref: '#/definitions/Order'
-  
+
   /companies/{id}:
     get:
       description: 公司信息
@@ -1106,7 +1112,7 @@ paths:
         - name: kw
           in: query
           description: 关键字(用空格分开)
-          required: true
+          required: false
           type: string
         - name: orderby
           in: query
@@ -1179,9 +1185,9 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-            
+
   /upload/image:
-    post: 
+    post:
       description: 上传图片
       tags:
         - 其他模块
@@ -1200,9 +1206,9 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-            
-  
-            
+
+
+
 definitions:
   User:
     type: object
@@ -1308,6 +1314,10 @@ definitions:
         type: integer
       company_name:
         type: string
+      creator_id:
+        type: integer
+      creator_name:
+        type: string
       active:
         type: integer
       created_at:
@@ -1344,7 +1354,7 @@ definitions:
         type: string
       expect_time:
         type: array
-        items: 
+        items:
           $ref: '#/definitions/Time'
   Time:
     type: object
@@ -1372,14 +1382,14 @@ definitions:
         type: integer
       job_id:
         type: integer
-      number: 
+      number:
         type: integer
       number_applied:
         type: integer
       start_at:
         type: integer
       end_at:
-        type: end_at
+        type: integer
   JobApply:
     type: object
     properties:
@@ -1435,9 +1445,9 @@ definitions:
     properties:
       score:
         type: integer
-      comment: 
+      comment:
         type: string
-      user_id: 
+      user_id:
         type: integer
       user_nickname:
         type: string
@@ -1481,6 +1491,8 @@ definitions:
         type: integer
       job_name:
         type: string
+      job_time:
+        $ref: '#/definitions/JobTime'
       expect_job:
         $ref: '#/definitions/ExpectJob'
       applicant_id:

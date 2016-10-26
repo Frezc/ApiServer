@@ -32,6 +32,7 @@ class CreateJobsTable extends Migration
             $table->string('company_name')->nullable();
             // 创建者的id
             $table->integer('creator_id')->unsigned();
+            $table->string('creator_name');
             // 岗位是否活跃，0表示不活跃,1表示活跃
             $table->tinyInteger('active')->default(1);
             $table->timestamps();
@@ -39,6 +40,7 @@ class CreateJobsTable extends Migration
             $table->index(['name', 'active']);
             $table->index(['company_id', 'active']);
             $table->index(['company_name', 'active']);
+            $table->index('creator_name');
         });
     }
 

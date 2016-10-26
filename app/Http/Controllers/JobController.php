@@ -75,11 +75,9 @@ class JobController extends Controller {
             $q_array = explode(" ", trim($q));
 
             foreach ($q_array as $qi) {
-                $builder->where(function ($query) use ($qi) {
-                    $query->orWhere('name', 'like', '%' . $qi . '%')
+                $builder->orWhere('name', 'like', '%' . $qi . '%')
                         ->orWhere('description', 'like', '%' . $qi . '%')
                         ->orWhere('company_name', 'like', '%' . $qi . '%');
-                });
             }
         }
 
@@ -120,15 +118,21 @@ class JobController extends Controller {
         // create order
         $order = Order::create([
             'job_id' => $job->id,
+            'job_name' => $job->name,
             'job_time_id' => $jobTime->id,
             'expect_job_id' => $expectJob->id,
             'applicant_id' => $resume->user_id,
+            'applicant_name' => $self->nickname,
             'recruiter_type' => $job->company_id ? 1 : 0,
             'recruiter_id' => $job->company_id ? $job->company_id : $job->creator_id,
+            'recruiter_name' => $job->company_id ? $job->company_name : $job->creator_name,
             'status' => 0,
             'applicant_check' => 1,
             'recruiter_check' => 0
         ]);
+
+        $order->expect_job = $expectJob;
+        $order->job_time = $jobTime;
 
         return response()->json($order);
     }
