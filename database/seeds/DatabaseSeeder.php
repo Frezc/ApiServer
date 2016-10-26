@@ -2,6 +2,7 @@
 
 use App\ExpectJob;
 use App\ExpectTime;
+use App\Order;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Eloquent\Model;
 use Faker\Factory as Faker;
@@ -14,6 +15,7 @@ use App\JobApply;
 use App\JobEvaluate;
 use App\Role;
 use App\JobTime;
+use App\UserCompany;
 
 class DatabaseSeeder extends Seeder
 {
@@ -45,6 +47,8 @@ class DatabaseSeeder extends Seeder
         $jobEvaluate = 20;
         $expectJobNum = 50;
         $expectTimeNum = 100;
+        $userCompanyNum = 20;
+        $orderNum = 100;
 
         $faker = Faker::create('zh_CN');
 
@@ -61,7 +65,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         User::create([
-            'avatar' => '/images/avatars/default',
+            'avatar' => null,
             'email' => '504021398@qq.com',
             'phone' => $faker->unique()->phoneNumber,
             'password' => Hash::make('secret'),
@@ -73,7 +77,22 @@ class DatabaseSeeder extends Seeder
             'email_verified'=> 1,
             'role_id' => 2
         ]);
-        foreach (range(1, $userNum - 1) as $index) {
+
+        User::create([
+            'avatar' => null,
+            'email' => 'admin@tjz.com',
+            'phone' => $faker->unique()->phoneNumber,
+            'password' => Hash::make('secret'),
+            'nickname' => 'admin2',
+            'sign' => $faker->sentence(6,false),
+            'birthday' => $faker->date($format = 'Y-m-d', $max = 'now'),
+            'location'=> $faker->address,
+            'sex'=> $faker->numberBetween($min = 0, $max = 1),
+            'email_verified'=> 1,
+            'role_id' => 2
+        ]);
+
+        foreach (range(3, $userNum) as $index) {
             User::create([
                 'avatar' => null,
                 'email' => $faker->unique()->freeEmail,
@@ -100,8 +119,16 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        foreach (range(1, $userCompanyNum) as $i) {
+            UserCompany::create([
+                'user_id' => $faker->numberBetween($min = 1, $max = $userNum),
+                'company_id' => $faker->numberBetween($min = 1, $max = $companyNum)
+            ]);
+        }
+
         foreach (range(1, $jobNum) as $index) {
             $company = Company::findOrNew($faker->numberBetween($min = 1, $max = $companyNum));
+            $user = User::find($faker->numberBetween($min = 1, $max = $userNum));
 
             Job::create([
                 'salary_type' => 1,
@@ -110,8 +137,10 @@ class DatabaseSeeder extends Seeder
                 'visited'=> $faker->numberBetween($min = 0, $max = 1000),
                 'name'=> $faker->jobTitle,
                 'company_id'=> $company->id,
+                'company_name'=> $company->name,
+                'creator_id' => $user->id,
+                'creator_name' => $user->nickname,
                 'active'=> 1,
-                'company_name'=> $company ->name,
             ]);
         }
 
@@ -128,8 +157,10 @@ class DatabaseSeeder extends Seeder
         }
 
         foreach (range(1, $expectJobNum) as $index) {
+            $user = User::findOrFail($faker->numberBetween($min = 1, $max = $userNum));
             ExpectJob::create([
-                'user_id' => $faker->numberBetween($min = 1, $max = $userNum),
+                'user_id' => $user->id,
+                'user_name' => $user->nickname,
                 'name'=> $faker->name,
                 'photo' => null,
                 'school' => $faker->randomElement($array = array ('杭州电子科技大学','春田花花幼稚园','断罪小学')),
@@ -166,6 +197,28 @@ class DatabaseSeeder extends Seeder
                 'sex' => $faker->numberBetween($min = 0, $max = 1),
                 'expect_location'=> $faker->address,
                 'introduction'=> $faker->sentence(4, false),
+            ]);
+        }
+
+        foreach (range(1, $orderNum) as $i) {
+            $jobTime = JobTime::find($faker->numberBetween($min = 1, $max = $jobTimeNum));
+            $job = Job::find($jobTime->job_id);
+            $expectJob = ExpectJob::find($faker->numberBetween($min = 1, $max = $expectJobNum));
+
+            $status = $faker->numberBetween($min = 0, $max = 3);
+            Order::create([
+                'job_id' => $job->id,
+                'job_name' => $job->name,
+                'job_time_id' => $jobTime->id,
+                'expect_job_id' => $expectJob->id,
+                'applicant_id' => $expectJob->user_id,
+                'applicant_name' => $expectJob->user_name,
+                'recruiter_type' => $job->company_id ? 1 : 0,
+                'recruiter_id' => $job->company_id ? $job->company_id : $job->creator_id,
+                'recruiter_name' => $job->company_id ? $job->company_name : $job->creator_name,
+                'status' => $status,
+                'applicant_check' => $status == 0 ? $faker->numberBetween($min = 0, $max = 1) : 1,
+                'recruiter_check' => $status == 0 ? $faker->numberBetween($min = 0, $max = 1) : 1,
             ]);
         }
 

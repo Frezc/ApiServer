@@ -30,7 +30,7 @@ class CreateUsersTable extends Migration
             // 性别 0 为男 1为女
             $table->tinyInteger('sex')->default(0);
             // 公司id
-            $table->integer('company_id')->unsigned()->nullable();
+//            $table->integer('company_id')->unsigned()->nullable();
             // 是否通过邮箱，0：未通过 1：已通过
             $table->tinyInteger('email_verified')->default(0);
             // 角色的id
@@ -42,7 +42,6 @@ class CreateUsersTable extends Migration
             $table->unique('email');
             $table->unique('phone');
             $table->index('nickname');
-            $table->index('company_id');
         });
     }
 

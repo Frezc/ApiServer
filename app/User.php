@@ -46,6 +46,12 @@ class User extends Model implements AuthenticatableContract,
         return $this->hasMany('App\JobCompleted');
     }
 
+    /**
+     * 检查某用户是否对其他用户有访问权
+     * @param $owner_id 目标用户
+     * @return bool
+     * @throws MsgException
+     */
     public function checkAccess($owner_id) {
         if ($this->id != $owner_id) {
             $role = Role::find($this->role_id);

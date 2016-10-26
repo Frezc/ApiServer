@@ -17,6 +17,7 @@ Route::get('users/{id}/resumes', 'ResumeController@get');
 Route::delete('users/{id}/resumes/{resumeId}', 'ResumeController@delete');
 Route::post('users/{id}/resumes', 'ResumeController@add');
 Route::post('users/{id}/resumes/{resumeId}', 'ResumeController@update');
+Route::get('users/{id}/orders', 'OrderController@get');
 //Route::post('avatar', 'AuthenticateController@updateAvatar');
 Route::get('jobs', 'JobController@query');
 Route::get('job/apply', 'UserController@getJobApply');

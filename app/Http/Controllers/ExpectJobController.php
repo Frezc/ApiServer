@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\MsgException;
 use App\ExpectTime;
+use App\Job;
+use App\Order;
 use App\Resume;
 use Illuminate\Http\Request;
 use App\ExpectJob;
@@ -69,7 +71,34 @@ class ExpectJobController extends Controller {
         return response()->json(['total' => $count, 'list' => $expectJobs]);
     }
 
-    public function apply(Request $request) {
+    public function apply(Request $request, $id) {
+        $expectJob = ExpectJob::findOrFail($id);
 
+        $this->validate($request, [
+            'job_id' => 'integer'
+        ]);
+
+        $job = Job::findOrFail($request->input('job_id'));
+        $self = JWTAuth::parseToken()->authenticate();
+        $job->checkAccess($self);
+
+        $order = Order::create([
+            'job_id' => $job->id,
+            'job_name' => $job->name,
+            'job_time_id' => null,
+            'expect_job_id' => $expectJob->id,
+            'applicant_id' => $expectJob->user_id,
+            'applicant_name' => $expectJob->user_name,
+            'recruiter_type' => $job->company_id ? 1 : 0,
+            'recruiter_id' => $job->company_id ? $job->company_id : $job->creator_id,
+            'recruiter_name' => $job->company_id ? $job->company_name : $job->creator_name,
+            'status' => 0,
+            'applicant_check' => 0,
+            'recruiter_check' => 1
+        ]);
+
+        $order->expect_job = $expectJob;
+
+        return response()->json($order);
     }
 }
