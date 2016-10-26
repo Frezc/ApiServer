@@ -19,6 +19,8 @@ class UserController extends Controller {
     public function __construct() {
           $this->middleware('jwt.auth', ['except' => ['show','mainPage']]);
           $this->middleware('user.access', ['except' => ['show', 'query','mainPage']]);//用户角色验证
+
+
           $this->middleware('role:admin', ['only' => ['query']]);//管理员角色
     }
 
