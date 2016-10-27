@@ -1,21 +1,22 @@
 <?php
 
-use App\ExpectJob;
-use App\ExpectTime;
-use App\Order;
-use Illuminate\Database\Seeder;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Company;
+use App\Models\ExpectJob;
+use App\Models\ExpectTime;
+use App\Models\Job;
+use App\Models\JobApply;
+use App\Models\JobCompleted;
+use App\Models\JobEvaluate;
+use App\Models\JobTime;
+use App\Models\Message;
+use App\Models\Role;
+use App\Models\Notification;
+use App\Models\Order;
+use App\Models\Resume;
+use App\Models\User;
+use App\Models\UserCompany;
 use Faker\Factory as Faker;
-use App\Company;
-use App\Job;
-use App\User;
-use App\Resume;
-use App\JobCompleted;
-use App\JobApply;
-use App\JobEvaluate;
-use App\Role;
-use App\JobTime;
-use App\UserCompany;
+use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -218,7 +219,7 @@ class DatabaseSeeder extends Seeder
                 'recruiter_name' => $job->company_id ? $job->company_name : $job->creator_name,
                 'status' => $status,
                 'applicant_check' => $status == 0 ? $faker->numberBetween($min = 0, $max = 1) : 1,
-                'recruiter_check' => $status == 0 ? $faker->numberBetween($min = 0, $max = 1) : 1,
+                'recruiter_check' => $status == 0
             ]);
         }
 
@@ -253,6 +254,47 @@ class DatabaseSeeder extends Seeder
                 'job_id'  => $jc->job_id,
                 'comment' =>  $faker->catchPhrase,
                 'score' => $faker->numberBetween($min = 0, $max = 5),
+            ]);
+        }
+
+        Message::create([
+            'sender_id' => 1,
+            'sender_name' => '工作助手',
+            'receiver_id' => 1,
+            'type' => 'notification',
+            'content' => '简要消息',
+            'unread' => 9
+        ]);
+
+        foreach (range(1, 9) as $i) {
+            Notification::create([
+                'message_id' => 1,
+                'content' => $faker->realText($maxNbChars = 200)
+            ]);
+        }
+
+        foreach (range(2, $userNum) as $i) {
+            $user = User::find($i);
+            $conNum = $faker->numberBetween($min = 1, $max = 50);
+            $message = Message::create([
+                'sender_id' => $user->id,
+                'sender_name' => $user->nickname,
+                'receiver_id' => 1,
+                'type' => 'conversation',
+                'content' => '你好啊~',
+                'unread' => $conNum
+            ]);
+            \App\Models\Conversation::create([
+                'message_id' => $message->id,
+                'sender_id' => $i,
+                'sender_name' => $user->nickname,
+                'content' => '你好呀！'
+            ]);
+            \App\Models\Conversation::create([
+                'message_id' => $message->id,
+                'sender_id' => 1,
+                'sender_name' => 'admin',
+                'content' => '你好！'
             ]);
         }
     }

@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Job;
-use App\JobApply;
-use App\JobCompleted;
-use App\JobEvaluate;
-use App\Resume;
-use App\Uploadfile;
-use App\User;
+use App\Models\Job;
+use App\Models\JobApply;
+use App\Models\JobCompleted;
+use App\Models\JobEvaluate;
+use App\Models\Resume;
+use App\Models\Uploadfile;
+use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use JWTAuth;

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Uploadfile;
+use App\Models\Uploadfile;
 use Hash;
 use Illuminate\Http\Request;
 use JWTAuth;

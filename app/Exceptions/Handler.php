@@ -7,6 +7,7 @@ use App\Exceptions\MsgException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Illuminate\Auth\Access\AuthorizationException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Validation\ValidationException;
@@ -60,12 +61,12 @@ class Handler extends ExceptionHandler
             return response()->json(['error' => $e->getMessage()], $e->getStatusCode());
         } elseif ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
             return response()->json(['error' => 'token_invalid'], $e->getStatusCode());
-
+        } elseif ($e instanceof MethodNotAllowedHttpException) {
+            return response()->json(['error' => 'This route only allow ' . $e->getHeaders()['Allow']], $e->getStatusCode());
         } elseif ($e instanceof MsgException) {
             return response()->json(['error' => $e->getMessage()], $e->getCode());
         } elseif (!env('LOCAL', false)) {
             return response()->json(['error' => $e->getMessage()], 500);
-
         }
 
         // production

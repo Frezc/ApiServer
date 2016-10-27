@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use App\Exceptions\MsgException;
 use Illuminate\Auth\Authenticatable;

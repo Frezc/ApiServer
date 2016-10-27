@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\User;
+use App\Models\User;
 use Curl\Curl;
 use Hash;
 use Illuminate\Http\Request;

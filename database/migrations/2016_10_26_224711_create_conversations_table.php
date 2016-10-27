@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateMessagesTable extends Migration
+class CreateConversationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -12,24 +12,20 @@ class CreateMessagesTable extends Migration
      */
     public function up()
     {
-        Schema::create('messages', function (Blueprint $table) {
+        Schema::create('conversations', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('message_id')->unsigned();
 
-            $table->integer('sender_id')->unsigned()->nullable();
+            $table->integer('sender_id')->unsigned();
             $table->string('sender_name');
             $table->string('sender_avatar')->nullable();
 
-            $table->integer('receiver_id')->unsigned();
-
-            // 消息的类型 ['notification', 'conversation']
-            $table->string('type')->default('notification');
             $table->string('content');
-            // 未读信息数
-            $table->tinyInteger('unread')->default(0);
 
             $table->timestamps();
 
-            $table->index(['receiver_id']);
+            $table->index('sender_id');
+            $table->index('message_id');
         });
     }
 
@@ -40,6 +36,6 @@ class CreateMessagesTable extends Migration
      */
     public function down()
     {
-        Schema::drop('messages');
+        Schema::drop('conversations');
     }
 }
