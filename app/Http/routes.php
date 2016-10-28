@@ -27,15 +27,19 @@ Route::post('jobs/{id}/apply', 'JobController@apply');
 Route::post('job/apply', 'UserController@postJobApply');
 Route::get('job/evaluate', 'JobController@getJobEvaluate');
 Route::post('job/evaluate', 'UserController@postJobEvaluate');
-
 Route::post('expect_jobs', 'ExpectJobController@create');
-
 Route::get('expect_jobs', 'ExpectJobController@query');
-
 Route::post('expect_jobs/{id}/apply', 'ExpectJobController@apply');
 Route::get('getAllJob', 'UserController@mainPage');
 Route::get('companies', 'CompanyController@query');
 Route::get('companies/{id}', 'CompanyController@get')->where('id', '[0-9]+');
+
+Route::get('umsg', 'MessageController@getUpdate');
+Route::get('messages', 'MessageController@get');
+Route::get('notifications/{id}', 'MessageController@getNotification');
+Route::get('conversations/{id}', 'MessageController@getConversation');
+Route::post('conversations', 'MessageController@postConversation');
+
 
 // 需要限制次数的请求
 // 每分钟三次

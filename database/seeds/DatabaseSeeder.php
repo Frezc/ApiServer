@@ -9,24 +9,22 @@ use App\Models\JobCompleted;
 use App\Models\JobEvaluate;
 use App\Models\JobTime;
 use App\Models\Message;
-use App\Models\Role;
 use App\Models\Notification;
 use App\Models\Order;
 use App\Models\Resume;
+use App\Models\Role;
 use App\Models\User;
 use App\Models\UserCompany;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
 
-class DatabaseSeeder extends Seeder
-{
+class DatabaseSeeder extends Seeder {
     /**
      * Run the database seeds.
      *
      * @return void
      */
-    public function run()
-    {
+    public function run() {
         // factory(App\Company::class,20)->create();
         // factory(App\Job::class,20)->create();
         // factory(App\User::class,20)->create();
@@ -71,11 +69,11 @@ class DatabaseSeeder extends Seeder
             'phone' => $faker->unique()->phoneNumber,
             'password' => Hash::make('secret'),
             'nickname' => 'admin',
-            'sign' => $faker->sentence(6,false),
+            'sign' => $faker->sentence(6, false),
             'birthday' => $faker->date($format = 'Y-m-d', $max = 'now'),
-            'location'=> $faker->address,
-            'sex'=> $faker->numberBetween($min = 0, $max = 1),
-            'email_verified'=> 1,
+            'location' => $faker->address,
+            'sex' => $faker->numberBetween($min = 0, $max = 1),
+            'email_verified' => 1,
             'role_id' => 2
         ]);
 
@@ -85,11 +83,11 @@ class DatabaseSeeder extends Seeder
             'phone' => $faker->unique()->phoneNumber,
             'password' => Hash::make('secret'),
             'nickname' => 'admin2',
-            'sign' => $faker->sentence(6,false),
+            'sign' => $faker->sentence(6, false),
             'birthday' => $faker->date($format = 'Y-m-d', $max = 'now'),
-            'location'=> $faker->address,
-            'sex'=> $faker->numberBetween($min = 0, $max = 1),
-            'email_verified'=> 1,
+            'location' => $faker->address,
+            'sex' => $faker->numberBetween($min = 0, $max = 1),
+            'email_verified' => 1,
             'role_id' => 2
         ]);
 
@@ -102,17 +100,17 @@ class DatabaseSeeder extends Seeder
                 'nickname' => $faker->name,
                 'sign' => $faker->sentence(6, false),
                 'birthday' => $faker->date($format = 'Y-m-d', $max = 'now'),
-                'location'=> $faker->address,
-                'sex'=> $faker->numberBetween($min = 0, $max = 1),
-                'email_verified'=> $faker->numberBetween($min = 0, $max = 1)
+                'location' => $faker->address,
+                'sex' => $faker->numberBetween($min = 0, $max = 1),
+                'email_verified' => $faker->numberBetween($min = 0, $max = 1)
             ]);
         }
 
         foreach (range(1, $companyNum) as $index) {
             Company::create([
                 'name' => $faker->unique()->company,
-                'url'  => $faker->url,
-                'address'=> $faker->address,
+                'url' => $faker->url,
+                'address' => $faker->address,
                 'logo' => null,
                 'description' => $faker->catchPhrase,
                 'contact_person' => $faker->name,
@@ -135,13 +133,13 @@ class DatabaseSeeder extends Seeder
                 'salary_type' => 1,
                 'salary' => '100',
                 'description' => $faker->catchPhrase,
-                'visited'=> $faker->numberBetween($min = 0, $max = 1000),
-                'name'=> $faker->jobTitle,
-                'company_id'=> $company->id,
-                'company_name'=> $company->name,
+                'visited' => $faker->numberBetween($min = 0, $max = 1000),
+                'name' => $faker->jobTitle,
+                'company_id' => $company->id,
+                'company_name' => $company->name,
                 'creator_id' => $user->id,
                 'creator_name' => $user->nickname,
-                'active'=> 1,
+                'active' => 1,
             ]);
         }
 
@@ -162,13 +160,13 @@ class DatabaseSeeder extends Seeder
             ExpectJob::create([
                 'user_id' => $user->id,
                 'user_name' => $user->nickname,
-                'name'=> $faker->name,
+                'name' => $faker->name,
                 'photo' => null,
-                'school' => $faker->randomElement($array = array ('杭州电子科技大学','春田花花幼稚园','断罪小学')),
-                'birthday' =>  $faker->date($format = 'Y-m-d', $max = 'now'),
+                'school' => $faker->randomElement($array = array('杭州电子科技大学', '春田花花幼稚园', '断罪小学')),
+                'birthday' => $faker->date($format = 'Y-m-d', $max = 'now'),
                 'sex' => $faker->numberBetween($min = 0, $max = 1),
-                'expect_location'=> $faker->address,
-                'introduction'=> $faker->sentence(4, false),
+                'expect_location' => $faker->address,
+                'introduction' => $faker->sentence(4, false),
                 'is_public' => 1
             ]);
         }
@@ -190,14 +188,14 @@ class DatabaseSeeder extends Seeder
         foreach (range(1, $resumeNum) as $index) {
             Resume::create([
                 'user_id' => $faker->numberBetween($min = 1, $max = $userNum),
-                'title'  => $faker->jobTitle,
-                'name'=> $faker->name,
+                'title' => $faker->jobTitle,
+                'name' => $faker->name,
                 'photo' => null,
-                'school' => $faker->randomElement($array = array ('杭州电子科技大学','春田花花幼稚园','断罪小学')),
-                'birthday' =>  $faker->date($format = 'Y-m-d', $max = 'now'),
+                'school' => $faker->randomElement($array = array('杭州电子科技大学', '春田花花幼稚园', '断罪小学')),
+                'birthday' => $faker->date($format = 'Y-m-d', $max = 'now'),
                 'sex' => $faker->numberBetween($min = 0, $max = 1),
-                'expect_location'=> $faker->address,
-                'introduction'=> $faker->sentence(4, false),
+                'expect_location' => $faker->address,
+                'introduction' => $faker->sentence(4, false),
             ]);
         }
 
@@ -227,10 +225,10 @@ class DatabaseSeeder extends Seeder
             $resume = Resume::findOrNew($faker->numberBetween($min = 1, $max = $resumeNum));
 
             JobCompleted::create([
-                'user_id' => $resume->user_id ,
-                'job_id'  => $faker->numberBetween($min = 1, $max = $jobNum),
-                'resume_id'=> $resume->id,
-                'description' =>  $faker->sentence(4, false),
+                'user_id' => $resume->user_id,
+                'job_id' => $faker->numberBetween($min = 1, $max = $jobNum),
+                'resume_id' => $resume->id,
+                'description' => $faker->sentence(4, false),
             ]);
         }
 
@@ -238,10 +236,10 @@ class DatabaseSeeder extends Seeder
             $resume = Resume::findOrNew($faker->numberBetween($min = 1, $max = $resumeNum));
 
             JobApply::create([
-                'user_id' => $resume->user_id ,
-                'job_id'  => $faker->numberBetween($min = 1, $max = $jobNum),
-                'resume_id'=> $resume->id,
-                'description' =>  $faker->sentence(4, false),
+                'user_id' => $resume->user_id,
+                'job_id' => $faker->numberBetween($min = 1, $max = $jobNum),
+                'resume_id' => $resume->id,
+                'description' => $faker->sentence(4, false),
                 'status' => $faker->numberBetween($min = 0, $max = 1),
             ]);
         }
@@ -251,8 +249,8 @@ class DatabaseSeeder extends Seeder
 
             JobEvaluate::create([
                 'user_id' => $jc->user_id,
-                'job_id'  => $jc->job_id,
-                'comment' =>  $faker->catchPhrase,
+                'job_id' => $jc->job_id,
+                'comment' => $faker->catchPhrase,
                 'score' => $faker->numberBetween($min = 0, $max = 5),
             ]);
         }
@@ -285,13 +283,13 @@ class DatabaseSeeder extends Seeder
                 'unread' => $conNum
             ]);
             \App\Models\Conversation::create([
-                'message_id' => $message->id,
+                'conversation_id' => 1 . 'c' . $i,
                 'sender_id' => $i,
                 'sender_name' => $user->nickname,
                 'content' => '你好呀！'
             ]);
             \App\Models\Conversation::create([
-                'message_id' => $message->id,
+                'conversation_id' => 1 . 'c' . $i,
                 'sender_id' => 1,
                 'sender_name' => 'admin',
                 'content' => '你好！'

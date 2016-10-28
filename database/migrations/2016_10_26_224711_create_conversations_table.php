@@ -14,8 +14,9 @@ class CreateConversationsTable extends Migration
     {
         Schema::create('conversations', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('message_id')->unsigned();
 
+            // `{用户1的id}c{用户2的id}` 这里用户1的id永远小于用户2
+            $table->string('conversation_id');
             $table->integer('sender_id')->unsigned();
             $table->string('sender_name');
             $table->string('sender_avatar')->nullable();
@@ -25,7 +26,7 @@ class CreateConversationsTable extends Migration
             $table->timestamps();
 
             $table->index('sender_id');
-            $table->index('message_id');
+            $table->index('conversation_id');
         });
     }
 

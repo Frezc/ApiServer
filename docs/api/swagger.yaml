@@ -1,9 +1,9 @@
 swagger: '2.0'
 info:
-  version: 0.7.1
+  version: 0.7.2
   title: 淘兼职api
   description: |
-    Admin标签代表只能管理员使用;  
+    Admin标签代表只能管理员使用;
     Auth标签代表需要在请求里带上获得的token（见https://github.com/tymondesigns/jwt-auth/wiki/Authentication ）
 host: tjz.frezc.com
 basePath: /
@@ -495,7 +495,7 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
   /job/evaluate:
-    get: 
+    get:
       description: 得到岗位的评价
       tags:
         - 岗位模块
@@ -567,7 +567,7 @@ paths:
       tags:
         - 用户模块
         - Auth
-      parameters: 
+      parameters:
         - name: id
           in: path
           description: 用户的id
@@ -787,7 +787,7 @@ paths:
           in: query
           description: 状态筛选，0：未确认，1：已确认，2：已完成，3：已取消
           required: false
-          type: integer 
+          type: integer
         - name: applicant_check
           in: query
           description: 申请者是否确认(0, 1)，默认无视
@@ -1206,8 +1206,140 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-
-
+  /umsg:
+    get:
+      description: 得到提醒等更新信息
+      tags:
+        - 其他模块
+        - Auth
+      parameters: []
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            properties:
+              messages_count:
+                type: integer
+  /messages:
+    get:
+      description: 得到消息列表
+      tags:
+        - 其他模块
+        - Auth
+      parameters:
+        - name: off
+          in: query
+          description: 默认0
+          required: false
+          type: integer
+        - name: siz
+          in: query
+          description: 最多返回的结果, 默认20
+          required: false
+          type: integer
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              list:
+                type: array
+                items:
+                  $ref: '#/definitions/Message'
+  /notifications/{id}:
+    get:
+      description: 得到通知列表，按时间倒序
+      tags:
+        - 其他模块
+        - Auth
+      parameters:
+        - name: id
+          in: path
+          description: 通知id
+          required: true
+          type: integer
+        - name: off
+          in: query
+          description: 默认0
+          required: false
+          type: integer
+        - name: siz
+          in: query
+          description: 最多返回的结果, 默认20
+          required: false
+          type: integer
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              list:
+                type: array
+                items:
+                  $ref: '#/definitions/Notification'
+  /conversations/{id}:
+    get:
+      description: 得到对话列表，按时间倒序
+      tags:
+        - 其他模块
+        - Auth
+      parameters:
+        - name: id
+          in: path
+          description: 对话id
+          required: true
+          type: integer
+        - name: off
+          in: query
+          description: 默认0
+          required: false
+          type: integer
+        - name: siz
+          in: query
+          description: 最多返回的结果, 默认20
+          required: false
+          type: integer
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              list:
+                type: array
+                items:
+                  $ref: '#/definitions/Conversation'
+  /conversations:
+    post:
+      description: 发送私信
+      tags:
+        - 其他模块
+        - Auth
+      parameters:
+        - name: receiver_id
+          in: formData
+          description: 对方用户的id
+          required: true
+          type: integer
+        - name: content
+          in: formData
+          description: 内容
+          required: true
+          type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            $ref: '#/definitions/Conversation'
 
 definitions:
   User:
@@ -1519,6 +1651,52 @@ definitions:
       updated_at:
         type: string
         format: date
+  Message:
+    type: object
+    properties:
+      id:
+        type: integer
+      sender_id:
+        type: integer
+      sender_name:
+        type: string
+      sender_avatar:
+        type: string
+      type:
+        type: string
+        enum: ['notification', 'conversation']
+      content:
+        type: string
+      unread:
+        type: integer
+      updated_at:
+        type: string
+        format: date
+  Notification:
+    type: object
+    properties:
+      id:
+        type: integer
+      content:
+        type: string
+      created_at:
+        type: string
+        format: date
+  Conversation:
+    type: object
+    properties:
+      id:
+        type: integer
+      sender_id:
+        type: integer
+      sender_name:
+        type: string
+      sender_avatar:
+        type: string
+      content:
+        type: string
+      created_at:
+        type: string
   UploadSuccess:
     type: object
     properties:

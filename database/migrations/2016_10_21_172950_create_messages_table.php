@@ -29,7 +29,9 @@ class CreateMessagesTable extends Migration
 
             $table->timestamps();
 
-            $table->index(['receiver_id']);
+            $table->index('receiver_id');
+            $table->index('sender_id');
+            $table->index('type');
         });
     }
 

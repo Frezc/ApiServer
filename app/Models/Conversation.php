@@ -8,4 +8,6 @@ class Conversation extends Model
 {
     protected $table = 'conversations';
     protected $guarded = ['id'];
+
+    protected $hidden = ['updated_at', 'conversation_id'];
 }
