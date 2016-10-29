@@ -414,24 +414,32 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-  /realNameApply:
+  /realNameApplies:
+    get:
+      description: 查看实名验证的状态
+      tags:
+        - 用户模块
+        - Auth
+      parameters: []
+      responses:
+        200:
+          description: is_examined代表当前状态，[0：未审核, 1：已通过, 2：已拒绝]
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/RealNameVerification'
     post:
       description: 申请实名验证
       tags:
         - 用户模块
         - Auth
       parameters:
-        - name: verification_code
-          in: formData
-          description: 短信获取的验证码
-          required: true
-          type: string
         - name: real_name
           in: formData
           description: 真实姓名
           required: true
           type: string
-        - name: ID_number
+        - name: id_number
           in: formData
           description: 身份证号
           required: true
@@ -441,14 +449,34 @@ paths:
           description: 验证用的照片
           required: true
           type: string
-          format: byte
       responses:
-        '200':
+        200:
           description: 提交申请成功，等待后台处理
           schema:
-            type: string
+            $ref: '#/definitions/RealNameVerification'
         default:
-          description: fail(注意返回的状态码，430:邮箱与验证码不符，431:验证码过期)
+          description: error，注意如果有非拒绝状态的申请时不能重复创建，不然会返回错误
+          schema:
+            $ref: '#/definitions/ErrorModel'
+  /realNameApplies/{id}:
+    delete:
+      description: 取消某项实名认证申请
+      tags:
+        - 用户模块
+        - Auth
+      parameters:
+        - name: id
+          in: path
+          description: 申请的id
+          required: true
+          type: integer
+      responses:
+        200:
+          description: 成功
+          schema:
+            $ref: '#/definitions/RealNameVerification'
+        default:
+          description: error，注意只能取消状态为申请中的项
           schema:
             $ref: '#/definitions/ErrorModel'
   /job/completed:
@@ -1697,6 +1725,28 @@ definitions:
         type: string
       created_at:
         type: string
+  RealNameVerification:
+    type: object
+    properties:
+      id:
+        type: integer
+      user_id:
+        type: integer
+      real_name:
+        type: string
+      id_number:
+        type: string
+      verifi_pic:
+        type: string
+      is_examined:
+        type: integer
+        enum: [0, 1, 2]
+      created_at:
+        type: string
+        format: date
+      updated_at:
+        type: string
+        format: date
   UploadSuccess:
     type: object
     properties:

@@ -19,6 +19,10 @@ Route::post('users/{id}/resumes', 'ResumeController@add');
 Route::post('users/{id}/resumes/{resumeId}', 'ResumeController@update');
 Route::get('users/{id}/orders', 'OrderController@get');
 //Route::post('avatar', 'AuthenticateController@updateAvatar');
+Route::get('realNameApplies', 'UserController@getRealNameApplies');
+Route::post('realNameApplies', 'UserController@createRealNameApplies');
+Route::delete('realNameApplies/{id}', 'UserController@deleteRealNameApply');
+
 Route::get('jobs', 'JobController@query');
 Route::get('job/apply', 'UserController@getJobApply');
 Route::get('job/completed', 'UserController@getJobCompleted');
@@ -31,6 +35,7 @@ Route::post('expect_jobs', 'ExpectJobController@create');
 Route::get('expect_jobs', 'ExpectJobController@query');
 Route::post('expect_jobs/{id}/apply', 'ExpectJobController@apply');
 Route::get('getAllJob', 'UserController@mainPage');
+
 Route::get('companies', 'CompanyController@query');
 Route::get('companies/{id}', 'CompanyController@get')->where('id', '[0-9]+');
 
@@ -66,7 +71,9 @@ Route::group(['middleware' => 'throttle:2'], function ($api) {
 });
 
 // boss
-Route::get('users', 'UserController@query');
+Route::group(['namespace' => 'BOSS', 'middleware' => ['jwt.auth', 'role:admin']], function () {
+    Route::get('users', 'UserController@query');
+});
 
 Route::get('/', function () {
     return view('welcome');

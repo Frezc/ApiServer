@@ -62,4 +62,14 @@ class User extends Model implements AuthenticatableContract,
         }
         return true;
     }
+
+    public function getRealNameVerification() {
+        return RealNameVerification::where('user_id', $this->id)->first();
+    }
+
+    public function checkNeedRealNameVerify() {
+        $rmv = RealNameVerification::where('user_id', $this->id)->whereIn('is_examined', [0, 1])->first();
+        if ($rmv) throw new MsgException('You needn\'t apply real name verification.', 400);
+        return true;
+    }
 }

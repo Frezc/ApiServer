@@ -36,6 +36,9 @@ class CreateUsersTable extends Migration
             // 角色的id
             $table->tinyInteger('role_id')->default(1);
 
+            // 是否通过实名验证
+            $table->tinyInteger('real_name_verified')->default(0);
+
             // $table->rememberToken();
             $table->timestamps();
 

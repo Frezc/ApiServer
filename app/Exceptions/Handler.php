@@ -49,7 +49,7 @@ class Handler extends ExceptionHandler
     public function render($request, Exception $e)
     {
         if ($e instanceof ModelNotFoundException) {
-            return response()->json(['error' => $e->getModel().' not found.'], 404);
+            return response()->json(['error' => substr($e->getModel(), strrpos($e->getModel(), '\\') + 1).' not found.'], 404);
         } elseif ($e instanceof NotFoundHttpException) {
             return response()->json(['error' => $request->path().' not found.'], 404);
         } elseif ($e instanceof ValidationException) {

@@ -295,5 +295,10 @@ class DatabaseSeeder extends Seeder {
                 'content' => '你好！'
             ]);
         }
+
+        \App\Models\Uploadfile::create([
+            'path' => 'images/test.png',
+            'uploader_id' => 1
+        ]);
     }
 }
