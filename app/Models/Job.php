@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Job extends Model
 {
-    protected $table = 'jobs';
+    protected $table = 'tjz_jobs';
     protected $guarded = ['id'];
 
     public function jobTime() {

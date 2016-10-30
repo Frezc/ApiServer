@@ -36,6 +36,8 @@ class DatabaseSeeder extends Seeder {
         //     'photo' => 'http://static.frezc.com/static/resume_photos/default'
         // ]);
 
+        $this->call(PresetSeeder::class);
+
         $userNum = 30;
         $companyNum = 10;
         $jobNum = 50;
@@ -50,46 +52,6 @@ class DatabaseSeeder extends Seeder {
         $orderNum = 100;
 
         $faker = Faker::create('zh_CN');
-
-        Role::create([
-            'name' => 'user',
-            'mode' => '1',
-            'public' => 1
-        ]);
-        Role::create([
-            'name' => 'admin',
-            'mode' => '11',
-            'public' => 1,
-            'admin' => 1
-        ]);
-
-        User::create([
-            'avatar' => null,
-            'email' => '504021398@qq.com',
-            'phone' => $faker->unique()->phoneNumber,
-            'password' => Hash::make('secret'),
-            'nickname' => 'admin',
-            'sign' => $faker->sentence(6, false),
-            'birthday' => $faker->date($format = 'Y-m-d', $max = 'now'),
-            'location' => $faker->address,
-            'sex' => $faker->numberBetween($min = 0, $max = 1),
-            'email_verified' => 1,
-            'role_id' => 2
-        ]);
-
-        User::create([
-            'avatar' => null,
-            'email' => 'admin@tjz.com',
-            'phone' => $faker->unique()->phoneNumber,
-            'password' => Hash::make('secret'),
-            'nickname' => 'admin2',
-            'sign' => $faker->sentence(6, false),
-            'birthday' => $faker->date($format = 'Y-m-d', $max = 'now'),
-            'location' => $faker->address,
-            'sex' => $faker->numberBetween($min = 0, $max = 1),
-            'email_verified' => 1,
-            'role_id' => 2
-        ]);
 
         foreach (range(3, $userNum) as $index) {
             User::create([
@@ -120,14 +82,14 @@ class DatabaseSeeder extends Seeder {
 
         foreach (range(1, $userCompanyNum) as $i) {
             UserCompany::create([
-                'user_id' => $faker->numberBetween($min = 1, $max = $userNum),
+                'user_id' => $faker->numberBetween($min = 1001, $max = 1000 + $userNum),
                 'company_id' => $faker->numberBetween($min = 1, $max = $companyNum)
             ]);
         }
 
         foreach (range(1, $jobNum) as $index) {
             $company = Company::findOrNew($faker->numberBetween($min = 1, $max = $companyNum));
-            $user = User::find($faker->numberBetween($min = 1, $max = $userNum));
+            $user = User::find($faker->numberBetween($min = 1001, $max = 1000 + $userNum));
 
             Job::create([
                 'salary_type' => 1,
@@ -156,7 +118,7 @@ class DatabaseSeeder extends Seeder {
         }
 
         foreach (range(1, $expectJobNum) as $index) {
-            $user = User::findOrFail($faker->numberBetween($min = 1, $max = $userNum));
+            $user = User::findOrFail($faker->numberBetween($min = 1001, $max = 1000 + $userNum));
             ExpectJob::create([
                 'user_id' => $user->id,
                 'user_name' => $user->nickname,
@@ -187,7 +149,7 @@ class DatabaseSeeder extends Seeder {
 
         foreach (range(1, $resumeNum) as $index) {
             Resume::create([
-                'user_id' => $faker->numberBetween($min = 1, $max = $userNum),
+                'user_id' => $faker->numberBetween($min = 1001, $max = 1000 + $userNum),
                 'title' => $faker->jobTitle,
                 'name' => $faker->name,
                 'photo' => null,
@@ -258,7 +220,7 @@ class DatabaseSeeder extends Seeder {
         Message::create([
             'sender_id' => 1,
             'sender_name' => '工作助手',
-            'receiver_id' => 1,
+            'receiver_id' => 1001,
             'type' => 'notification',
             'content' => '简要消息',
             'unread' => 9
@@ -272,7 +234,7 @@ class DatabaseSeeder extends Seeder {
         }
 
         foreach (range(2, $userNum) as $i) {
-            $user = User::find($i);
+            $user = User::find(1000 + $i);
             $conNum = $faker->numberBetween($min = 1, $max = 50);
             $message = Message::create([
                 'sender_id' => $user->id,
@@ -298,7 +260,7 @@ class DatabaseSeeder extends Seeder {
 
         \App\Models\Uploadfile::create([
             'path' => 'images/test.png',
-            'uploader_id' => 1
+            'uploader_id' => 1001
         ]);
     }
 }

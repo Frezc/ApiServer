@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Job;
 use App\Models\JobEvaluate;
 use App\Models\JobTime;
+use App\Models\Message;
 use App\Models\Order;
 use App\Models\Resume;
 use App\Models\User;
@@ -133,6 +134,8 @@ class JobController extends Controller {
 
         $order->expect_job = $expectJob;
         $order->job_time = $jobTime;
+
+//        Message::pushNotification(Message::$WORK_HELPER, )
 
         return response()->json($order);
     }
