@@ -239,20 +239,20 @@ class DatabaseSeeder extends Seeder {
             $message = Message::create([
                 'sender_id' => $user->id,
                 'sender_name' => $user->nickname,
-                'receiver_id' => 1,
+                'receiver_id' => 1001,
                 'type' => 'conversation',
                 'content' => '你好啊~',
                 'unread' => $conNum
             ]);
             \App\Models\Conversation::create([
-                'conversation_id' => 1 . 'c' . $i,
+                'conversation_id' => 1001 . 'c' . $i,
                 'sender_id' => $i,
                 'sender_name' => $user->nickname,
                 'content' => '你好呀！'
             ]);
             \App\Models\Conversation::create([
-                'conversation_id' => 1 . 'c' . $i,
-                'sender_id' => 1,
+                'conversation_id' => 1001 . 'c' . $i,
+                'sender_id' => 1001,
                 'sender_name' => 'admin',
                 'content' => '你好！'
             ]);

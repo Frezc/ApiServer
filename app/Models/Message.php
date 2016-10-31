@@ -14,12 +14,18 @@ class Message extends Model
 
     public static $WORK_HELPER = 1;
 
+    public static function getSender($id) {
+        return User::find($id);
+    }
+
     public static function pushNotification($from, $to, $content) {
         $message = Message::firstOrNew([
-            'sender_id' => $from,
+            'sender_id' => $from->id,
             'receiver_id' => $to,
             'type' => 'notification'
         ]);
+        $message->sender_name = $from->nickname;
+        $message->sender_avatar = $from->avatar;
         $message->content = $content;
         $message->unread++;
         $message->save();

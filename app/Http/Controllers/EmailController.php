@@ -17,6 +17,7 @@ class EmailController extends Controller {
     public function __construct() {
         $this->middleware('jwt.auth', ['only' => ['bindEmail']]);
         $this->middleware('email', ['only' => ['verifyEmail', 'bindEmail']]);
+        $this->middleware('log', ['only' => ['sendVerifyEmail', 'verifyEmail', 'bindEmail']]);
     }
 
     public function sendVerifyEmail(Request $request) {

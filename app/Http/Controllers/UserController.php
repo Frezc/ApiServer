@@ -21,6 +21,7 @@ class UserController extends Controller {
     public function __construct() {
         $this->middleware('jwt.auth', ['except' => ['show', 'mainPage']]);
         $this->middleware('user.access', ['only' => ['update']]);//用户角色验证
+        $this->middleware('log', ['only' => ['update', 'createRealNameApplies', 'deleteRealNameApply']]);
     }
 
     public function show($id) {

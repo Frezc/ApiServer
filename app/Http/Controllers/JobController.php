@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\PushNotifications;
 use App\Models\Job;
 use App\Models\JobEvaluate;
 use App\Models\JobTime;
@@ -9,6 +10,7 @@ use App\Models\Message;
 use App\Models\Order;
 use App\Models\Resume;
 use App\Models\User;
+use App\Models\UserCompany;
 use Illuminate\Http\Request;
 use JWTAuth;
 
@@ -16,6 +18,7 @@ class JobController extends Controller {
 
     public function __construct() {
         $this->middleware('jwt.auth', ['only' => ['apply']]);
+        $this->middleware('log', ['only' => ['apply']]);
     }
 
     public function get($id) {
@@ -135,7 +138,15 @@ class JobController extends Controller {
         $order->expect_job = $expectJob;
         $order->job_time = $jobTime;
 
-//        Message::pushNotification(Message::$WORK_HELPER, )
+        $to = $job->creator_id;
+        if ($job->company_id) {
+            $to = UserCompany::getUserIds($job->company_id);
+        }
+        $this->dispatch(new PushNotifications(
+            Message::getSender(Message::$WORK_HELPER),
+            $to,
+            $self->nickname . ' 申请了岗位 ' . $job->name . '。'
+        ));
 
         return response()->json($order);
     }

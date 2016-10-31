@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\PushNotifications;
 use App\Models\ExpectJob;
 use App\Models\ExpectTime;
 use App\Models\Job;
+use App\Models\Message;
 use App\Models\Order;
 use App\Models\Resume;
 use Illuminate\Http\Request;
@@ -14,6 +16,7 @@ class ExpectJobController extends Controller {
 
     public function __construct() {
         $this->middleware('jwt.auth');
+        $this->middleware('log', ['only' => ['create', 'apply']]);
     }
 
     public function create(Request $request) {
@@ -97,6 +100,12 @@ class ExpectJobController extends Controller {
         ]);
 
         $order->expect_job = $expectJob;
+
+        $this->dispatch(new PushNotifications(
+            Message::getSender(Message::$WORK_HELPER),
+            $expectJob->user_id,
+            $self->nickname . ' 为您发送了岗位邀请。'
+        ));
 
         return response()->json($order);
     }

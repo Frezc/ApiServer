@@ -2,6 +2,7 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\MemoryAction;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -49,6 +50,7 @@ class Kernel extends HttpKernel
         'email' => \App\Http\Middleware\EmailMiddleware::class,
         'sms' => \App\Http\Middleware\SmsMiddleware::class,
         'user.access' => \App\Http\Middleware\UserAccess::class,
-        'role' => \App\Http\Middleware\RoleCheck::class
+        'role' => \App\Http\Middleware\RoleCheck::class,
+        'log' => MemoryAction::class
     ];
 }

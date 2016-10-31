@@ -15,6 +15,7 @@ class ResumeController extends Controller {
     public function __construct() {
         $this->middleware('jwt.auth');
         $this->middleware('user.access');
+        $this->middleware('log', ['only' => ['delete', 'add', 'update']]);
     }
 
     public function get() {
