@@ -7,6 +7,7 @@ use App\Models\Job;
 use App\Models\JobApply;
 use App\Models\JobCompleted;
 use App\Models\JobEvaluate;
+use App\Models\Log;
 use App\Models\RealNameVerification;
 use App\Models\Resume;
 use App\Models\Uploadfile;
@@ -278,9 +279,11 @@ class UserController extends Controller {
         return response()->json($user);
     }
 
-    public function getRealNameApplies() {
+    public function getRealNameApplies($id) {
+        $user = User::findOrFail($id);
         $self = JWTAuth::parseToken()->authenticate();
-        $rnvs = RealNameVerification::where('user_id', $self->id)
+        $self->checkAccess($user->id);
+        $rnvs = RealNameVerification::where('user_id', $user->id)
             ->orderBy('updated_at', 'desc')
             ->get();
         $rnvs->each(function ($rnv) {
@@ -289,7 +292,8 @@ class UserController extends Controller {
         return response()->json($rnvs);
     }
 
-    public function createRealNameApplies(Request $request) {
+    public function createRealNameApplies(Request $request, $id) {
+        $user = User::findOrFail($id);
         $this->validate($request, [
             'real_name' => 'required|string|max:16',
             'id_number' => 'required|string|max:24',
@@ -299,15 +303,16 @@ class UserController extends Controller {
         $verifi_pic = $request->input('verifi_pic');
 
         $self = JWTAuth::parseToken()->authenticate();
-        $self->checkNeedRealNameVerify();
+        $self->checkAccess($user->id);
+        $user->checkNeedRealNameVerify();
 
         $uploadFile = Uploadfile::where('path', $verifi_pic)->first();
         $uploadFile->makeSureAccess($self);
         $uploadFile->replace();
 
         $rnv = RealNameVerification::create([
-            'user_id' => $self->id,
-            'user_name' => $self->nickname,
+            'user_id' => $user->id,
+            'user_name' => $user->nickname,
             'real_name' => $request->input('real_name'),
             'id_number' => $request->input('id_number'),
             'verifi_pic' => $uploadFile->path,
@@ -316,12 +321,39 @@ class UserController extends Controller {
         return response()->json($rnv);
     }
 
-    public function deleteRealNameApply($id) {
+    public function deleteRealNameApply($id, $rnaid) {
+        $user = User::findOrFail($id);
         $self = JWTAuth::parseToken()->authenticate();
-        $rnv = RealNameVerification::where('user_id', $self->id)->findOrFail($id);
+        $self->checkAccess($user->id);
+        $rnv = RealNameVerification::where('user_id', $user->id)->findOrFail($rnaid);
         if ($rnv->is_examined != 0) throw new MsgException('你只能取消未处理的申请。', 400);
         $rnv->is_examined = 3;
         $rnv->save();
         return response()->json($rnv);
+    }
+
+    public function getLogs(Request $request, $id) {
+        $user = User::findOrFail($id);
+
+        $this->validate($request, [
+            'siz' => 'integer|min:0',
+            'dir' => 'in:asc,desc',
+            'off' => 'integer|min:0'
+        ]);
+
+        $self = JWTAuth::parseToken()->authenticate();
+        $self->checkAccess($user->id);
+
+        $direction = $request->input('dir', 'desc');
+        $offset = $request->input('off', 0);
+        $limit = $request->input('siz', 20);
+
+        $builder = Log::where('user_id', $user->id);
+
+        $total = $builder->count();
+        $builder->orderBy('created_at', $direction);
+        $builder->skip($offset);
+        $builder->limit($limit);
+        return response()->json(['total' => $total, 'list' => $builder->get()]);
     }
 }

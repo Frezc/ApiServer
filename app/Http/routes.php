@@ -19,9 +19,10 @@ Route::post('users/{id}/resumes', 'ResumeController@add');
 Route::post('users/{id}/resumes/{resumeId}', 'ResumeController@update');
 Route::get('users/{id}/orders', 'OrderController@get');
 //Route::post('avatar', 'AuthenticateController@updateAvatar');
-Route::get('realNameApplies', 'UserController@getRealNameApplies');
-Route::post('realNameApplies', 'UserController@createRealNameApplies');
-Route::delete('realNameApplies/{id}', 'UserController@deleteRealNameApply');
+Route::get('users/{id}/realNameApplies', 'UserController@getRealNameApplies');
+Route::post('users/{id}/realNameApplies', 'UserController@createRealNameApplies');
+Route::delete('users/{id}/realNameApplies/{rnaid}', 'UserController@deleteRealNameApply');
+Route::get('users/{id}/logs', 'UserController@getLogs');
 
 Route::get('jobs', 'JobController@query');
 Route::get('job/apply', 'UserController@getJobApply');
@@ -73,6 +74,7 @@ Route::group(['middleware' => 'throttle:2'], function ($api) {
 // boss
 Route::group(['namespace' => 'BOSS', 'middleware' => ['jwt.auth', 'role:admin']], function () {
     Route::get('users', 'UserController@query');
+    Route::post('notifications', 'MessageController@postNotifications');
 });
 
 Route::get('/', function () {

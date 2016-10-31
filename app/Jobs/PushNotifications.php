@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Jobs\Job;
 use App\Models\Message;
+use App\Models\User;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -35,12 +36,19 @@ class PushNotifications extends Job implements ShouldQueue
      */
     public function handle()
     {
-        if (is_array($this->to)) {
-            foreach ($this->to as $to) {
-                Message::pushNotification($this->from, $to, $this->content);
+        if ($this->to) {
+            if (is_array($this->to)) {
+                foreach ($this->to as $to) {
+                    Message::pushNotification($this->from, $to, $this->content);
+                }
+            } else {
+                Message::pushNotification($this->from, $this->to, $this->content);
             }
         } else {
-            Message::pushNotification($this->from, $this->to, $this->content);
+            $userCount = User::where('id', '>', 1000)->count();
+            for ($i = 1001; $i <= 1000 + $userCount; $i++) {
+                Message::pushNotification($this->from, $i, $this->content);
+            }
         }
     }
 }

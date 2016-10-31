@@ -414,7 +414,7 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/ErrorModel'
-  /realNameApplies:
+  /users/{id}/realNameApplies:
     get:
       description: 查看实名验证的状态
       tags:
@@ -458,7 +458,7 @@ paths:
           description: error，注意如果有非拒绝状态的申请时不能重复创建，不然会返回错误
           schema:
             $ref: '#/definitions/ErrorModel'
-  /realNameApplies/{id}:
+  /users/{id}/realNameApplies/{id}:
     delete:
       description: 取消某项实名认证申请
       tags:
@@ -846,6 +846,45 @@ paths:
                 type: array
                 items:
                   $ref: '#/definitions/Order'
+  /users/{id}/logs:
+    get:
+      description: 得到用户的操作记录
+      tags:
+        - 用户模块
+        - Auth
+      parameters:
+        - name: id
+          in: path
+          description: 用户id
+          required: true
+          type: integer
+        - name: dir
+          in: query
+          description: 升序('asc')or降序('desc'), 默认降序
+          required: false
+          type: string
+        - name: off
+          in: query
+          description: 查找结果的偏移量（用来分页）
+          required: false
+          type: integer
+        - name: siz
+          in: query
+          description: 最多返回的结果
+          required: false
+          type: integer
+      responses:
+        200:
+          description: 返回操作记录
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              list:
+                type: array
+                items:
+                  $ref: '#/definitions/Log'
 
   /jobs:
     get:
@@ -879,7 +918,7 @@ paths:
           required: false
           type: integer
       responses:
-        '200':
+        200:
           description: 返回搜索的所有岗位
           schema:
             type: object
@@ -1278,6 +1317,35 @@ paths:
                 type: array
                 items:
                   $ref: '#/definitions/Message'
+  /notifications:
+    post:
+      description: 发布通知
+      tags:
+        - BOSS
+        - Admin
+      consumes:
+        - application/json
+      parameters:
+        - name: notification
+          in: body
+          description: 通知
+          required: true
+          schema:
+            type: object
+            properties:
+              content:
+                type: string
+              from:
+                type: integer
+              target:
+                type: array
+                items:
+                  type: integer
+      responses:
+        '200':
+          description: 发布成功
+          schema:
+            type: string
   /notifications/{id}:
     get:
       description: 得到通知列表，按时间倒序
@@ -1745,6 +1813,22 @@ definitions:
         type: string
         format: date
       updated_at:
+        type: string
+        format: date
+  Log:
+    type: object
+    properties:
+      ip:
+        type: string
+      user_id:
+        type: integer
+      method:
+        type: string
+      url:
+        type: string
+      params:
+        type: string
+      created_at:
         type: string
         format: date
   UploadSuccess:

@@ -35,6 +35,14 @@ class PresetSeeder extends Seeder
         ]);
 
         User::create([
+            'avatar' => null,
+            'email' => 'notification-helper@tjz.com',
+            'password' => Hash::make('secret'),
+            'nickname' => '通知助手',
+            'email_verified' => 1,
+        ]);
+
+        User::create([
             'id' => 1001,
             'avatar' => null,
             'email' => '504021398@qq.com',
