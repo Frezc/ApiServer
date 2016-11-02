@@ -268,7 +268,7 @@ class UserController extends Controller {
             $uploadFile = Uploadfile::where('path', $avatar)->first();
             $uploadFile->makeSureAccess($user);
         }
-
+        
         $user->update(array_only($request->all(),
             ['nickname', 'sex', 'sign', 'birthday', 'location', 'avatar']));
 
