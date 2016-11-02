@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use App\Exceptions\MsgException;
 use Illuminate\Auth\Authenticatable;
@@ -60,6 +60,16 @@ class User extends Model implements AuthenticatableContract,
             }
             throw new MsgException('You have no access to this user.', 401);
         }
+        return true;
+    }
+
+    public function getRealNameVerification() {
+        return RealNameVerification::where('user_id', $this->id)->first();
+    }
+
+    public function checkNeedRealNameVerify() {
+        $rmv = RealNameVerification::where('user_id', $this->id)->whereIn('is_examined', [0, 1])->first();
+        if ($rmv) throw new MsgException('You needn\'t apply real name verification.', 400);
         return true;
     }
 }

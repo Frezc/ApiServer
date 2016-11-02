@@ -7,5 +7,8 @@ phpspec.yml
 composer.lock
 composer.phar
 _ide_helper.php
+<<<<<<< HEAD
 config
 .gitignore
+=======
+>>>>>>> 6889a7f6984dbc0762a288b486ec63429105ab1d

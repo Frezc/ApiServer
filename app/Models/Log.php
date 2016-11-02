@@ -1,11 +1,11 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ExpectTime extends Model
+class Log extends Model
 {
-    protected $table = 'expect_times';
+    protected $table = 'tjz_logs';
     protected $guarded = ['id'];
 }

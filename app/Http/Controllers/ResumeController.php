@@ -2,14 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\MsgException;
-use App\Resume;
-use App\User;
+use App\Models\Resume;
+use App\Models\Uploadfile;
 use Illuminate\Http\Request;
 use JWTAuth;
 use Response;
 use Storage;
-use App\Uploadfile;
 
 class ResumeController extends Controller {
     public $default_photo = 'resume_photos\default';
@@ -17,6 +15,7 @@ class ResumeController extends Controller {
     public function __construct() {
         $this->middleware('jwt.auth');
         $this->middleware('user.access');
+        $this->middleware('log', ['only' => ['delete', 'add', 'update']]);
     }
 
     public function get() {

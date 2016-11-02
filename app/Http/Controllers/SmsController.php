@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\User;
+use App\Models\User;
 use Curl\Curl;
 use Hash;
 use Illuminate\Http\Request;
@@ -12,7 +12,7 @@ use Validator;
 class SmsController extends Controller {
     public function __construct() {
         $this->middleware('jwt.auth', ['only' => ['bindPhone']]);
-        $this->middleware('sms', ['only' => ['registerByPhone', 'bindPhone', 'resetPassword']]);
+        $this->middleware('sms', ['only' => ['getSmsCode', 'bindPhone', 'resetPassword']]);
     }
 
     public function getSmsCode(Request $request) {

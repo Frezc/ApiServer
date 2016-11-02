@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Job;
-use App\JobApply;
-use App\JobCompleted;
-use App\JobEvaluate;
-use App\Resume;
-use App\Uploadfile;
-use App\User;
+use App\Exceptions\MsgException;
+use App\Models\Job;
+use App\Models\JobApply;
+use App\Models\JobCompleted;
+use App\Models\JobEvaluate;
+use App\Models\Log;
+use App\Models\RealNameVerification;
+use App\Models\Resume;
+use App\Models\Uploadfile;
+use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use JWTAuth;
@@ -17,15 +20,14 @@ use Validator;
 class UserController extends Controller {
 
     public function __construct() {
-          $this->middleware('jwt.auth', ['except' => ['show','mainPage']]);
-          $this->middleware('user.access', ['except' => ['show', 'query','mainPage']]);//用户角色验证
-
-
-          $this->middleware('role:admin', ['only' => ['query']]);//管理员角色
+        $this->middleware('jwt.auth', ['except' => ['show', 'mainPage']]);
+        $this->middleware('user.access', ['only' => ['update']]);//用户角色验证
+        $this->middleware('log', ['only' => ['update', 'createRealNameApplies', 'deleteRealNameApply']]);
     }
 
     public function show($id) {
         $user = User::findOrFail($id);
+        $user->avatar = Uploadfile::convertToUrl($user->avatar);
         return response()->json($user);
     }
 
@@ -267,6 +269,7 @@ class UserController extends Controller {
         if ($avatar) {
             $uploadFile = Uploadfile::where('path', $avatar)->first();
             $uploadFile->makeSureAccess($user);
+            $uploadFile->replace($user->avatar);
         }
         
         $user->update(array_only($request->all(),
@@ -276,40 +279,81 @@ class UserController extends Controller {
         return response()->json($user);
     }
 
-    public function query(Request $request) {
+    public function getRealNameApplies($id) {
+        $user = User::findOrFail($id);
+        $self = JWTAuth::parseToken()->authenticate();
+        $self->checkAccess($user->id);
+        $rnvs = RealNameVerification::where('user_id', $user->id)
+            ->orderBy('updated_at', 'desc')
+            ->get();
+        $rnvs->each(function ($rnv) {
+            $rnv->verifi_pic = Uploadfile::convertToUrl($rnv->verifi_pic);
+        });
+        return response()->json($rnvs);
+    }
+
+    public function createRealNameApplies(Request $request, $id) {
+        $user = User::findOrFail($id);
         $this->validate($request, [
-            'kw' => 'string',
+            'real_name' => 'required|string|max:16',
+            'id_number' => 'required|string|max:24',
+            'verifi_pic' => 'required|exists:uploadfiles,path'
+        ]);
+
+        $verifi_pic = $request->input('verifi_pic');
+
+        $self = JWTAuth::parseToken()->authenticate();
+        $self->checkAccess($user->id);
+        $user->checkNeedRealNameVerify();
+
+        $uploadFile = Uploadfile::where('path', $verifi_pic)->first();
+        $uploadFile->makeSureAccess($self);
+        $uploadFile->replace();
+
+        $rnv = RealNameVerification::create([
+            'user_id' => $user->id,
+            'user_name' => $user->nickname,
+            'real_name' => $request->input('real_name'),
+            'id_number' => $request->input('id_number'),
+            'verifi_pic' => $uploadFile->path,
+        ]);
+
+        return response()->json($rnv);
+    }
+
+    public function deleteRealNameApply($id, $rnaid) {
+        $user = User::findOrFail($id);
+        $self = JWTAuth::parseToken()->authenticate();
+        $self->checkAccess($user->id);
+        $rnv = RealNameVerification::where('user_id', $user->id)->findOrFail($rnaid);
+        if ($rnv->is_examined != 0) throw new MsgException('你只能取消未处理的申请。', 400);
+        $rnv->is_examined = 3;
+        $rnv->save();
+        return response()->json($rnv);
+    }
+
+    public function getLogs(Request $request, $id) {
+        $user = User::findOrFail($id);
+
+        $this->validate($request, [
             'siz' => 'integer|min:0',
             'dir' => 'in:asc,desc',
             'off' => 'integer|min:0'
         ]);
 
-        $q = $request->input('kw', '');
-        $direction = $request->input('dir', 'asc');
+        $self = JWTAuth::parseToken()->authenticate();
+        $self->checkAccess($user->id);
+
+        $direction = $request->input('dir', 'desc');
         $offset = $request->input('off', 0);
         $limit = $request->input('siz', 20);
 
-        $q_array = $q ? explode(" ", trim($q)) : [];
-        $builder = User::query();
-        foreach ($q_array as $qi) {
-            $builder->where(function ($query) use ($qi) {
-                $query->orWhere('nickname', 'like', '%' . $qi . '%')
-                    ->orWhere('email', 'like', '%' . $qi . '%');
-            });
-        }
+        $builder = Log::where('user_id', $user->id);
 
         $total = $builder->count();
-
-        $builder->orderBy('id', $direction);
+        $builder->orderBy('created_at', $direction);
         $builder->skip($offset);
         $builder->limit($limit);
-
-        $users = $builder->get();
-
-        $users->each(function ($user) {
-            $user->setHidden(['password']);
-        });
-
-        return response()->json(['total' => $total, 'list' => $users]);
+        return response()->json(['total' => $total, 'list' => $builder->get()]);
     }
 }

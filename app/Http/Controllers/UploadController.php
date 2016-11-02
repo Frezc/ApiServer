@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Uploadfile;
+use App\Models\Log;
+use App\Models\Uploadfile;
 use Hash;
 use Illuminate\Http\Request;
 use JWTAuth;
@@ -35,6 +36,14 @@ class UploadController extends Controller {
                 'uploader_id' => $user->id
             ]);
         }
+
+        Log::create([
+            'ip' => $request->ip(),
+            'user_id' => $user->id,
+            'method' => $request->method(),
+            'url' => $request->url(),
+            'params' => json_encode(['file' => $path])
+        ]);
 
         return response()->json(['file' => $path]);
     }

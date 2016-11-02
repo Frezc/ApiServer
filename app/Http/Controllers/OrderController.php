@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Order;
-use App\User;
+use App\Models\Order;
+use App\Models\User;
 use Illuminate\Http\Request;
-
-use App\Http\Requests;
 use JWTAuth;
 
 class OrderController extends Controller
