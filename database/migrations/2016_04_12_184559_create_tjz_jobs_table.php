@@ -32,11 +32,20 @@ class CreateTjzJobsTable extends Migration
             $table->string('company_name')->nullable();
             // 创建者的id
             $table->integer('creator_id')->unsigned();
+            $table->string('salary_time');
             $table->string('creator_name');
             // 岗位是否活跃，0表示不活跃,1表示活跃
             $table->tinyInteger('active')->default(1);
+                //statu 0 表示已经通过申请切没有该工作了，1表示该工作可以申请，2表示该工作有人申请
+            $table->tinyInteger('statu')->default(1) ;
+             //工作类型
+            $table->string('job_type');
+          
+            //联系人的电话
+            $table->string('contact_number');
+            $table->string('position');
+                
             $table->timestamps();
-
             $table->index(['name', 'active']);
             $table->index(['company_id', 'active']);
             $table->index(['company_name', 'active']);
