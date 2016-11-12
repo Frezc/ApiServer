@@ -25,6 +25,11 @@ class UserController extends Controller {
         $this->middleware('log', ['only' => ['update', 'createRealNameApplies', 'deleteRealNameApply']]);
     }
 
+    public function self() {
+        $self = JWTAuth::parseToken()->authenticate();
+        return response()->json($self);
+    }
+
     public function show($id) {
         $user = User::findOrFail($id);
         $user->avatar = Uploadfile::convertToUrl($user->avatar);

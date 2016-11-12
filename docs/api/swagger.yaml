@@ -304,6 +304,18 @@ paths:
           schema:
             $ref: '#/definitions/ErrorModel'
 
+  /self:
+    get:
+      description: 得到当前登录用户的信息
+      tags:
+        - 用户模块
+        - Auth
+      parameters: []
+      responses:
+        '200':
+          description: 找到用户
+          schema:
+            $ref: '#/definitions/User'
   /users:
     get:
       description: 搜索对应的用户信息
@@ -1380,16 +1392,16 @@ paths:
                 type: array
                 items:
                   $ref: '#/definitions/Notification'
-  /conversations/{id}:
+  /conversations:
     get:
       description: 得到对话列表，按时间倒序
       tags:
         - 其他模块
         - Auth
       parameters:
-        - name: id
-          in: path
-          description: 对话id
+        - name: target_id
+          in: query
+          description: 对方的id
           required: true
           type: integer
         - name: off
@@ -1414,7 +1426,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/definitions/Conversation'
-  /conversations:
     post:
       description: 发送私信
       tags:

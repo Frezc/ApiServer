@@ -9,6 +9,7 @@ Route::post('verifyEmail', 'EmailController@verifyEmail');
 Route::post('bindEmail', 'EmailController@bindEmail');
 Route::post('user/idCardVerify', 'UserController@idCardVerify');
 
+Route::get('self', 'UserController@self');
 Route::post('users/{id}', 'UserController@update');
 Route::get('users/{id}', 'UserController@show');
 // Route::post('user', 'UserController@store');
@@ -43,7 +44,7 @@ Route::get('companies/{id}', 'CompanyController@get')->where('id', '[0-9]+');
 Route::get('umsg', 'MessageController@getUpdate');
 Route::get('messages', 'MessageController@get');
 Route::get('notifications/{id}', 'MessageController@getNotification');
-Route::get('conversations/{id}', 'MessageController@getConversation');
+Route::get('conversations', 'MessageController@getConversation');
 Route::post('conversations', 'MessageController@postConversation');
 
 
