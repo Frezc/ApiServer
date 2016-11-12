@@ -4,20 +4,20 @@
 //Route::get('test', 'SmsController@test');
 //Route::post('testEmail', 'EmailController@emailSend');
 Route::post('resetPassword', 'SmsController@resetPassword');//重置密码
-Route::post('bindPhone', 'SmsController@bindPhone');
-Route::post('verifyEmail', 'EmailController@verifyEmail');
-Route::post('bindEmail', 'EmailController@bindEmail');
-Route::post('user/idCardVerify', 'UserController@idCardVerify');
+Route::post('bindPhone', 'SmsController@bindPhone');//手机绑定
+Route::post('verifyEmail', 'EmailController@verifyEmail');//邮件验证
+Route::post('bindEmail', 'EmailController@bindEmail');//邮箱绑定
+Route::post('user/idCardVerify', 'UserController@idCardVerify');//身份验证
 
-Route::post('users/{id}', 'UserController@update');
+Route::post('users/{id}', 'UserController@update');//更新
 Route::get('users/{id}', 'UserController@show');
 // Route::post('user', 'UserController@store');
-Route::get('users/{id}/resumes', 'ResumeController@get');
+Route::get('users/{id}/resumes', 'ResumeController@get');//获取简历
 //Route::get('resume/photo', 'ResumeController@photo');
-Route::delete('users/{id}/resumes/{resumeId}', 'ResumeController@delete');
-Route::post('users/{id}/resumes', 'ResumeController@add');
-Route::post('users/{id}/resumes/{resumeId}', 'ResumeController@update');
-Route::get('users/{id}/orders', 'OrderController@get');
+Route::delete('users/{id}/resumes/{resumeId}', 'ResumeController@delete');//建立删除
+Route::post('users/{id}/resumes', 'ResumeController@add');//添加简历
+Route::post('users/{id}/resumes/{resumeId}', 'ResumeController@update');//更新简历
+Route::get('users/{id}/orders', 'OrderController@get');//
 //Route::post('avatar', 'AuthenticateController@updateAvatar');
 Route::get('users/{id}/realNameApplies', 'UserController@getRealNameApplies');
 Route::post('users/{id}/realNameApplies', 'UserController@createRealNameApplies');
@@ -39,6 +39,8 @@ Route::get('getAllJob', 'UserController@mainPage');
 
 Route::get('companies', 'CompanyController@query');
 Route::get('companies/{id}', 'CompanyController@get')->where('id', '[0-9]+');
+
+Route::post('releaseJob','CompanyController@releaseJob');
 
 Route::get('umsg', 'MessageController@getUpdate');
 Route::get('messages', 'MessageController@get');

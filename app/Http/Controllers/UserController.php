@@ -34,6 +34,8 @@ class UserController extends Controller {
 
     public function mainPage(Request $request) {
         $builder = Job::query();
+        $builder->where("statu","=","1");
+  
         $builder->orderBy(
             $request->input('orderBytime', 'created_at'),
             $request->input('order', 'asc')
