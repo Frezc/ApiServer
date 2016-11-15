@@ -233,27 +233,35 @@ class DatabaseSeeder extends Seeder {
             ]);
         }
 
+        $admin = User::find(1001);
         foreach (range(2, $userNum) as $i) {
             $user = User::find(1000 + $i);
-            $conNum = $faker->numberBetween($min = 1, $max = 50);
-            $message = Message::create([
+            Message::create([
                 'sender_id' => $user->id,
                 'sender_name' => $user->nickname,
                 'receiver_id' => 1001,
                 'type' => 'conversation',
+                'content' => 'frezc：你好啊~',
+                'unread' => 1
+            ]);
+            Message::create([
+                'sender_id' => $admin->id,
+                'sender_name' => $admin->nickname,
+                'receiver_id' => $user->id,
+                'type' => 'conversation',
                 'content' => '你好啊~',
-                'unread' => $conNum
+                'unread' => 1
             ]);
             \App\Models\Conversation::create([
-                'conversation_id' => 1001 . 'c' . $i,
-                'sender_id' => $i,
+                'conversation_id' => $admin->id . 'c' . $user->id,
+                'sender_id' => $user->id,
                 'sender_name' => $user->nickname,
                 'content' => '你好呀！'
             ]);
             \App\Models\Conversation::create([
-                'conversation_id' => 1001 . 'c' . $i,
-                'sender_id' => 1001,
-                'sender_name' => 'admin',
+                'conversation_id' => $admin->id . 'c' . $user->id,
+                'sender_id' => $admin->id,
+                'sender_name' => $admin->nickname,
                 'content' => '你好！'
             ]);
         }

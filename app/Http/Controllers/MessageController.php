@@ -79,7 +79,7 @@ class MessageController extends Controller
         $self = JWTAuth::parseToken()->authenticate();
 
         $message = Message::where('receiver_id', $self->id)
-            ->where('sender_id', $targetId);
+            ->where('sender_id', $targetId)->first();
         $message->unread = 0;
         $message->save();
 
@@ -87,7 +87,7 @@ class MessageController extends Controller
         $builder = Conversation::where('conversation_id', $conversationId);
         $total = $builder->count();
         $list = $builder
-            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
             ->skip($offset)
             ->limit($limit)
             ->get();
