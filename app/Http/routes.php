@@ -78,6 +78,7 @@ Route::group(['middleware' => 'throttle:2'], function ($api) {
 Route::group(['namespace' => 'BOSS', 'middleware' => ['jwt.auth', 'role:admin']], function () {
     Route::get('users', 'UserController@query');
     Route::post('notifications', 'MessageController@postNotifications');
+    Route::get('real_name_applies', 'UserController@getAllRealNameApplies');
 });
 
 Route::get('/', function () {

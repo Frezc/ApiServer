@@ -72,4 +72,10 @@ class User extends Model implements AuthenticatableContract,
         if ($rmv) throw new MsgException('You needn\'t apply real name verification.', 400);
         return true;
     }
+
+    public function getCompanies() {
+        return UserCompany::where('user_id', $this->id)->get()->each(function ($item, $index) {
+            $item->setVisible(['company_id', 'company_name']);
+        });
+    }
 }

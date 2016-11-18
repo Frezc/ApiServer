@@ -12,7 +12,6 @@ use App\Models\Message;
 use App\Models\Notification;
 use App\Models\Order;
 use App\Models\Resume;
-use App\Models\Role;
 use App\Models\User;
 use App\Models\UserCompany;
 use Faker\Factory as Faker;
@@ -50,12 +49,13 @@ class DatabaseSeeder extends Seeder {
         $expectTimeNum = 100;
         $userCompanyNum = 20;
         $orderNum = 100;
+        $rnaNum = 30;
 
         $faker = Faker::create('zh_CN');
 
         foreach (range(3, $userNum) as $index) {
             User::create([
-                'avatar' => null,
+                'avatar' => Storage::url('images/test.jpg'),
                 'email' => $faker->unique()->freeEmail,
                 'phone' => $faker->unique()->phoneNumber,
                 'password' => Hash::make('secret'),
@@ -73,7 +73,7 @@ class DatabaseSeeder extends Seeder {
                 'name' => $faker->unique()->company,
                 'url' => $faker->url,
                 'address' => $faker->address,
-                'logo' => null,
+                'logo' => Storage::url('images/test.jpg'),
                 'description' => $faker->catchPhrase,
                 'contact_person' => $faker->name,
                 'contact' => $faker->phoneNumber,
@@ -81,9 +81,13 @@ class DatabaseSeeder extends Seeder {
         }
 
         foreach (range(1, $userCompanyNum) as $i) {
+            $user = User::find($faker->numberBetween($min = 1001, $max = 1000 + $userNum));
+            $company = Company::find($faker->numberBetween($min = 1, $max = $companyNum));
             UserCompany::create([
-                'user_id' => $faker->numberBetween($min = 1001, $max = 1000 + $userNum),
-                'company_id' => $faker->numberBetween($min = 1, $max = $companyNum)
+                'user_id' => $user->id,
+                'user_name' => $user->nickname,
+                'company_id' => $company->id,
+                'company_name' => $company->name
             ]);
         }
 
@@ -123,7 +127,7 @@ class DatabaseSeeder extends Seeder {
                 'user_id' => $user->id,
                 'user_name' => $user->nickname,
                 'name' => $faker->name,
-                'photo' => null,
+                'photo' => Storage::url('images/test.jpg'),
                 'school' => $faker->randomElement($array = array('杭州电子科技大学', '春田花花幼稚园', '断罪小学')),
                 'birthday' => $faker->date($format = 'Y-m-d', $max = 'now'),
                 'sex' => $faker->numberBetween($min = 0, $max = 1),
@@ -152,7 +156,7 @@ class DatabaseSeeder extends Seeder {
                 'user_id' => $faker->numberBetween($min = 1001, $max = 1000 + $userNum),
                 'title' => $faker->jobTitle,
                 'name' => $faker->name,
-                'photo' => null,
+                'photo' => Storage::url('images/test.jpg'),
                 'school' => $faker->randomElement($array = array('杭州电子科技大学', '春田花花幼稚园', '断罪小学')),
                 'birthday' => $faker->date($format = 'Y-m-d', $max = 'now'),
                 'sex' => $faker->numberBetween($min = 0, $max = 1),
@@ -267,8 +271,27 @@ class DatabaseSeeder extends Seeder {
         }
 
         \App\Models\Uploadfile::create([
-            'path' => 'images/test.png',
+            'path' => Storage::url('images/test.jpg'),
             'uploader_id' => 1001
         ]);
+
+        foreach (range(1, $rnaNum) as $i) {
+            $user = User::find(1000 + $i);
+            \App\Models\RealNameVerification::create([
+                'user_id' => $user->id,
+                'user_name' => $user->nickname,
+                'real_name' => $faker->name,
+                'id_number' => $this->randomNumber(18),
+                'verifi_pic' => Storage::url('images/test.jpg')
+            ]);
+        }
+    }
+
+    private function randomNumber($length) {
+        $a = '';
+        for ($i = 0; $i < $length; $i++) {
+            $a .= mt_rand(0,9);
+        }
+        return $a;
     }
 }

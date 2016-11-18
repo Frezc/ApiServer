@@ -10,7 +10,6 @@ use Response;
 use Storage;
 
 class ResumeController extends Controller {
-    public $default_photo = 'resume_photos\default';
 
     public function __construct() {
         $this->middleware('jwt.auth');
@@ -24,9 +23,6 @@ class ResumeController extends Controller {
         $builder = $user->resumes();
         $total = $builder->count();
         $resumes = $builder->get();
-        foreach ($resumes as $resume) {
-            $resume->photo = asset(Storage::url($resume->photo));
-        }
         return response()->json(['total' => $total, 'list' => $resumes]);
     }
 

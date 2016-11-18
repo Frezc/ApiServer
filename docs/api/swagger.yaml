@@ -432,7 +432,12 @@ paths:
       tags:
         - 用户模块
         - Auth
-      parameters: []
+      parameters: 
+        - name: id
+          in: path
+          description: 用户的id
+          required: true
+          type: integer
       responses:
         200:
           description: is_examined代表当前状态，[0：未审核, 1：已通过, 2：已拒绝]
@@ -446,6 +451,11 @@ paths:
         - 用户模块
         - Auth
       parameters:
+        - name: id
+          in: path
+          description: 用户的id
+          required: true
+          type: integer
         - name: real_name
           in: formData
           description: 真实姓名
@@ -470,7 +480,7 @@ paths:
           description: error，注意如果有非拒绝状态的申请时不能重复创建，不然会返回错误
           schema:
             $ref: '#/definitions/ErrorModel'
-  /users/{id}/realNameApplies/{id}:
+  /users/{id}/realNameApplies/{aid}:
     delete:
       description: 取消某项实名认证申请
       tags:
@@ -478,6 +488,11 @@ paths:
         - Auth
       parameters:
         - name: id
+          in: path
+          description: 用户的id
+          required: true
+          type: integer
+        - name: aid
           in: path
           description: 申请的id
           required: true
@@ -1280,7 +1295,7 @@ paths:
         '200':
           description: 上传成功，返回图片对应的url
           schema:
-            $ref: '#/definitions/UploadSuccess'
+            type: string
         default:
           description: unexpected error
           schema:
@@ -1333,7 +1348,6 @@ paths:
     post:
       description: 发布通知
       tags:
-        - BOSS
         - Admin
       consumes:
         - application/json
@@ -1447,6 +1461,41 @@ paths:
           description: 成功
           schema:
             $ref: '#/definitions/Conversation'
+            
+  /real_name_applies:
+    get:
+      description: 得到实名认证申请列表
+      tags:
+        - Admin
+      parameters:
+        - name: is_examined 
+          in: query
+          description: 审核状态[0：未审核, 1：已通过, 2：已拒绝]
+          required: false
+          type: integer
+          default: 0
+        - name: off
+          in: query
+          description: 默认0
+          required: false
+          type: integer
+        - name: siz
+          in: query
+          description: 最多返回的结果, 默认20
+          required: false
+          type: integer
+      responses:
+        200:
+          description: is_examined代表当前状态，[0：未审核, 1：已通过, 2：已拒绝]
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              list:
+                type: array
+                items:
+                  $ref: '#/definitions/RealNameVerification'
 
 definitions:
   User:
@@ -1472,8 +1521,15 @@ definitions:
         type: integer
       phone:
         type: string
-      company_id:
-        type: integer
+      companies:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
       email_verified:
         type: integer
       created_at:
@@ -1811,6 +1867,8 @@ definitions:
         type: integer
       user_id:
         type: integer
+      user_name:
+        type: string
       real_name:
         type: string
       id_number:

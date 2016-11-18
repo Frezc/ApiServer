@@ -22,11 +22,7 @@ class Uploadfile extends Model
     }
 
     public function makeSureAccess($user) {
-        if ($this->uploader_id != $user->id) {
-            /* throw */
-            throw new MsgException('你没有权限访问此图片', 401);
-        }
-        return true;
+        return $user->checkAccess($this->uploader_id);
     }
 
     public static function convertToUrl($path) {
