@@ -22,8 +22,9 @@ class MemoryAction
         $data = [
             'ip' => $request->ip(),
             'user_id' => $self->id,
+            'user_name' => $self->nickname,
             'method' => $request->method(),
-            'url' => $request->url(),
+            'path' => $request->path(),
             'params' => json_encode($request->all())
         ];
         Log::create($data);

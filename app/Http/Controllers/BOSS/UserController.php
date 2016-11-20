@@ -10,6 +10,7 @@ namespace App\Http\Controllers\BOSS;
 
 
 use App\Http\Controllers\Controller;
+use App\Models\CompanyApply;
 use App\Models\RealNameVerification;
 use App\Models\User;
 use App\Models\Uploadfile;
@@ -56,23 +57,46 @@ class UserController extends Controller {
 
     public function getAllRealNameApplies(Request $request) {
         $this->validate($request, [
-            'examine_status' => 'integer|in:0,1,2',
+            'status' => 'integer|in:1,2,3',
             'siz' => 'integer|min:0',
             'off' => 'integer|min:0',
             'user_id' => 'integer'
         ]);
 
-        $status = $request->input('examine_status', 0);
+        $status = $request->input('status', 1);
         $offset = $request->input('off', 0);
         $size = $request->input('siz', 20);
         $user_id = $request->input('user_id');
 
-        $builder = RealNameVerification::where('is_examined', $status);
+        $builder = RealNameVerification::where('status', $status);
         if ($user_id) $builder->where('user_id', $user_id);
         $total = $builder->count();
         $builder->orderBy('created_at', 'desc')
                 ->skip($offset)
                 ->limit($size);
+        $result = $builder->get();
+        return response()->json(['total' => $total, 'list' => $result]);
+    }
+
+    public function getAllCompanyApplies(Request $request) {
+        $this->validate($request, [
+            'status' => 'integer|in:1,2,3',
+            'siz' => 'integer|min:0',
+            'off' => 'integer|min:0',
+            'user_id' => 'integer'
+        ]);
+
+        $status = $request->input('status', 1);
+        $offset = $request->input('off', 0);
+        $size = $request->input('siz', 20);
+        $user_id = $request->input('user_id');
+
+        $builder = CompanyApply::where('status', $status);
+        if ($user_id) $builder->where('user_id', $user_id);
+        $total = $builder->count();
+        $builder->orderBy('created_at', 'desc')
+            ->skip($offset)
+            ->limit($size);
         $result = $builder->get();
         return response()->json(['total' => $total, 'list' => $result]);
     }

@@ -42,7 +42,7 @@ class UploadController extends Controller {
             'ip' => $request->ip(),
             'user_id' => $user->id,
             'method' => $request->method(),
-            'url' => $request->url(),
+            'path' => $request->path(),
             'params' => json_encode(['file' => $path])
         ]);
 

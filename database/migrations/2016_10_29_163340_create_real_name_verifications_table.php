@@ -20,8 +20,10 @@ class CreateRealNameVerificationsTable extends Migration
             $table->string('id_number', 24);
             // 验证图片的url
             $table->string('verifi_pic');
-            // 是否审核通过 [0: 未审核, 1: 已通过, 2: 已拒绝, 3: 已取消]
-            $table->tinyInteger('is_examined')->default(0);
+            // 是否审核通过 [1: 未审核, 2: 已通过, 3: 已拒绝, 4: 已取消]
+            $table->tinyInteger('status')->default(1);
+            // 审核者留言
+            $table->text('message')->default('');
             $table->timestamps();
             $table->index('user_id');
         });

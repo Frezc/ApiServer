@@ -40,12 +40,14 @@ Route::get('getAllJob', 'UserController@mainPage');
 
 Route::get('companies', 'CompanyController@query');
 Route::get('companies/{id}', 'CompanyController@get')->where('id', '[0-9]+');
+Route::get('companies/apply', 'CompanyController@getApply');
+Route::post('companies/apply', 'CompanyController@postApply');
 
 Route::post('releaseJob','CompanyController@releaseJob');
 
 Route::get('umsg', 'MessageController@getUpdate');
 Route::get('messages', 'MessageController@get');
-Route::get('notifications/{id}', 'MessageController@getNotification');
+Route::get('notifications/{id}', 'MessageController@getNotification')->where('id', '[0-9]+');
 Route::get('conversations', 'MessageController@getConversation');
 Route::post('conversations', 'MessageController@postConversation');
 
@@ -79,6 +81,8 @@ Route::group(['namespace' => 'BOSS', 'middleware' => ['jwt.auth', 'role:admin']]
     Route::get('users', 'UserController@query');
     Route::post('notifications', 'MessageController@postNotifications');
     Route::get('real_name_applies', 'UserController@getAllRealNameApplies');
+    Route::get('notifications/history', 'MessageController@getHistory');
+    Route::get('company_applies', 'UserController@getAllCompanyApplies');
 });
 
 Route::get('/', function () {

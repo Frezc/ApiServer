@@ -12,6 +12,7 @@ use App\Models\Message;
 use App\Models\Notification;
 use App\Models\Order;
 use App\Models\Resume;
+use App\Models\Uploadfile;
 use App\Models\User;
 use App\Models\UserCompany;
 use Faker\Factory as Faker;
@@ -50,6 +51,7 @@ class DatabaseSeeder extends Seeder {
         $userCompanyNum = 20;
         $orderNum = 100;
         $rnaNum = 30;
+        $caNum = 25;
 
         $faker = Faker::create('zh_CN');
 
@@ -270,9 +272,14 @@ class DatabaseSeeder extends Seeder {
             ]);
         }
 
-        \App\Models\Uploadfile::create([
+        Uploadfile::create([
             'path' => Storage::url('images/test.jpg'),
             'uploader_id' => 1001
+        ]);
+
+        Uploadfile::create([
+            'path' => Storage::url('images/test.jpg'),
+            'uploader_id' => 1002
         ]);
 
         foreach (range(1, $rnaNum) as $i) {
@@ -282,7 +289,25 @@ class DatabaseSeeder extends Seeder {
                 'user_name' => $user->nickname,
                 'real_name' => $faker->name,
                 'id_number' => $this->randomNumber(18),
-                'verifi_pic' => Storage::url('images/test.jpg')
+                'verifi_pic' => Storage::url('images/test.jpg'),
+                "message" => ""
+            ]);
+        }
+
+        foreach (range(1, $caNum) as $i) {
+            $user = User::find(1000 + $i);
+            \App\Models\CompanyApply::create([
+                "user_id" => $user->id,
+                "user_name" => $user->nickname,
+                "name" => $faker->unique()->company,
+                "url" => $faker->url,
+                "address" => $faker->address,
+                "logo" => Storage::url('images/test.jpg'),
+                "description" => $faker->sentence(6, false),
+                "contact_person" => $faker->name,
+                "contact" => $faker->phoneNumber,
+                "business_license" => Storage::url('images/test.jpg'),
+                "message" => "",
             ]);
         }
     }
@@ -290,7 +315,7 @@ class DatabaseSeeder extends Seeder {
     private function randomNumber($length) {
         $a = '';
         for ($i = 0; $i < $length; $i++) {
-            $a .= mt_rand(0,9);
+            $a .= mt_rand(0, 9);
         }
         return $a;
     }
