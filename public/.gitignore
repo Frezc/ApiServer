@@ -1,3 +1,6 @@
-.uini
-ErrorFiles
-up-rewrite.conf
+*
+!.gitignore
+!.htaccess
+!favicon.ico
+!index.php
+!robots.txt

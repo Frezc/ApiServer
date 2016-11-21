@@ -12,7 +12,7 @@ use App\Models\Message;
 use App\Models\Notification;
 use App\Models\Order;
 use App\Models\Resume;
-use App\Models\Role;
+use App\Models\Uploadfile;
 use App\Models\User;
 use App\Models\UserCompany;
 use Faker\Factory as Faker;
@@ -50,12 +50,14 @@ class DatabaseSeeder extends Seeder {
         $expectTimeNum = 100;
         $userCompanyNum = 20;
         $orderNum = 100;
+        $rnaNum = 30;
+        $caNum = 25;
 
         $faker = Faker::create('zh_CN');
 
         foreach (range(3, $userNum) as $index) {
             User::create([
-                'avatar' => null,
+                'avatar' => Storage::url('images/test.jpg'),
                 'email' => $faker->unique()->freeEmail,
                 'phone' => $faker->unique()->phoneNumber,
                 'password' => Hash::make('secret'),
@@ -73,7 +75,7 @@ class DatabaseSeeder extends Seeder {
                 'name' => $faker->unique()->company,
                 'url' => $faker->url,
                 'address' => $faker->address,
-                'logo' => null,
+                'logo' => Storage::url('images/test.jpg'),
                 'description' => $faker->catchPhrase,
                 'contact_person' => $faker->name,
                 'contact' => $faker->phoneNumber,
@@ -81,9 +83,13 @@ class DatabaseSeeder extends Seeder {
         }
 
         foreach (range(1, $userCompanyNum) as $i) {
+            $user = User::find($faker->numberBetween($min = 1001, $max = 1000 + $userNum));
+            $company = Company::find($faker->numberBetween($min = 1, $max = $companyNum));
             UserCompany::create([
-                'user_id' => $faker->numberBetween($min = 1001, $max = 1000 + $userNum),
-                'company_id' => $faker->numberBetween($min = 1, $max = $companyNum)
+                'user_id' => $user->id,
+                'user_name' => $user->nickname,
+                'company_id' => $company->id,
+                'company_name' => $company->name
             ]);
         }
 
@@ -123,7 +129,7 @@ class DatabaseSeeder extends Seeder {
                 'user_id' => $user->id,
                 'user_name' => $user->nickname,
                 'name' => $faker->name,
-                'photo' => null,
+                'photo' => Storage::url('images/test.jpg'),
                 'school' => $faker->randomElement($array = array('杭州电子科技大学', '春田花花幼稚园', '断罪小学')),
                 'birthday' => $faker->date($format = 'Y-m-d', $max = 'now'),
                 'sex' => $faker->numberBetween($min = 0, $max = 1),
@@ -152,7 +158,7 @@ class DatabaseSeeder extends Seeder {
                 'user_id' => $faker->numberBetween($min = 1001, $max = 1000 + $userNum),
                 'title' => $faker->jobTitle,
                 'name' => $faker->name,
-                'photo' => null,
+                'photo' => Storage::url('images/test.jpg'),
                 'school' => $faker->randomElement($array = array('杭州电子科技大学', '春田花花幼稚园', '断罪小学')),
                 'birthday' => $faker->date($format = 'Y-m-d', $max = 'now'),
                 'sex' => $faker->numberBetween($min = 0, $max = 1),
@@ -233,34 +239,84 @@ class DatabaseSeeder extends Seeder {
             ]);
         }
 
+        $admin = User::find(1001);
         foreach (range(2, $userNum) as $i) {
             $user = User::find(1000 + $i);
-            $conNum = $faker->numberBetween($min = 1, $max = 50);
-            $message = Message::create([
+            Message::create([
                 'sender_id' => $user->id,
                 'sender_name' => $user->nickname,
                 'receiver_id' => 1001,
                 'type' => 'conversation',
+                'content' => 'frezc：你好啊~',
+                'unread' => 1
+            ]);
+            Message::create([
+                'sender_id' => $admin->id,
+                'sender_name' => $admin->nickname,
+                'receiver_id' => $user->id,
+                'type' => 'conversation',
                 'content' => '你好啊~',
-                'unread' => $conNum
+                'unread' => 1
             ]);
             \App\Models\Conversation::create([
-                'conversation_id' => 1001 . 'c' . $i,
-                'sender_id' => $i,
+                'conversation_id' => $admin->id . 'c' . $user->id,
+                'sender_id' => $user->id,
                 'sender_name' => $user->nickname,
                 'content' => '你好呀！'
             ]);
             \App\Models\Conversation::create([
-                'conversation_id' => 1001 . 'c' . $i,
-                'sender_id' => 1001,
-                'sender_name' => 'admin',
+                'conversation_id' => $admin->id . 'c' . $user->id,
+                'sender_id' => $admin->id,
+                'sender_name' => $admin->nickname,
                 'content' => '你好！'
             ]);
         }
 
-        \App\Models\Uploadfile::create([
-            'path' => 'images/test.png',
+        Uploadfile::create([
+            'path' => Storage::url('images/test.jpg'),
             'uploader_id' => 1001
         ]);
+
+        Uploadfile::create([
+            'path' => Storage::url('images/test.jpg'),
+            'uploader_id' => 1002
+        ]);
+
+        foreach (range(1, $rnaNum) as $i) {
+            $user = User::find(1000 + $i);
+            \App\Models\RealNameVerification::create([
+                'user_id' => $user->id,
+                'user_name' => $user->nickname,
+                'real_name' => $faker->name,
+                'id_number' => $this->randomNumber(18),
+                'verifi_pic' => Storage::url('images/test.jpg'),
+                "message" => ""
+            ]);
+        }
+
+        foreach (range(1, $caNum) as $i) {
+            $user = User::find(1000 + $i);
+            \App\Models\CompanyApply::create([
+                "user_id" => $user->id,
+                "user_name" => $user->nickname,
+                "name" => $faker->unique()->company,
+                "url" => $faker->url,
+                "address" => $faker->address,
+                "logo" => Storage::url('images/test.jpg'),
+                "description" => $faker->sentence(6, false),
+                "contact_person" => $faker->name,
+                "contact" => $faker->phoneNumber,
+                "business_license" => Storage::url('images/test.jpg'),
+                "message" => "",
+            ]);
+        }
+    }
+
+    private function randomNumber($length) {
+        $a = '';
+        for ($i = 0; $i < $length; $i++) {
+            $a .= mt_rand(0, 9);
+        }
+        return $a;
     }
 }

@@ -16,12 +16,14 @@ class CreateTjzLogsTable extends Migration
             $table->increments('id');
             $table->string('ip');
             $table->integer('user_id')->unsigned();
-            $table->string('method');
-            $table->string('url');
+            $table->string('user_name');
+            $table->string('method', 16);
+            $table->string('path');
             $table->text('params');
             $table->timestamps();
 
             $table->index('user_id');
+            $table->index(['method', 'path']);
         });
     }
 

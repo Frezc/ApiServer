@@ -21,18 +21,17 @@ class UserController extends Controller {
 
     public function __construct() {
         $this->middleware('jwt.auth', ['except' => ['show', 'mainPage']]);
-        $this->middleware('user.access', ['only' => ['update']]);//用户角色验证
         $this->middleware('log', ['only' => ['update', 'createRealNameApplies', 'deleteRealNameApply']]);
     }
 
     public function self() {
         $self = JWTAuth::parseToken()->authenticate();
-        return response()->json($self);
+        return $this->show($self->id);
     }
 
     public function show($id) {
         $user = User::findOrFail($id);
-        $user->avatar = Uploadfile::convertToUrl($user->avatar);
+//        $user->companies = $user->getCompanies();
         return response()->json($user);
     }
 
@@ -260,7 +259,8 @@ class UserController extends Controller {
         return $this->response->errorInternal('evaluate save failed');
     }
 
-    public function update(Request $request) {
+    public function update(Request $request, $id) {
+        $user = User::findOrFail($id);
         $this->validate($request, [
             'nickname' => 'max:32',
             'sex' => 'in:0,1',
@@ -270,7 +270,8 @@ class UserController extends Controller {
             'avatar' => 'exists:uploadfiles,path'
         ]);
 
-        $user = JWTAuth::parseToken()->authenticate();
+        $self = JWTAuth::parseToken()->authenticate();
+        $self->checkAccess($user->id);
 
         $avatar = $request->input('avatar');
         if ($avatar) {
@@ -293,9 +294,6 @@ class UserController extends Controller {
         $rnvs = RealNameVerification::where('user_id', $user->id)
             ->orderBy('updated_at', 'desc')
             ->get();
-        $rnvs->each(function ($rnv) {
-            $rnv->verifi_pic = Uploadfile::convertToUrl($rnv->verifi_pic);
-        });
         return response()->json($rnvs);
     }
 

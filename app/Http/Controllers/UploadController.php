@@ -25,9 +25,10 @@ class UploadController extends Controller {
         $content = file_get_contents($file->getRealPath());
         $path = 'images/' . md5(md5($content).'$'.$user->id) . '.' . $file->getClientOriginalExtension();
         Storage::put('public/' . $path, $content);
+        $path = Storage::url($path);
         $uploadedFile = Uploadfile::where('path', $path)->first();
         if ($uploadedFile) {
-            $uploadedFile->uploader_id = $user->id;
+//            $uploadedFile->uploader_id = $user->id;
             $uploadedFile->exist = 1;
             $uploadedFile->save();
         } else {
@@ -41,10 +42,10 @@ class UploadController extends Controller {
             'ip' => $request->ip(),
             'user_id' => $user->id,
             'method' => $request->method(),
-            'url' => $request->url(),
+            'path' => $request->path(),
             'params' => json_encode(['file' => $path])
         ]);
 
-        return response()->json(['file' => $path]);
+        return $path;
     }
 }
