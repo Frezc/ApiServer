@@ -41,6 +41,7 @@ class CompanyController extends Controller {
           $job->company_name=$company->name;
           $job->creator_name=$company->contact_person;
           $job->contact_number=$company->contact;
+        
           $job->job_type=$request->input('job_type');
           $jobstime =new JobTime;
           $jobstime->start_at=$request->input('start_at');

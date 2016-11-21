@@ -43,7 +43,7 @@ class AuthenticateController extends Controller {
 
         // 2.获得输入的参数(如果要在这个方法里使用)
         $email = $request->input('email');
-
+       
         // 3.处理逻辑
         // 验证email和password是否对应
         $credentials = $request->only('email', 'password');
@@ -106,6 +106,7 @@ class AuthenticateController extends Controller {
         ]);
 
         $user = new User;
+        
         $user->email = $request->input('email');
         $user->nickname = $request->input('nickname');
         $user->password = Hash::make($request->input('password'));
