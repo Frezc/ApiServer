@@ -45,8 +45,6 @@ class CreateUsersTable extends Migration
             $table->unique('email');
             $table->unique('phone');
             $table->index('nickname');
-            
-            $table->string("pay_password");
         });
     }
 

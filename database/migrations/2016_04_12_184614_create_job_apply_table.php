@@ -18,8 +18,9 @@ class CreateJobApplyTable extends Migration
             $table->integer('job_id')->unsigned();
             $table->integer('resume_id')->unsigned();
             $table->string('description')->nullable();
-            // 0：申请中，1：申请成功，2：申请失败
+            // 0：申请中，1：申请成功，2：申请失败 
             $table->tinyInteger('status')->default(0);
+
             $table->timestamps();
 
             $table->index(['user_id', 'status']);

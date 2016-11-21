@@ -95,6 +95,7 @@ class JobController extends Controller {
         $builder->limit($limit);
 
         $jobs = $builder->get();
+        
         foreach ($jobs as $job) {
             $job->number_evaluate = JobEvaluate::where('job_id', $job->id)->count();
             $job->average_score = JobEvaluate::where('job_id', $job->id)->avg('score');

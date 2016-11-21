@@ -9,6 +9,7 @@ Route::post('verifyEmail', 'EmailController@verifyEmail');//邮件验证
 Route::post('bindEmail', 'EmailController@bindEmail');//邮箱绑定
 Route::post('user/idCardVerify', 'UserController@idCardVerify');//身份验证
 
+Route::get('self', 'UserController@self');
 Route::post('users/{id}', 'UserController@update');//更新
 Route::get('users/{id}', 'UserController@show');
 // Route::post('user', 'UserController@store');
@@ -45,7 +46,7 @@ Route::post('releaseJob','CompanyController@releaseJob');
 Route::get('umsg', 'MessageController@getUpdate');
 Route::get('messages', 'MessageController@get');
 Route::get('notifications/{id}', 'MessageController@getNotification');
-Route::get('conversations/{id}', 'MessageController@getConversation');
+Route::get('conversations', 'MessageController@getConversation');
 Route::post('conversations', 'MessageController@postConversation');
 
 
