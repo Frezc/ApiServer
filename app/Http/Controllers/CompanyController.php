@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 class CompanyController extends Controller {
 
     function __construct(){
-        $this->middleware('jwt.auth',['only'=>['releaseJob']]);
+        // $this->middleware('jwt.auth',['only'=>['releaseJob']]);
     }
 
     public function get($id) {
@@ -31,17 +31,15 @@ class CompanyController extends Controller {
           $job->description=$request->input('description');
           $job->pay_way=$request->input('pay_way');
           $job->salary=$request->input('salary');
-          $job->company_name=$request->input('company_name');
-          $job->creator_id=$request->input('creator_id');
           $job->company_id=$request->input('company_id');
-          $job->creator_name=$request->input('creator_name');
-
-          $job->contact_number=$request->input('contact_number');
+          $company=Company::find($request->input('company_id'));
+          $job->company_name=$company->name;
+          $job->creator_name=$company->contact_person;
+          $job->contact_number=$company->contact;
           $job->job_type=$request->input('job_type');
-          $job->salary_time=$request->input('salary_time');
           $jobstime =new JobTime;
           $jobstime->start_at=$request->input('start_at');
-          $jobstime->end_at=$request->input('end-at');
+          $jobstime->end_at=$request->input('end_at') ;
           $jobstime->number=$request->input('demanded_number');
           $jobstime->save();
           $job->save();
