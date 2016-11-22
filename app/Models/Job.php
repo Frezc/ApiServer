@@ -9,6 +9,7 @@ class Job extends Model
 {
     protected $table = 'tjz_jobs';
     protected $guarded = ['id'];
+    protected $hidden = ['updated_at'];
 
     public function jobTime() {
         return JobTime::where('job_id', $this->id);

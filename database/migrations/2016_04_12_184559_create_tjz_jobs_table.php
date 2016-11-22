@@ -16,12 +16,12 @@ class CreateTjzJobsTable extends Migration
             $table->increments('id');
             // 工作名称
             $table->string('name');
-            // 支付方式 0：线下支付，1：在线支付
-            $table->tinyInteger('pay_way')->default(0);
-            // 工资类型，0：面议, 1：固定数值
-            $table->tinyInteger('salary_type')->default(0);
-            // 工资
-            $table->string('salary', 16);
+            // 支付方式 1：线下支付，2：在线支付
+            $table->tinyInteger('pay_way')->default(1);
+            // 工资类型，1：面议, 2：固定数值
+            $table->tinyInteger('salary_type')->default(1);
+            // 工资 放到 job_time里
+//            $table->string('salary', 16);
             $table->string('description')->nullable();
             // 访问次数
             $table->integer('visited')->unsigned()->default(0);
@@ -30,11 +30,12 @@ class CreateTjzJobsTable extends Migration
             // 如果是以商家为名发布则不为空
             $table->integer('company_id')->unsigned()->nullable();
             $table->string('company_name')->nullable();
-            // 创建者的id
+            // 创建者
             $table->integer('creator_id')->unsigned();
-            $table->string('salary_time');
             $table->string('creator_name');
-            // 岗位是否活跃，0表示不活跃,1表示活跃
+            // ??
+            $table->string('salary_time');
+            // 岗位是否活跃，0表示不活跃（下架）,1表示活跃
             $table->tinyInteger('active')->default(1);
                 //statu 0 表示已经通过申请切没有该工作了，1表示该工作可以申请，2表示该工作有人申请
             $table->tinyInteger('statu')->default(1) ;
@@ -42,14 +43,17 @@ class CreateTjzJobsTable extends Migration
             $table->string('job_type');
           
             //联系人的电话
-            $table->string('contact_number');
+            $table->string('contact');
             $table->string('position');
                 
             $table->timestamps();
-            $table->index(['name', 'active']);
-            $table->index(['company_id', 'active']);
-            $table->index(['company_name', 'active']);
+            $table->index('name');
+            $table->index('company_id');
+            $table->index('company_name');
+            $table->index('creator_id');
             $table->index('creator_name');
+            $table->index('active');
+            $table->index('job_type');
         });
     }
 

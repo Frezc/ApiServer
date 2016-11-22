@@ -54,13 +54,20 @@ class User extends Model implements AuthenticatableContract,
      */
     public function checkAccess($owner_id) {
         if ($this->id != $owner_id) {
-            $role = Role::find($this->role_id);
-            if ($role && $role->name == 'admin') {
+            if ($this->isAdmin()) {
                 return true;
             }
             throw new MsgException('You have no access to this user.', 401);
         }
         return true;
+    }
+
+    public function isAdmin() {
+        $role = Role::find($this->role_id);
+        if ($role && $role->name == 'admin') {
+            return true;
+        }
+        return false;
     }
 
     public function getRealNameVerification() {

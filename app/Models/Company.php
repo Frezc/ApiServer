@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\MsgException;
 use Illuminate\Database\Eloquent\Model;
 
 class Company extends Model
@@ -11,12 +12,22 @@ class Company extends Model
 
     protected $guarded = ['id'];
 
+    protected $hidden = ['business_license', 'updated_at'];
+
     public function jobs(){
       return $this->hasMany('App\Job');
     }
 
     public function checkEmployee($user_id) {
         return !!UserCompany::where('user_id', $user_id)->where('company_id', $this->id)->first();
+    }
+
+    public function makeSureAccess(User $user) {
+        if ($user->isAdmin() || $this->checkEmployee($user->id)) {
+            return true;
+        }
+
+        throw new MsgException('You have no access to this company.', 401);
     }
 
     public static function search($keywords) {

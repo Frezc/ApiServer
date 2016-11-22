@@ -13,7 +13,7 @@ use JWTAuth;
 class CompanyController extends Controller {
 
     function __construct(){
-        $this->middleware('jwt.auth',['only'=>['releaseJob', 'getApply', 'postApply']]);
+        $this->middleware('jwt.auth',['only'=>['releaseJob', 'getApply', 'postApply', 'update']]);
     }
 
     public function get($id) {
@@ -129,5 +129,23 @@ class CompanyController extends Controller {
         $companyApply = CompanyApply::create($params);
 
         return response()->json($companyApply);
+    }
+
+    public function update(Request $request, $id) {
+        $company = Company::findOrFail($id);
+        $this->validate($request, [
+            'url' => 'string',
+            'address' => 'string',
+            'logo' => 'exists:uploadfiles,path',
+            'description' => 'string',
+            'contact_person' => 'max:16',
+            'contact' => 'max:50'
+        ]);
+
+        $self = JWTAuth::parseToken()->authenticate();
+        $company->makeSureAccess($self);
+
+        $company->update(array_only($request->all(), ['url', 'address', 'logo', 'description', 'contact_person', 'contact']));
+        return response()->json($company);
     }
 }
