@@ -15,8 +15,8 @@ class Job extends Model
         return JobTime::where('job_id', $this->id);
     }
 
-    public function checkAccess($user) {
-        if ($this->creator_id == $user->id) {
+    public function checkAccess(User $user) {
+        if ($this->creator_id == $user->id || $user->isAdmin()) {
             return true;
         }
         if ($this->company_id) {

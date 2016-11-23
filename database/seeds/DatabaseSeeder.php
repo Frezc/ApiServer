@@ -96,15 +96,15 @@ class DatabaseSeeder extends Seeder {
         foreach (range(1, $jobNum) as $index) {
             $company = Company::findOrNew($faker->numberBetween($min = 1, $max = $companyNum));
             $user = User::find($faker->numberBetween($min = 1001, $max = 1000 + $userNum));
-
+            $hasCom = $faker->boolean;
             Job::create([
-                'salary_type' => $faker->numberBetween($min = 1, $max = 2),
+//                'salary_type' => $faker->numberBetween($min = 1, $max = 2),
 //                'salary' => '100',
                 'description' => $faker->catchPhrase,
                 'visited' => $faker->numberBetween($min = 0, $max = 1000),
                 'name' => $faker->jobTitle,
-                'company_id' => $company->id,
-                'company_name' => $company->name,
+                'company_id' => $hasCom ? $company->id : null,
+                'company_name' => $hasCom ? $company->name : null,
                 'creator_id' => $user->id,
                 'creator_name' => $user->nickname,
                 'contact' => $faker->phoneNumber,
@@ -115,11 +115,14 @@ class DatabaseSeeder extends Seeder {
         foreach (range(1, $jobTimeNum) as $i) {
             $number = $faker->numberBetween($min = 1, $max = 100);
             $start_at = time() + 60 * 60 * 24 * $faker->numberBetween($min = 1, $max = 180);
+            $st = $faker->numberBetween($min = 1, $max = 2);
+            $salary = $st == 2 ? $faker->numberBetween($min = 1, $max = 1000) : 0;
             JobTime::create([
                 'job_id' => $faker->numberBetween($min = 1, $max = $jobNum),
                 'number' => $number,
                 'number_applied' => $faker->numberBetween($min = 0, $max = $number),
-                'salary' => $faker->numberBetween($min = 0, $max = 1000),
+                'salary_type' => $st,
+                'salary' => $salary,
                 'apply_end_at' => $faker->numberBetween($min = $start_at - 60 * 60 * 2, $max = $start_at),
                 'start_at' => $start_at,
                 'end_at' => $faker->numberBetween($min = $start_at, $max = $start_at + 60 * 60 * 3)
@@ -150,9 +153,9 @@ class DatabaseSeeder extends Seeder {
                 'month' => date('n', $time),
                 'dayS' => date('j', $time),
                 'dayE' => date('j', $time + 60 * 60 * 24 * 7),
-                'hourS' => 8,
-                'hourE' => 20,
-                'minuteS' => 30
+//                'hourS' => 8,
+//                'hourE' => 20,
+//                'minuteS' => 30
             ]);
         }
 

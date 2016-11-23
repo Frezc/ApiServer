@@ -109,4 +109,31 @@ class ExpectJobController extends Controller {
 
         return response()->json($order);
     }
+
+    public function get($id) {
+        $expectJob = ExpectJob::findOrFail($id);
+        $expectJob->bindExpectTime();
+        return response()->json($expectJob);
+    }
+
+    public function update(Request $request, $id) {
+        $expectJob = ExpectJob::findOrFail($id);
+        $this->validate($request, [
+            'name' => 'string|between:1, 16',
+            'photo' => 'exists:uploadfiles,path',
+            'school' => 'string|max:250',
+            'introduction' => 'string',
+            'birthday' => 'date',
+            'contact' => 'string',
+            'sex' => 'in:0,1',
+            'expect_location' => 'string'
+        ]);
+
+        $self = JWTAuth::parseToken()->authenticate();
+        $expectJob->makeSureAccess($self);
+
+        $expectJob->update(array_only($request->all(),
+            ['name', 'photo', 'school', 'introduction', 'birthday', 'contact', 'sex', 'expect_location']));
+        return response()->json($expectJob);
+    }
 }

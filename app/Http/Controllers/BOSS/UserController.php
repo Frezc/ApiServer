@@ -11,6 +11,7 @@ namespace App\Http\Controllers\BOSS;
 
 use App\Http\Controllers\Controller;
 use App\Models\CompanyApply;
+use App\Models\Order;
 use App\Models\RealNameVerification;
 use App\Models\User;
 use App\Models\Uploadfile;
@@ -93,6 +94,27 @@ class UserController extends Controller {
 
         $builder = CompanyApply::where('status', $status);
         if ($user_id) $builder->where('user_id', $user_id);
+        $total = $builder->count();
+        $builder->orderBy('created_at', 'desc')
+            ->skip($offset)
+            ->limit($size);
+        $result = $builder->get();
+        return response()->json(['total' => $total, 'list' => $result]);
+    }
+
+    public function getOrders(Request $request) {
+        $this->validate($request, [
+            'siz' => 'integer|min:0',
+            'off' => 'integer|min:0',
+            'user_id' => 'integer'
+        ]);
+
+        $offset = $request->input('off', 0);
+        $size = $request->input('siz', 20);
+        $user_id = $request->input('user_id');
+
+        $builder = Order::query();
+        if ($user_id) $builder->where('applicant_id', $user_id)->orWhere('recruiter_id', $user_id);
         $total = $builder->count();
         $builder->orderBy('created_at', 'desc')
             ->skip($offset)

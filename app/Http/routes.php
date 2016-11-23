@@ -29,12 +29,15 @@ Route::get('jobs', 'JobController@query');
 Route::get('job/apply', 'UserController@getJobApply');
 Route::get('job/completed', 'UserController@getJobCompleted');
 Route::get('jobs/{id}', 'JobController@get')->where('id', '[0-9]+');
+Route::post('jobs/{id}', 'JobController@update')->where('id', '[0-9]+');
 Route::post('jobs/{id}/apply', 'JobController@apply');
 Route::post('job/apply', 'UserController@postJobApply');
 Route::get('job/evaluate', 'JobController@getJobEvaluate');
 Route::post('job/evaluate', 'UserController@postJobEvaluate');
 Route::post('expect_jobs', 'ExpectJobController@create');
 Route::get('expect_jobs', 'ExpectJobController@query');
+Route::get('expect_jobs/{id}', 'ExpectJobController@get')->where('id', '[0-9]+');
+Route::post('expect_jobs/{id}', 'ExpectJobController@update')->where('id', '[0-9]+');
 Route::post('expect_jobs/{id}/apply', 'ExpectJobController@apply');
 Route::get('getAllJob', 'UserController@mainPage');
 
@@ -84,6 +87,7 @@ Route::group(['namespace' => 'BOSS', 'middleware' => ['jwt.auth', 'role:admin']]
     Route::get('real_name_applies', 'UserController@getAllRealNameApplies');
     Route::get('notifications/history', 'MessageController@getHistory');
     Route::get('company_applies', 'UserController@getAllCompanyApplies');
+    Route::get('orders', 'UserController@getOrders');
 });
 
 Route::get('/', function () {

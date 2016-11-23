@@ -18,8 +18,8 @@ class CreateTjzJobsTable extends Migration
             $table->string('name');
             // 支付方式 1：线下支付，2：在线支付
             $table->tinyInteger('pay_way')->default(1);
-            // 工资类型，1：面议, 2：固定数值
-            $table->tinyInteger('salary_type')->default(1);
+            // 工资类型，1：面议, 2：固定数值 (放到job_time内)
+//            $table->tinyInteger('salary_type')->default(1);
             // 工资 放到 job_time里
 //            $table->string('salary', 16);
             $table->string('description')->nullable();

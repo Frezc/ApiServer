@@ -20,10 +20,10 @@ class CreateExpectTimesTable extends Migration
             $table->tinyInteger('month')->unsigned();
             $table->tinyInteger('dayS')->unsigned();
             $table->tinyInteger('dayE')->nullable()->unsigned();
-            $table->tinyInteger('hourS')->nullable()->unsigned();
-            $table->tinyInteger('hourE')->nullable()->unsigned();
-            $table->tinyInteger('minuteS')->nullable()->unsigned();
-            $table->tinyInteger('minuteE')->nullable()->unsigned();
+//            $table->tinyInteger('hourS')->nullable()->unsigned();
+//            $table->tinyInteger('hourE')->nullable()->unsigned();
+//            $table->tinyInteger('minuteS')->nullable()->unsigned();
+//            $table->tinyInteger('minuteE')->nullable()->unsigned();
             $table->timestamps();
         });
     }
