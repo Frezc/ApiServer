@@ -59,7 +59,7 @@ class UserController extends Controller {
             $builder->skip($request->input('offset'));
         }
         $builder->limit($request->input('limit'));
-        return response()->json(['list', $builder->get(), 'total', $total]);
+        return response()->json(['list'=> $builder->get(), 'total'=>  $total]);
 
 }
 
