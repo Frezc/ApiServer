@@ -9,9 +9,7 @@ class Company extends Model
 {
     //
     protected $table = 'companys';
-
     protected $guarded = ['id'];
-
     protected $hidden = ['business_license', 'updated_at'];
 
     public function jobs(){
@@ -42,6 +40,10 @@ class Company extends Model
                 return $query;
             });
         return $builder;
+    }
+
+    public function users() {
+        return $this->belongsToMany('App\Models\User', 'user_company', 'company_id', 'user_id');
     }
 
 }

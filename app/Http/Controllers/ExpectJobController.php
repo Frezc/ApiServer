@@ -16,7 +16,7 @@ class ExpectJobController extends Controller {
 
     public function __construct() {
         $this->middleware('jwt.auth');
-        $this->middleware('log', ['only' => ['create', 'apply']]);
+        $this->middleware('log', ['only' => ['create', 'apply', 'update']]);
     }
 
     public function create(Request $request) {
@@ -54,15 +54,21 @@ class ExpectJobController extends Controller {
             'kw' => 'string',
             'siz' => 'integer|min:0',
             'orderby' => 'in:created_at',
+            'user_id' => 'integer',
             'dir' => 'in:asc,desc',
             'off' => 'integer|min:0'
         ]);
 
+        $user_id = $request->input('user_id');
+
         $builder = ExpectJob::search($request->input('kw'));
+
+        if ($user_id) $builder->where('user_id', $user_id);
+
         $count = $builder->count();
-        $builder->orderBy($request->input('orderby', 'created_at'), $request->input('dir', 'desc'));
-        $builder->skip($request->input('off', 0));
-        $builder->limit($request->input('siz', 20));
+        $builder->orderBy($request->input('orderby', 'created_at'), $request->input('dir', 'desc'))
+                ->skip($request->input('off', 0))
+                ->limit($request->input('siz', 20));
         $expectJobs = $builder->get();
 
         $expectJobs->each(function ($expectJob) {

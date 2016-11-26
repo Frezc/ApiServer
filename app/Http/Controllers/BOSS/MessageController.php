@@ -4,6 +4,7 @@ namespace App\Http\Controllers\BOSS;
 
 use App\Http\Controllers\Controller;
 use App\Jobs\PushNotifications;
+use App\Models\Feedback;
 use App\Models\Log;
 use App\Models\Message;
 use Illuminate\Http\Request;
@@ -61,5 +62,43 @@ class MessageController extends Controller {
                 return array_merge($base, $params);
             });
         return response()->json(['total' => $total, 'list' => $list]);
+    }
+
+    public function getFeedbacks(Request $request) {
+        $this->validate($request, [
+            'off' => 'integer|min:0',
+            'siz' => 'min:0|integer',
+            'status' => 'in:1,2,3',
+            'type' => 'in:1,2,3'
+        ]);
+
+        $offset = $request->input('off', 0);
+        $size = $request->input('siz', 20);
+        $status = $request->input('status');
+        $type = $request->input('type');
+
+        $builder = Feedback::query();
+        $status && $builder->where('status', $status);
+        $type && $builder->where('type', $type);
+
+        $total = $builder->count();
+        $list = $builder
+            ->orderBy('id', 'desc')
+            ->skip($offset)
+            ->limit($size)
+            ->get();
+        return response()->json(['total' => $total, 'list' => $list]);
+    }
+
+    public function updateFeedback(Request $request, $id) {
+        $fb = Feedback::findOrFail($id);
+        $this->validate($request, [
+            'type' => 'in:1,2,3',
+            'status' => 'in:1,2,3',
+            'message' => 'string'
+        ]);
+
+        $fb->update(array_only($request->all(), ['type', 'status', 'message']));
+        return response()->json($fb);
     }
 }

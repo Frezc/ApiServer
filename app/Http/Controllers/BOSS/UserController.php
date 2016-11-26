@@ -10,6 +10,7 @@ namespace App\Http\Controllers\BOSS;
 
 
 use App\Http\Controllers\Controller;
+use App\Models\Company;
 use App\Models\CompanyApply;
 use App\Models\Order;
 use App\Models\RealNameVerification;
@@ -19,9 +20,13 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller {
 
+    public function __construct() {
+    }
+
     public function query(Request $request) {
         $this->validate($request, [
             'kw' => 'string',
+            'company_id' => 'integer',
             'siz' => 'integer|min:0',
             'dir' => 'in:asc,desc',
             'off' => 'integer|min:0'
@@ -31,9 +36,18 @@ class UserController extends Controller {
         $direction = $request->input('dir', 'asc');
         $offset = $request->input('off', 0);
         $limit = $request->input('siz', 20);
+        $company_id = $request->input('company_id');
 
         $q_array = $q ? explode(" ", trim($q)) : [];
-        $builder = User::query();
+
+        if ($company_id) {
+            $company = Company::find($company_id);
+            if (!$company) return response()->json(['total' => 0, 'list' => []]);
+            $builder = $company->users();
+        } else {
+            $builder = User::query();
+        }
+
         foreach ($q_array as $qi) {
             $builder->where(function ($query) use ($qi) {
                 $query->orWhere('nickname', 'like', '%' . $qi . '%')

@@ -27,4 +27,19 @@ class Job extends Model
 
         throw new MsgException('You have no access to this job.', 401);
     }
+
+    public static function search($keyword) {
+        $builder = Job::query();
+        if ($keyword) {
+            $q_array = explode(" ", trim($keyword));
+
+            foreach ($q_array as $qi) {
+                $builder->orWhere('name', 'like', '%' . $qi . '%')
+                    ->orWhere('description', 'like', '%' . $qi . '%')
+                    ->orWhere('company_name', 'like', '%' . $qi . '%');
+            }
+        }
+
+        return $builder;
+    }
 }

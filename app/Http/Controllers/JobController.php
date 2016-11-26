@@ -18,7 +18,7 @@ class JobController extends Controller {
 
     public function __construct() {
         $this->middleware('jwt.auth', ['only' => ['apply']]);
-        $this->middleware('log', ['only' => ['apply']]);
+        $this->middleware('log', ['only' => ['apply', 'update']]);
     }
 
     public function get($id) {
@@ -83,6 +83,8 @@ class JobController extends Controller {
             'kw' => 'string',
             'siz' => 'integer|min:0',
             'orderby' => 'in:id,created_at',
+            'company_id' => 'integer',
+            'user_id' => 'integer',
             'dir' => 'in:asc,desc',
             'off' => 'integer|min:0'
         ]);
@@ -92,18 +94,13 @@ class JobController extends Controller {
         $orderby = $request->input('orderby', 'id');
         $direction = $request->input('dir', 'asc');
         $offset = $request->input('off', 0);
+        $company_id = $request->input('company_id');
+        $user_id = $request->input('user_id');
 
-        $builder = Job::query();
+        $builder = Job::search($q);
 
-        if ($q) {
-            $q_array = explode(" ", trim($q));
-
-            foreach ($q_array as $qi) {
-                $builder->orWhere('name', 'like', '%' . $qi . '%')
-                        ->orWhere('description', 'like', '%' . $qi . '%')
-                        ->orWhere('company_name', 'like', '%' . $qi . '%');
-            }
-        }
+        $user_id && $builder->where('creator_id', $user_id);
+        $company_id && $builder->where('company_id', $company_id);
 
         $total = $builder->count();
 
