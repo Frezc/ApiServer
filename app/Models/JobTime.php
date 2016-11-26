@@ -10,5 +10,5 @@ class JobTime extends Model
     protected $table = 'job_times';
     protected $guarded = ['id'];
 
-    protected $hidden = ['updated_at'];
+    protected $hidden = ['updated_at', 'job_id'];
 }

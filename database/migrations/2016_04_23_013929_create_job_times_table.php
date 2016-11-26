@@ -20,7 +20,14 @@ class CreateJobTimesTable extends Migration
             // 已经申请成功的人数
             $table->mediumInteger('number_applied')->unsigned()->default(0);
 
-            $table->integer('start_at')->unsigned()->nullable();
+            // 工资
+            $table->integer('salary')->unsigned()->default(0);
+            // 申请截止时间（默认为开始时间）
+            $table->integer('apply_end_at')->unsigned();
+            // 开始时间
+            $table->integer('start_at')->unsigned();
+            // 结束时间
+
             $table->integer('end_at')->unsigned()->nullable();
         
 //            $table->smallInteger('year')->unsigned();

@@ -23,6 +23,8 @@ class JobController extends Controller {
 
     public function get($id) {
         $job = Job::findOrFail($id);
+        $job->visited++;
+        $job->save();
         $jobEva = JobEvaluate::where('job_id', $job->id);
         $job->number_evaluate = $jobEva->count();
         $job->average_score = $jobEva->avg('score');
