@@ -99,7 +99,7 @@ class DatabaseSeeder extends Seeder {
 
             Job::create([
                 'salary_type' => $faker->numberBetween($min = 1, $max = 2),
-//                'salary' => '100',
+                'salary' => '100',
                 'description' => $faker->catchPhrase,
                 'visited' => $faker->numberBetween($min = 0, $max = 1000),
                 'name' => $faker->jobTitle,
