@@ -20,5 +20,12 @@ class UserCompany extends Model {
             })
             ->toArray();
     }
-
+    public static function getCompanyId($user_id) {
+        return UserCompany::where('user_id', $user_id)
+            ->get()
+            ->map(function ($uc) {
+            return $uc->company_id;
+        })
+            ->toArray();
+    }
 }

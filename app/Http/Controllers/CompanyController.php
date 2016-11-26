@@ -7,6 +7,7 @@ use App\Models\CompanyApply;
 use App\Models\Job;
 use App\Models\JobTime;
 use App\Models\Uploadfile;
+use App\Models\UserCompany;
 use Illuminate\Http\Request;
 use JWTAuth;
 
@@ -32,24 +33,30 @@ class CompanyController extends Controller {
             'demanded_number'=>'integer|min:0'
         ]);
           $job=new Job;
+          $jobstime =new JobTime;
           $job->name=$request->input('name');
           $job->description=$request->input('description');
           $job->pay_way=$request->input('pay_way');
           $job->salary=$request->input('salary');
-          $job->company_id=$request->input('company_id');
-          $company=Company::find($request->input('company_id'));
+          $job->salary_type=$request->input('salary_type');
+          $user=JWTAuth::parseToken()->authenticate();
+          $user_id=$user->id;
+          $job->creator_id=$user_id;
+          $user_company=UserCompany::getCompanyId($user_id);
+          $company_id=$user_company[0];
+          $company=Company::find($company_id);
+          $job->company_id=$company_id;
           $job->company_name=$company->name;
           $job->creator_name=$company->contact_person;
           $job->contact_number=$company->contact;
-        
           $job->job_type=$request->input('job_type');
-          $jobstime =new JobTime;
           $jobstime->start_at=$request->input('start_at');
           $jobstime->end_at=$request->input('end_at') ;
           $jobstime->number=$request->input('demanded_number');
-          $jobstime->save();
           $job->save();
-          return 'success';
+          $jobstime->job_id=$job->id;
+          $jobstime->save();
+          return  response()->json($job);
     }
 
 

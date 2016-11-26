@@ -24,7 +24,8 @@ Route::get('users/{id}/realNameApplies', 'UserController@getRealNameApplies');
 Route::post('users/{id}/realNameApplies', 'UserController@createRealNameApplies');
 Route::delete('users/{id}/realNameApplies/{rnaid}', 'UserController@deleteRealNameApply');
 Route::get('users/{id}/logs', 'UserController@getLogs');
-
+Route::get('userGetOrder','UserController@user_get_order');
+Route::get('companyGetOrder','UserController@company_get_order');
 Route::get('jobs', 'JobController@query');
 Route::get('job/apply', 'UserController@getJobApply');
 Route::get('job/completed', 'UserController@getJobCompleted');
