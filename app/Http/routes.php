@@ -45,7 +45,7 @@ Route::post('companies/{id}', 'CompanyController@update')->where('id', '[0-9]+')
 Route::get('companies/apply', 'CompanyController@getApply');
 Route::post('companies/apply', 'CompanyController@postApply');
 
-Route::post('releaseJob','CompanyController@releaseJob');
+Route::get('releaseJob','CompanyController@releaseJob');
 
 Route::get('umsg', 'MessageController@getUpdate');
 Route::get('messages', 'MessageController@get');

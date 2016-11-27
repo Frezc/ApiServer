@@ -17,9 +17,9 @@ class CreateTjzJobsTable extends Migration
             // 工作名称
             $table->string('name');
             // 支付方式 1：线下支付，2：在线支付
-            $table->tinyInteger('pay_way')->default(1);
+            $table->tinyInteger('pay_way')->default(1)->nullable();
             // 工资类型，1：面议, 2：固定数值
-            $table->tinyInteger('salary_type')->default(1);
+            $table->tinyInteger('salary_type')->default(1)->nullable();
             // 工资 放到 job_time里
 //            $table->string('salary', 16);
             $table->string('description')->nullable();
@@ -34,7 +34,7 @@ class CreateTjzJobsTable extends Migration
             $table->integer('creator_id')->unsigned();
             $table->string('creator_name');
             // 工资
-            $table->string('salary');
+            $table->string('salary')->nullable();
             // 岗位是否活跃，0表示不活跃（下架）,1表示活跃
             $table->tinyInteger('active')->default(1);
              //工作类型
