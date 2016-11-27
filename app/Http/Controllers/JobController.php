@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Job;
-use App\JobEvaluate;
-use App\JobTime;
-use App\Order;
-use App\Resume;
-use App\User;
+use App\Jobs\PushNotifications;
+use App\Models\Job;
+use App\Models\JobEvaluate;
+use App\Models\JobTime;
+use App\Models\Message;
+use App\Models\Order;
+use App\Models\Resume;
+use App\Models\User;
+use App\Models\UserCompany;
 use Illuminate\Http\Request;
 use JWTAuth;
 
@@ -15,10 +18,13 @@ class JobController extends Controller {
 
     public function __construct() {
         $this->middleware('jwt.auth', ['only' => ['apply']]);
+        $this->middleware('log', ['only' => ['apply']]);
     }
 
     public function get($id) {
         $job = Job::findOrFail($id);
+        $job->visited++;
+        $job->save();
         $jobEva = JobEvaluate::where('job_id', $job->id);
         $job->number_evaluate = $jobEva->count();
         $job->average_score = $jobEva->avg('score');
@@ -75,11 +81,9 @@ class JobController extends Controller {
             $q_array = explode(" ", trim($q));
 
             foreach ($q_array as $qi) {
-                $builder->where(function ($query) use ($qi) {
-                    $query->orWhere('name', 'like', '%' . $qi . '%')
+                $builder->orWhere('name', 'like', '%' . $qi . '%')
                         ->orWhere('description', 'like', '%' . $qi . '%')
                         ->orWhere('company_name', 'like', '%' . $qi . '%');
-                });
             }
         }
 
@@ -93,6 +97,7 @@ class JobController extends Controller {
         $builder->limit($limit);
 
         $jobs = $builder->get();
+        
         foreach ($jobs as $job) {
             $job->number_evaluate = JobEvaluate::where('job_id', $job->id)->count();
             $job->average_score = JobEvaluate::where('job_id', $job->id)->avg('score');
@@ -120,15 +125,31 @@ class JobController extends Controller {
         // create order
         $order = Order::create([
             'job_id' => $job->id,
+            'job_name' => $job->name,
             'job_time_id' => $jobTime->id,
             'expect_job_id' => $expectJob->id,
             'applicant_id' => $resume->user_id,
+            'applicant_name' => $self->nickname,
             'recruiter_type' => $job->company_id ? 1 : 0,
             'recruiter_id' => $job->company_id ? $job->company_id : $job->creator_id,
+            'recruiter_name' => $job->company_id ? $job->company_name : $job->creator_name,
             'status' => 0,
             'applicant_check' => 1,
             'recruiter_check' => 0
         ]);
+
+        $order->expect_job = $expectJob;
+        $order->job_time = $jobTime;
+
+        $to = $job->creator_id;
+        if ($job->company_id) {
+            $to = UserCompany::getUserIds($job->company_id);
+        }
+        $this->dispatch(new PushNotifications(
+            Message::getSender(Message::$WORK_HELPER),
+            $to,
+            $self->nickname . ' 申请了岗位 ' . $job->name . '。'
+        ));
 
         return response()->json($order);
     }

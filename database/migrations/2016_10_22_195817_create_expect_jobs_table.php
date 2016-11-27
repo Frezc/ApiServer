@@ -15,6 +15,7 @@ class CreateExpectJobsTable extends Migration
         Schema::create('expect_jobs', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id')->unsigned();
+            $table->string('user_name');
             // 简历标题
             $table->string('name', 16);
             // 照片的url

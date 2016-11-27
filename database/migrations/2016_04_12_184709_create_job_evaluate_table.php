@@ -19,7 +19,6 @@ class CreateJobEvaluateTable extends Migration
             $table->tinyInteger('score');
             $table->string('comment')->nullable();
             $table->timestamps();
-
             $table->index('user_id');
             $table->index('job_id');
         });

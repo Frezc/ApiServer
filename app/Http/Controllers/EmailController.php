@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\MsgException;
-use App\User;
+use App\Models\User;
 use DB;
 use Hash;
 use Illuminate\Http\Request;
@@ -17,6 +17,7 @@ class EmailController extends Controller {
     public function __construct() {
         $this->middleware('jwt.auth', ['only' => ['bindEmail']]);
         $this->middleware('email', ['only' => ['verifyEmail', 'bindEmail']]);
+        $this->middleware('log', ['only' => ['sendVerifyEmail', 'verifyEmail', 'bindEmail']]);
     }
 
     public function sendVerifyEmail(Request $request) {

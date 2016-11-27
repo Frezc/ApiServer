@@ -1,0 +1,9 @@
+diff a/app/Exceptions/Handler.php b/app/Exceptions/Handler.php	(rejected hunks)
+@@ -48,7 +48,6 @@
+     public function render($request, Exception $e)
+     {
+         if ($e instanceof ModelNotFoundException) {
+-            return response()->json(['error' => $request->path().' not found.'], 404);
+             return response()->json(['error' => $e->getModel().' not found.'], 404);
+         } elseif ($e instanceof NotFoundHttpException) {
+             return response()->json(['error' => $request->path().' not found.'], 404);

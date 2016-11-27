@@ -16,15 +16,18 @@ class CreateOrdersTable extends Migration
             $table->increments('id');
 
             $table->integer('job_id')->unsigned();
-            $table->integer('job_time_id')->unsigned();
+            $table->string('job_name');
+            $table->integer('job_time_id')->unsigned()->nullable();
             // 用户申请所提供的数据
             $table->integer('expect_job_id')->unsigned();
 
             // 应聘者id
             $table->integer('applicant_id')->unsigned();
+            $table->string('applicant_name');
             // 招聘者类型 0：个人，1：商家
             $table->tinyInteger('recruiter_type')->default(0);
             $table->integer('recruiter_id')->unsigned();
+            $table->string('recruiter_name');
 
             // 订单状态 0：创建，1：确认、未开始、进行中、已结束，2：已完成，3：已取消
             $table->tinyInteger('status')->default(0);

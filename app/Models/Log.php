@@ -1,11 +1,11 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Order extends Model
+class Log extends Model
 {
-    protected $table = 'orders';
+    protected $table = 'tjz_logs';
     protected $guarded = ['id'];
 }

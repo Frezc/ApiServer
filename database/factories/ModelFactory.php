@@ -10,7 +10,7 @@
 |
 */
 
-$factory->define(App\User::class, function ($faker) {
+$factory->define(App\Models\User::class, function ($faker) {
     return [
         'avatar' => '/images/avatars/default',
         'email' => $faker->unique()->freeEmail,
@@ -25,7 +25,7 @@ $factory->define(App\User::class, function ($faker) {
 
     ];
 });
-$factory->define(App\Company::class, function ($faker) {
+$factory->define(App\Models\Company::class, function ($faker) {
     return [
         'name' => $faker->unique()->company,
         'url'  => $faker->url,
@@ -37,11 +37,11 @@ $factory->define(App\Company::class, function ($faker) {
 
     ];
 });
-$factory->define(App\JobApply::class, function ($faker) {
-    $resume = \App\Resume::findOrNew($faker->numberBetween($min = 1, $max = 35));
+$factory->define(App\Models\JobApply::class, function ($faker) {
+    $resume = \App\Models\Resume::findOrNew($faker->numberBetween($min = 1, $max = 35));
     while (!$resume->user_id||!$resume->id)
     {
-        $resume = \App\Resume::findOrNew($faker->numberBetween($min = 1, $max = 35));
+        $resume = \App\Models\Resume::findOrNew($faker->numberBetween($min = 1, $max = 35));
     }
     return [
         'user_id' => $resume->user_id ,
@@ -52,11 +52,11 @@ $factory->define(App\JobApply::class, function ($faker) {
 
     ];
 });
-$factory->define(App\JobCompleted::class, function ($faker) {
-    $resume = \App\Resume::findOrNew($faker->numberBetween($min = 1, $max = 35));
+$factory->define(App\Models\JobCompleted::class, function ($faker) {
+    $resume = \App\Models\Resume::findOrNew($faker->numberBetween($min = 1, $max = 35));
     while (!$resume->user_id||!$resume->id)
     {
-        $resume = \App\Resume::findOrNew($faker->numberBetween($min = 1, $max = 35));
+        $resume = \App\Models\Resume::findOrNew($faker->numberBetween($min = 1, $max = 35));
     }
     return [
         'user_id' => $resume->user_id ,
@@ -66,11 +66,11 @@ $factory->define(App\JobCompleted::class, function ($faker) {
 
     ];
 });
-$factory->define(App\JobEvaluate::class, function ($faker) {
-    $jc = \App\JobCompleted::findOrNew($faker->numberBetween($min = 1, $max = 100));
+$factory->define(App\Models\JobEvaluate::class, function ($faker) {
+    $jc = \App\Models\JobCompleted::findOrNew($faker->numberBetween($min = 1, $max = 100));
     while (!$jc->user_id)
     {
-        $jc = \App\Resume::findOrNew($faker->numberBetween($min = 1, $max = 100));
+        $jc = \App\Models\Resume::findOrNew($faker->numberBetween($min = 1, $max = 100));
     }
     return [
         'user_id' => $jc->user_id,
@@ -79,14 +79,14 @@ $factory->define(App\JobEvaluate::class, function ($faker) {
         'score' => $faker->numberBetween($min = 0, $max = 5),
     ];
 });
-$factory->define(App\Job::class, function ($faker) {
+$factory->define(App\Models\Job::class, function ($faker) {
 
-    $company =\App\Company::findOrNew($faker->numberBetween($min = 0, $max = 39));
+    $company = \App\Models\Company::findOrNew($faker->numberBetween($min = 0, $max = 39));
     //dd($company);
     while ($company->id==null)
     {
         echo 'failed once','<br>';
-        $company =\App\Company::findOrNew($faker->numberBetween($min = 0, $max = 39));
+        $company = \App\Models\Company::findOrNew($faker->numberBetween($min = 0, $max = 39));
     }
     return [
         'salary' => ($faker->numberBetween($min = 4, $max = 100)*10).'元/天',
@@ -101,7 +101,7 @@ $factory->define(App\Job::class, function ($faker) {
         'company_name'=> $company ->name,
     ];
 });
-$factory->define(App\Resume::class, function ($faker) {
+$factory->define(App\Models\Resume::class, function ($faker) {
     return [
         'user_id' => $faker->numberBetween($min = 0, $max = 12),
         'title'  => $faker->jobTitle,

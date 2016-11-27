@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use App\Exceptions\MsgException;
 use Illuminate\Auth\Authenticatable;
@@ -46,14 +46,43 @@ class User extends Model implements AuthenticatableContract,
         return $this->hasMany('App\JobCompleted');
     }
 
+    /**
+     * 检查某用户是否对其他用户有访问权
+     * @param $owner_id 目标用户
+     * @return bool
+     * @throws MsgException
+     */
     public function checkAccess($owner_id) {
         if ($this->id != $owner_id) {
-            $role = Role::find($this->role_id);
-            if ($role && $role->name == 'admin') {
+            if ($this->isAdmin()) {
                 return true;
             }
             throw new MsgException('You have no access to this user.', 401);
         }
         return true;
+    }
+
+    public function isAdmin() {
+        $role = Role::find($this->role_id);
+        if ($role && $role->name == 'admin') {
+            return true;
+        }
+        return false;
+    }
+
+    public function getRealNameVerification() {
+        return RealNameVerification::where('user_id', $this->id)->first();
+    }
+
+    public function checkNeedRealNameVerify() {
+        $rmv = RealNameVerification::where('user_id', $this->id)->whereIn('is_examined', [0, 1])->first();
+        if ($rmv) throw new MsgException('You needn\'t apply real name verification.', 400);
+        return true;
+    }
+
+    public function getCompanies() {
+        return UserCompany::where('user_id', $this->id)->get()->each(function ($item, $index) {
+            $item->setVisible(['company_id', 'company_name']);
+        });
     }
 }

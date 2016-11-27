@@ -27,9 +27,11 @@ class CreateCompanysTable extends Migration
             $table->string('contact_person')->nullable();
             // 联系方式
             $table->string('contact')->nullable();
+            // 营业执照
+            $table->string('business_license');
             $table->timestamps();
 
-            $table->unique('name');
+            $table->index('name');
         });
     }
 

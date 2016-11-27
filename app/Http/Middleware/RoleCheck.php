@@ -3,7 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Exceptions\MsgException;
-use App\Role;
+use App\Models\Role;
 use Closure;
 use JWTAuth;
 

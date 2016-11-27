@@ -2,17 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\MsgException;
-use App\ExpectTime;
-use App\Resume;
+use App\Jobs\PushNotifications;
+use App\Models\ExpectJob;
+use App\Models\ExpectTime;
+use App\Models\Job;
+use App\Models\Message;
+use App\Models\Order;
+use App\Models\Resume;
 use Illuminate\Http\Request;
-use App\ExpectJob;
 use JWTAuth;
 
 class ExpectJobController extends Controller {
 
     public function __construct() {
         $this->middleware('jwt.auth');
+        $this->middleware('log', ['only' => ['create', 'apply']]);
     }
 
     public function create(Request $request) {
@@ -69,7 +73,40 @@ class ExpectJobController extends Controller {
         return response()->json(['total' => $count, 'list' => $expectJobs]);
     }
 
-    public function apply(Request $request) {
+    public function apply(Request $request, $id) {
+        $expectJob = ExpectJob::findOrFail($id);
 
+        $this->validate($request, [
+            'job_id' => 'integer'
+        ]);
+
+        $job = Job::findOrFail($request->input('job_id'));
+        $self = JWTAuth::parseToken()->authenticate();
+        $job->checkAccess($self);
+
+        $order = Order::create([
+            'job_id' => $job->id,
+            'job_name' => $job->name,
+            'job_time_id' => null,
+            'expect_job_id' => $expectJob->id,
+            'applicant_id' => $expectJob->user_id,
+            'applicant_name' => $expectJob->user_name,
+            'recruiter_type' => $job->company_id ? 1 : 0,
+            'recruiter_id' => $job->company_id ? $job->company_id : $job->creator_id,
+            'recruiter_name' => $job->company_id ? $job->company_name : $job->creator_name,
+            'status' => 0,
+            'applicant_check' => 0,
+            'recruiter_check' => 1
+        ]);
+
+        $order->expect_job = $expectJob;
+
+        $this->dispatch(new PushNotifications(
+            Message::getSender(Message::$WORK_HELPER),
+            $expectJob->user_id,
+            $self->nickname . ' 为您发送了岗位邀请。'
+        ));
+
+        return response()->json($order);
     }
 }

@@ -15,7 +15,6 @@ class CreateExpectTimesTable extends Migration
         Schema::create('expect_times', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('expect_job_id')->unsigned();
-
             $table->smallInteger('year')->unsigned();
             $table->tinyInteger('month')->unsigned();
             $table->tinyInteger('dayS')->unsigned();
