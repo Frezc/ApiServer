@@ -40,8 +40,7 @@ class CompanyController extends Controller {
           $job->creator_id=$request->input('creator_id');
           $job->company_id=$request->input('company_id');
           $job->creator_name=$request->input('creator_name');
-
-          $job->contact_number=$request->input('contact_number');
+          $job->contact=$request->input('contact_number');
           $job->job_type=$request->input('job_type');
           $job->salary_time=$request->input('salary_time');
           $jobstime =new JobTime;
