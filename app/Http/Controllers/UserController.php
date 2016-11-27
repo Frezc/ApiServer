@@ -36,22 +36,19 @@ class UserController extends Controller {
     }
 
 
-    public function mainPage(Request $request) {
+    public function mainPage(Request $request)
+    {
         $builder = Job::query();
-        $builder->where("statu","=","1");
-  
         $builder->orderBy(
             $request->input('orderBytime', 'created_at'),
             $request->input('order', 'asc')
-
         );
-
+        $total =$builder->count();
         if ($request->has('offset')) {
             $builder->skip($request->input('offset'));
         }
         $builder->limit($request->input('limit'));
-
-        return $builder->get()->toArray();
+        return response()->json(['list'=> $builder->get(), 'total'=>  $total]);
 
     }
 

@@ -31,25 +31,31 @@ class CompanyController extends Controller {
             'salary'=>'integer|min:0',
             'demanded_number'=>'integer|min:0'
         ]);
-          $job=new Job;
-          $job->name=$request->input('name');
-          $job->description=$request->input('description');
-          $job->pay_way=$request->input('pay_way');
-          $job->salary=$request->input('salary');
-          $job->company_name=$request->input('company_name');
-          $job->creator_id=$request->input('creator_id');
-          $job->company_id=$request->input('company_id');
-          $job->creator_name=$request->input('creator_name');
-          $job->contact=$request->input('contact_number');
-          $job->job_type=$request->input('job_type');
-          $job->salary_time=$request->input('salary_time');
-          $jobstime =new JobTime;
-          $jobstime->start_at=$request->input('start_at');
-          $jobstime->end_at=$request->input('end-at');
-          $jobstime->number=$request->input('demanded_number');
-          $jobstime->save();
-          $job->save();
-          return 'success';
+        $job=new Job;
+        $jobstime =new JobTime;
+        $job->name=$request->input('name');
+        $job->description=$request->input('description');
+        $job->pay_way=$request->input('pay_way');
+        $job->salary=$request->input('salary');
+        $job->salary_type=$request->input('salary_type');
+        $user=JWTAuth::parseToken()->authenticate();
+        $user_id=$user->id;
+        $job->creator_id=$user_id;
+        $user_company=UserCompany::getCompanyId($user_id);
+        $company_id=$user_company[0];
+        $company=Company::find($company_id);
+        $job->company_id=$company_id;
+        $job->company_name=$company->name;
+        $job->creator_name=$company->contact_person;
+        $job->contact=$company->contact;
+        $job->job_type=$request->input('job_type');
+        $jobstime->start_at=$request->input('start_at');
+        $jobstime->end_at=$request->input('end_at') ;
+        $jobstime->number=$request->input('demanded_number');
+        $job->save();
+        $jobstime->job_id=$job->id;
+        $jobstime->save();
+        return  response()->json($job);
     }
 
 
