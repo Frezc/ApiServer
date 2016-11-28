@@ -73,7 +73,7 @@ class PresetSeeder extends Seeder
 
         \App\Models\Data::create([
             'key' => 'banners',
-            'data' => json_encode([
+            'value' => json_encode([
                 Storage::url('images/__banner1.jpg'),
                 Storage::url('images/__banner2.jpg'),
                 Storage::url('images/__banner3.jpg'),

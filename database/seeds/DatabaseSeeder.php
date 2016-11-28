@@ -299,8 +299,7 @@ class DatabaseSeeder extends Seeder {
                 'user_name' => $user->nickname,
                 'real_name' => $faker->name,
                 'id_number' => $this->randomNumber(18),
-                'verifi_pic' => Storage::url('images/test.jpg'),
-                "message" => ""
+                'verifi_pic' => Storage::url('images/test.jpg')
             ]);
         }
 
@@ -316,8 +315,7 @@ class DatabaseSeeder extends Seeder {
                 "description" => $faker->sentence(6, false),
                 "contact_person" => $faker->name,
                 "contact" => $faker->phoneNumber,
-                "business_license" => Storage::url('images/test.jpg'),
-                "message" => "",
+                "business_license" => Storage::url('images/test.jpg')
             ]);
         }
 
