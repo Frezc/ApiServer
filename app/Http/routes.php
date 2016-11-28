@@ -30,12 +30,15 @@ Route::get('jobs', 'JobController@query');
 Route::get('job/apply', 'UserController@getJobApply');
 Route::get('job/completed', 'UserController@getJobCompleted');
 Route::get('jobs/{id}', 'JobController@get')->where('id', '[0-9]+');
-Route::post('jobs/{id}/apply', 'JobController@apply');
+Route::post('jobs/{id}', 'JobController@update')->where('id', '[0-9]+');
+Route::post('jobs/{id}/apply', 'JobController@apply')->where('id', '[0-9]+');
 Route::post('job/apply', 'UserController@postJobApply');
 Route::get('job/evaluate', 'JobController@getJobEvaluate');
 Route::post('job/evaluate', 'UserController@postJobEvaluate');
 Route::post('expect_jobs', 'ExpectJobController@create');
 Route::get('expect_jobs', 'ExpectJobController@query');
+Route::get('expect_jobs/{id}', 'ExpectJobController@get')->where('id', '[0-9]+');
+Route::post('expect_jobs/{id}', 'ExpectJobController@update')->where('id', '[0-9]+');
 Route::post('expect_jobs/{id}/apply', 'ExpectJobController@apply');
 Route::get('getAllJob', 'UserController@mainPage');
 
@@ -47,12 +50,14 @@ Route::post('companies/apply', 'CompanyController@postApply');
 
 Route::get('releaseJob','CompanyController@releaseJob');
 
+Route::delete('orders/{id}', 'OrderController@close')->where('id', '[0-9]+');
 Route::get('umsg', 'MessageController@getUpdate');
 Route::get('messages', 'MessageController@get');
 Route::get('notifications/{id}', 'MessageController@getNotification')->where('id', '[0-9]+');
 Route::get('conversations', 'MessageController@getConversation');
 Route::post('conversations', 'MessageController@postConversation');
-
+Route::post('feedbacks', 'MessageController@postFeedback');
+Route::get('banners', 'DataController@getBanners');
 
 // 需要限制次数的请求
 // 每分钟三次
@@ -85,6 +90,10 @@ Route::group(['namespace' => 'BOSS', 'middleware' => ['jwt.auth', 'role:admin']]
     Route::get('real_name_applies', 'UserController@getAllRealNameApplies');
     Route::get('notifications/history', 'MessageController@getHistory');
     Route::get('company_applies', 'UserController@getAllCompanyApplies');
+    Route::get('orders', 'UserController@getOrders');
+    Route::get('feedbacks', 'MessageController@getFeedbacks');
+    Route::post('data', 'DataController@setData');
+    Route::post('feedbacks/{id}', 'MessageController@updateFeedback');
 });
 
 Route::get('/', function () {

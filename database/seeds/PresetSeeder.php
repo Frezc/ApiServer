@@ -70,5 +70,14 @@ class PresetSeeder extends Seeder
             'email_verified' => 1,
             'role_id' => 2
         ]);
+
+        \App\Models\Data::create([
+            'key' => 'banners',
+            'value' => json_encode([
+                Storage::url('images/__banner1.jpg'),
+                Storage::url('images/__banner2.jpg'),
+                Storage::url('images/__banner3.jpg'),
+                Storage::url('images/__banner4.jpg')])
+        ]);
     }
 }

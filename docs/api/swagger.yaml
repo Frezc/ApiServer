@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 0.7.3
+  version: 0.7.4
   title: 淘兼职api
   description: |
     Admin标签代表只能管理员使用;
@@ -815,6 +815,14 @@ paths:
           in: query
           description: '按某列进行排序(id, created_at, number), 默认id'
           type: string
+        - name: company_id
+          in: query
+          description: 该企业的岗位
+          type: integer
+        - name: user_id
+          in: query
+          description: 该用户发布的岗位
+          type: integer
         - name: dir
           in: query
           description: "升序('asc')or降序('desc'), 默认升序"
@@ -853,6 +861,41 @@ paths:
       responses:
         '200':
           description: 返回岗位详情
+          schema:
+            $ref: '#/definitions/Job'
+    post:
+      description: 修改岗位信息
+      tags:
+        - 岗位模块
+      parameters:
+        - name: id
+          in: path
+          description: 岗位id
+          required: true
+          type: integer
+        - name: name
+          in: formData
+          description: 岗位名称
+          type: string
+        - name: pay_way
+          in: formData
+          description: 支付方式 1：线下支付，2：在线支付
+          type: integer
+        - name: description
+          in: formData
+          description: 描述信息
+          type: string
+        - name: active
+          in: formData
+          description: 岗位是否活跃，0表示不活跃（下架）,1表示活跃
+          type: integer
+        - name: contact
+          in: formData
+          description: 联系方式
+          type: string
+      responses:
+        '200':
+          description: 返回修改后的岗位信息
           schema:
             $ref: '#/definitions/Job'
   /jobs/{id}/apply:
@@ -980,6 +1023,10 @@ paths:
           description: 关键字(用空格分开)
           required: true
           type: string
+        - name: user_id
+          in: query
+          description: 筛选用户
+          type: integer
         - name: orderby
           in: query
           description: 默认created_at
@@ -1009,6 +1056,70 @@ paths:
                 type: array
                 items:
                   $ref: '#/definitions/ExpectJob'
+  /expect_jobs/{id}:
+    get:
+      description: 公开的简历
+      tags:
+        - 岗位模块
+      parameters:
+        - name: id
+          in: path
+          description: 公开简历的id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: 返回公开简历的详情信息
+          schema:
+            $ref: '#/definitions/ExpectJob'
+    post:
+      description: 更新公开简历
+      tags:
+        - 岗位模块
+        - Auth
+      parameters:
+        - name: id
+          in: path
+          description: 求职申请id
+          required: true
+          type: integer
+        - name: name
+          in: formData
+          description: 名字
+          type: string
+        - name: photo
+          in: formData
+          description: 照片
+          type: string
+        - name: school
+          in: formData
+          description: 学校
+          type: string
+        - name: introduction
+          in: formData
+          description: 描述
+          type: string
+        - name: birthday
+          in: formData
+          description: 生日
+          type: string
+        - name: contact
+          in: formData
+          description: 联系方式
+          type: string
+        - name: sex
+          in: formData
+          description: 性别 0 为男 1为女
+          type: string
+        - name: expect_location
+          in: formData
+          description: 期望工作地点
+          type: string
+      responses:
+        200:
+          description: 返回更新后的信息
+          schema:
+            $ref: '#/definitions/ExpectJob'
   /expect_jobs/{id}/apply:
     post:
       description: 为求职者发送确认订单
@@ -1101,6 +1212,10 @@ paths:
           in: query
           description: '按某列进行排序(id, created_at), 默认id'
           type: string
+        - name: user_id
+          in: query
+          description: 用户筛选
+          type: integer
         - name: dir
           in: query
           description: "升序('asc')or降序('desc'), 默认升序"
@@ -1200,6 +1315,24 @@ paths:
           description: 提交申请成功
           schema:
             $ref: '#/definitions/CompanyApply'
+
+  /orders/{id}:
+    delete:
+      description: 关闭订单
+      tags:
+        - 订单模块
+        - Auth
+      parameters:
+        - name: id
+          in: path
+          description: 订单id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: 关闭成功
+          schema:
+            $ref: '#/definitions/Order'
 
   /upload/image:
     post:
@@ -1483,6 +1616,10 @@ paths:
           in: query
           description: 关键字
           type: string
+        - name: company_id
+          in: query
+          description: 对应企业的用户
+          type: integer
         - name: dir
           in: query
           description: 升序('asc')or降序('desc'), 默认升序
@@ -1507,6 +1644,36 @@ paths:
                 type: array
                 items:
                   $ref: '#/definitions/User'
+  /orders:
+    get:
+      description: 得到订单信息
+      tags:
+        - Admin
+      parameters:
+        - name: user_id
+          in: query
+          description: 对应用户的订单
+          type: integer
+        - name: off
+          in: query
+          description: 查找结果的偏移量（用来分页）
+          type: integer
+        - name: siz
+          in: query
+          description: 最多返回的结果
+          type: integer
+      responses:
+        200:
+          description: 返回对应的订单列表
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              list:
+                type: array
+                items:
+                  $ref: '#/definitions/Order'
 
 definitions:
   User:
@@ -1600,8 +1767,6 @@ definitions:
         type: string
       pay_way:
         type: integer
-      salary_type:
-        type: integer
       description:
         type: string
       visited:
@@ -1659,6 +1824,9 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Time'
+      created_at:
+        type: string
+        format: date
   Time:
     type: object
     properties:
@@ -1670,14 +1838,14 @@ definitions:
         type: integer
       dayE:
         type: integer
-      hourS:
-        type: integer
-      hourE:
-        type: integer
-      minuteS:
-        type: integer
-      minuteE:
-        type: integer
+#      hourS:
+#        type: integer
+#      hourE:
+#        type: integer
+#      minuteS:
+#        type: integer
+#      minuteE:
+#        type: integer
   JobTime:
     type: object
     properties:
@@ -1686,6 +1854,8 @@ definitions:
       number:
         type: integer
       number_applied:
+        type: integer
+      salary_type:
         type: integer
       salary:
         type: integer

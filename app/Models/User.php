@@ -39,11 +39,15 @@ class User extends Model implements AuthenticatableContract,
     }
 
     public function jobApplies() {
-        return $this->hasMany('App\JobApply');
+        return $this->hasMany('App\Models\JobApply');
     }
 
     public function jobCompleteds() {
-        return $this->hasMany('App\JobCompleted');
+        return $this->hasMany('App\Models\JobCompleted');
+    }
+
+    public function companies() {
+        return $this->belongsToMany('App\Models\Company', 'user_company', 'user_id', 'company_id');
     }
 
     /**

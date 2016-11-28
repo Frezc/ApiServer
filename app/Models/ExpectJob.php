@@ -34,4 +34,12 @@ class ExpectJob extends Model
     public function bindExpectTime() {
         $this->expect_time = ExpectTime::where('expect_job_id', $this->id)->get();
     }
+
+    public function makeSureAccess(User $user) {
+        if ($this->user_id == $user->id || $user->isAdmin()) {
+            return true;
+        }
+
+        throw new MsgException('You have no access to this job.', 401);
+    }
 }

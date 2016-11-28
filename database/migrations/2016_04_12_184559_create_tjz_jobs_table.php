@@ -20,6 +20,7 @@ class CreateTjzJobsTable extends Migration
             $table->tinyInteger('pay_way')->default(1)->nullable();
             // 工资类型，1：面议, 2：固定数值
             $table->tinyInteger('salary_type')->default(1)->nullable();
+
             // 工资 放到 job_time里
 //            $table->string('salary', 16);
             $table->string('description')->nullable();

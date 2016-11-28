@@ -18,7 +18,7 @@ class JobController extends Controller {
 
     public function __construct() {
         $this->middleware('jwt.auth', ['only' => ['apply']]);
-        $this->middleware('log', ['only' => ['apply']]);
+        $this->middleware('log', ['only' => ['apply', 'update']]);
     }
 
     public function get($id) {
@@ -29,6 +29,24 @@ class JobController extends Controller {
         $job->number_evaluate = $jobEva->count();
         $job->average_score = $jobEva->avg('score');
         $job->time = JobTime::where('job_id', $job->id)->get();
+        return response()->json($job);
+    }
+
+    public function update(Request $request, $id) {
+        $job = Job::findOrFail($id);
+        $this->validate($request, [
+            'name' => 'string|between:1,250',
+            'pay_way' => 'integer|in:1,2',
+            'salary_type' => 'integer|in:1,2',
+            'description' => 'string',
+            'active' => 'integer|in:0,1',
+            'contact' => 'string|max:250'
+        ]);
+
+        $self = JWTAuth::parseToken()->authenticate();
+        $job->checkAccess($self);
+
+        $job->update(array_only($request->all(), ['name', 'pay_way', 'salary_type', 'description', 'active', 'contact']));
         return response()->json($job);
     }
 
@@ -65,6 +83,8 @@ class JobController extends Controller {
             'kw' => 'string',
             'siz' => 'integer|min:0',
             'orderby' => 'in:id,created_at',
+            'company_id' => 'integer',
+            'user_id' => 'integer',
             'dir' => 'in:asc,desc',
             'off' => 'integer|min:0'
         ]);
@@ -74,18 +94,13 @@ class JobController extends Controller {
         $orderby = $request->input('orderby', 'id');
         $direction = $request->input('dir', 'asc');
         $offset = $request->input('off', 0);
+        $company_id = $request->input('company_id');
+        $user_id = $request->input('user_id');
 
-        $builder = Job::query();
+        $builder = Job::search($q);
 
-        if ($q) {
-            $q_array = explode(" ", trim($q));
-
-            foreach ($q_array as $qi) {
-                $builder->orWhere('name', 'like', '%' . $qi . '%')
-                        ->orWhere('description', 'like', '%' . $qi . '%')
-                        ->orWhere('company_name', 'like', '%' . $qi . '%');
-            }
-        }
+        $user_id && $builder->where('creator_id', $user_id);
+        $company_id && $builder->where('company_id', $company_id);
 
         $total = $builder->count();
 

@@ -37,8 +37,8 @@ class CreateCompanyAppliesTable extends Migration
 
             // 是否审核通过 [1: 未审核, 2: 已通过, 3: 已拒绝, 4: 已取消]
             $table->tinyInteger('status')->default(1);
-            // 审核留言
-            $table->text('message')->default('');
+            // 拒绝理由
+            $table->text('reason')->default('');
             $table->timestamps();
 
             $table->index(['user_id', 'status']);

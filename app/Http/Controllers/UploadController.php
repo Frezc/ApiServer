@@ -13,6 +13,7 @@ class UploadController extends Controller {
 
     public function __construct() {
         $this->middleware('jwt.auth');
+        $this->middleware('log', ['only' => ['uploadImage']]);
     }
 
     public function uploadImage(Request $request) {

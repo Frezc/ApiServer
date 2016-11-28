@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Conversation;
+use App\Models\Feedback;
 use App\Models\Message;
 use App\Models\Notification;
 use App\Models\User;
@@ -13,6 +14,7 @@ class MessageController extends Controller
 {
     public function __construct() {
         $this->middleware('jwt.auth');
+        $this->middleware('log', ['only' => ['postConversation', 'postFeedback']]);
     }
 
     public function getUpdate() {
@@ -136,6 +138,27 @@ class MessageController extends Controller
         $message->save();
 
         return response()->json($conversation);
+    }
+
+    public function postFeedback(Request $request) {
+        $this->validate($request, [
+            'content' => 'required|string',
+            'type' => 'in:1,2,3',
+            'p1' => 'exists:uploadfiles,path',
+            'p2' => 'exists:uploadfiles,path',
+            'p3' => 'exists:uploadfiles,path',
+            'p4' => 'exists:uploadfiles,path',
+            'p5' => 'exists:uploadfiles,path'
+        ]);
+
+        $self = JWTAuth::parseToken()->authenticate();
+        Feedback::create(array_merge(array_only($request->all(),
+            ['content', 'type', 'p1', 'p2', 'p3', 'p4', 'p5']), [
+            'user_id' => $self->id,
+            'user_name' => $self->nickname
+        ]));
+
+        return '感谢您的反馈！';
     }
 
     private function getConversationId($id1, $id2) {

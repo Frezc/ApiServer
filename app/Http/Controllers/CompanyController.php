@@ -8,6 +8,7 @@ use App\Models\Job;
 use App\Models\JobTime;
 use App\Models\Uploadfile;
 use App\Models\UserCompany;
+use App\Models\User;
 use Illuminate\Http\Request;
 use JWTAuth;
 
@@ -16,7 +17,7 @@ class CompanyController extends Controller {
     function __construct(){
 
         $this->middleware('jwt.auth',['only'=>['releaseJob', 'getApply', 'postApply', 'update']]);
-
+        $this->middleware('log', ['only' => ['postApply', 'update']]);
     }
 
     public function get($id) {
@@ -65,6 +66,7 @@ class CompanyController extends Controller {
             'kw' => 'string',
             'siz' => 'integer|min:0',
             'orderby' => 'in:id,created_at',
+            'user_id' => 'integer',
             'dir' => 'in:asc,desc',
             'off' => 'integer|min:0'
         ]);
@@ -74,9 +76,16 @@ class CompanyController extends Controller {
         $orderby = $request->input('orderby', 'id');
         $direction = $request->input('dir', 'asc');
         $offset = $request->input('off', 0);
+        $user_id = $request->input('user_id');
 
+        if ($user_id) {
+            $user = User::find($user_id);
+            if ($user) $builder = $user->companies();
+            else return response()->json(['total' => 0, 'list' => []]);
+        } else {
+            $builder = Company::search($keywords);
+        }
 
-        $builder = Company::search($keywords);
         $total = $builder->count();
 
         //排列
