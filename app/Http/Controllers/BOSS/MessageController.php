@@ -13,7 +13,7 @@ use JWTAuth;
 class MessageController extends Controller {
 
     public function __construct() {
-        $this->middleware('log', ['only' => ['postNotifications']]);
+        $this->middleware('log', ['only' => ['postNotifications', 'updateFeedback']]);
     }
 
     public function postNotifications(Request $request) {
@@ -99,6 +99,10 @@ class MessageController extends Controller {
         ]);
 
         $fb->update(array_only($request->all(), ['type', 'status', 'message']));
+        if ($request->input('status') == 2) {
+            $this->dispatch(new PushNotifications(
+                Message::getSender(Message::$NOTI_HELPER), $fb->user_id, '反馈已被处理！感谢您对本产品的支持。'));
+        }
         return response()->json($fb);
     }
 }

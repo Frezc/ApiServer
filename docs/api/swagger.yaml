@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 0.7.4
+  version: 0.7.5
   title: 淘兼职api
   description: |
     Admin标签代表只能管理员使用;
@@ -1509,6 +1509,109 @@ paths:
           description: 成功
           schema:
             $ref: '#/definitions/Conversation'
+  /banners:
+    get:
+      description: 得到首页banner的图片链接
+      tags:
+        - 其他模块
+      parameters: []
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: array
+            items:
+              type: string
+  /feedbacks:
+    post:
+      description: 发送反馈信息
+      tags:
+        - 其他模块
+        - Auth
+      parameters:
+        - name: content
+          in: formData
+          description: 内容
+          required: true
+          type: string
+        - name: type
+          in: formData
+          description: 类型
+          type: integer
+        - name: p1
+          in: formData
+          description: 第一张图片
+          type: string
+        - name: p2
+          in: formData
+          description: 第二张图片（下面的p3, p4, p5省略）
+          type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: string
+    get:
+      description: 得到用户的反馈信息
+      tags:
+        - Admin
+      parameters:
+        - name: off
+          in: query
+          description: 默认0
+          type: integer
+        - name: siz
+          in: query
+          description: 最多返回的结果, 默认20
+          type: integer
+        - name: status
+          in: query
+          description: 状态筛选
+          type: integer
+        - name: type
+          in: query
+          description: 类型筛选
+          type: integer
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              list:
+                type: array
+                items:
+                  $ref: '#/definitions/Feedback'
+  /feedbacks/{id}:
+    post:
+      description: 更新反馈信息
+      tags:
+        - Admin
+      parameters:
+        - name: id
+          in: path
+          description: 通知id
+          required: true
+          type: integer
+        - name: type
+          in: formData
+          description: 类型
+          type: integer
+        - name: status
+          in: formData
+          description: 状态
+          type: integer
+        - name: message
+          in: formData
+          description: 留言
+          type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            $ref: '#/definitions/Feedback'
   /notifications/history:
     get:
       description: 通知发布历史
@@ -1571,6 +1674,31 @@ paths:
                 type: array
                 items:
                   $ref: '#/definitions/RealNameVerification'
+  /real_name_applies/{id}:
+    post:
+      description: 通过或拒绝实名认证
+      tags:
+        - Admin
+      parameters:
+        - name: id
+          in: path
+          description: id
+          required: true
+          type: integer
+        - name: action
+          in: formData
+          description: ['acc': 通过， 'rej': 拒绝]
+          required: true
+          type: string
+        - name: reason
+          in: formData
+          description: 拒绝理由
+          type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            $ref: '#/definitions/RealNameVerification'
   /company_applies:
     get:
       description: 得到企业认证申请列表
@@ -1606,6 +1734,31 @@ paths:
                 type: array
                 items:
                   $ref: '#/definitions/CompanyApply'
+  /company_applies/{id}:
+    post:
+      description: 通过或拒绝公司认证
+      tags:
+        - Admin
+      parameters:
+        - name: id
+          in: path
+          description: id
+          required: true
+          type: integer
+        - name: action
+          in: formData
+          description: ['acc': 通过， 'rej': 拒绝]
+          required: true
+          type: string
+        - name: reason
+          in: formData
+          description: 拒绝理由
+          type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            $ref: '#/definitions/CompanyApply'
   /users:
     get:
       description: 搜索对应的用户信息
@@ -1674,6 +1827,25 @@ paths:
                 type: array
                 items:
                   $ref: '#/definitions/Order'
+  /data:
+    post:
+      description: 保存数据
+      tags:
+        - Admin
+      parameters:
+        - name: key
+          in: formData
+          required: true
+          type: string
+        - name: value
+          in: formData
+          required: true
+          type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            type: string
 
 definitions:
   User:
@@ -2133,6 +2305,39 @@ definitions:
         type: string
         format: date
       updated_at:
+        type: string
+        format: date
+  Feedback:
+    type: object
+    properties:
+      id:
+        type: integer
+      user_id:
+        type: integer
+      user_name:
+        type: string
+      content:
+        type: string
+      p1:
+        type: string
+      p2:
+        type: string
+      p3:
+        type: string
+      p4:
+        type: string
+      p5:
+        type: string
+      type:
+        type: integer
+      status:
+        type: integer
+      dealt_at:
+        type: string
+        format: date
+      message:
+        type: string
+      created_at:
         type: string
         format: date
   ErrorModel:

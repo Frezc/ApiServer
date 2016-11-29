@@ -26,7 +26,7 @@ class CreateFeedbacksTable extends Migration
             $table->string('p3')->nullable();
             $table->string('p4')->nullable();
             $table->string('p5')->nullable();
-            // 反馈内容类型 1：无分类 2：应用相关 3：功能相关
+            // 反馈内容类型 1：无分类 2：应用相关 3：功能相关 4: 操作相关
             $table->tinyInteger('type')->default(1);
 
             // 处理状态 1：未处理，2：已处理，3：搁置

@@ -13,6 +13,7 @@ class Message extends Model
     protected $hidden = ['created_at', 'receiver_id'];
 
     public static $WORK_HELPER = 1;
+    public static $NOTI_HELPER = 2;
 
     public static function getSender($id) {
         return User::find($id);

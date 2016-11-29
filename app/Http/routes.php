@@ -94,6 +94,8 @@ Route::group(['namespace' => 'BOSS', 'middleware' => ['jwt.auth', 'role:admin']]
     Route::get('feedbacks', 'MessageController@getFeedbacks');
     Route::post('data', 'DataController@setData');
     Route::post('feedbacks/{id}', 'MessageController@updateFeedback');
+    Route::post('real_name_applies/{id}', 'UserController@updateRealNameApply')->where('id', '[0-9]+');
+    Route::post('company_applies/{id}', 'UserController@updateCompanyApply')->where('id', '[0-9]+');
 });
 
 Route::get('/', function () {

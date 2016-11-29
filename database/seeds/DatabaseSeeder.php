@@ -331,7 +331,7 @@ class DatabaseSeeder extends Seeder {
                 'p3' => $pic,
                 'p4' => $pic,
                 'p5' => $pic,
-                'type' => $faker->numberBetween($min = 1, $max = 3)
+                'type' => $faker->numberBetween($min = 1, $max = 4)
             ]);
         }
     }
