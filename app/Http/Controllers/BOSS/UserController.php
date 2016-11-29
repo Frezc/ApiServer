@@ -16,7 +16,6 @@ use App\Models\CompanyApply;
 use App\Models\Order;
 use App\Models\RealNameVerification;
 use App\Models\User;
-use App\Models\Uploadfile;
 use Illuminate\Http\Request;
 
 class UserController extends Controller {
@@ -43,9 +42,7 @@ class UserController extends Controller {
         $q_array = $q ? explode(" ", trim($q)) : [];
 
         if ($company_id) {
-            $company = Company::find($company_id);
-            if (!$company) return response()->json(['total' => 0, 'list' => []]);
-            $builder = $company->users();
+            $builder = User::where('company_id', $company_id);
         } else {
             $builder = User::query();
         }
@@ -153,8 +150,17 @@ class UserController extends Controller {
             throw new MsgException('You can\'t update this apply.', 400);
         }
 
-        $rna->status = $action == 'acc' ? 2 : 3;
-        if ($action == 'rej') $rna->reason = $reason;
+        if ($action == 'acc') {
+            $rna->status = 2;
+            $user = User::find($rna->user_id);
+            if ($user) {
+                $user->real_name_verified = 1;
+                $user->save();
+            }
+        } else {
+            $rna->status = 3;
+            $rna->reason = $reason;
+        }
         $rna->save();
 
         return response()->json($rna);
@@ -176,10 +182,16 @@ class UserController extends Controller {
 
         if ($action == 'acc') {
             $ca->status = 2;
-            Company::create(array_only($ca->toArray(), [
+            $company = Company::create(array_only($ca->toArray(), [
                 'name', 'url', 'address', 'logo', 'description', 'contact_person', 'contact',
                 'business_license'
             ]));
+            $user = User::find($ca->user_id);
+            if ($user) {
+                $user->company_id = $company->id;
+                $user->company_name = $company->name;
+                $user->save();
+            }
         } else {
             $ca->status = 3;
             $ca->reason = $reason;

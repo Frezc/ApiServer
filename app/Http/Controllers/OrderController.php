@@ -70,7 +70,7 @@ class OrderController extends Controller
         if ($order->applicant_id == $self->id) {
             $close_type = 1;
         } elseif ($order->recruiter_type == 0 && $order->recruiter_id == $self->id
-            || $order->recruiter_type == 1 && UserCompany::checkUC($self->id, $order->recruiter_id)) {
+            || $order->recruiter_type == 1 && $self->company_id == $order->recruiter_id) {
             $close_type = 2;
         } elseif ($self->isAdmin()) {
             $close_type = 3;

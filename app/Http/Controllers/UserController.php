@@ -32,7 +32,6 @@ class UserController extends Controller {
 
     public function show($id) {
         $user = User::findOrFail($id);
-//        $user->companies = $user->getCompanies();
         return response()->json($user);
     }
   public  function  user_get_order(Request $request){

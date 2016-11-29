@@ -20,7 +20,7 @@ class Job extends Model
             return true;
         }
         if ($this->company_id) {
-            if (UserCompany::checkUC($user->id, $this->company_id)) {
+            if ($user->company_id == $this->company_id) {
                 return true;
             }
         }

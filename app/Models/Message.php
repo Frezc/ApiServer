@@ -38,10 +38,10 @@ class Message extends Model
     }
 
     public static function pushNotificationToCampany($from, $company_id, $content) {
-        UserCompany::where('company_id', $company_id)
+        User::where('company_id', $company_id)
             ->get()
-            ->each(function ($uc) use ($from, $content) {
-                Message::pushNotification($from, $uc->user_id, $content);
+            ->each(function ($user) use ($from, $content) {
+                Message::pushNotification($from, $user->id, $content);
             });
     }
 

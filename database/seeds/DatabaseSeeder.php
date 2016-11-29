@@ -56,7 +56,24 @@ class DatabaseSeeder extends Seeder {
 
         $faker = Faker::create('zh_CN');
 
+        foreach (range(1, $companyNum) as $index) {
+            Company::create([
+                'name' => $faker->unique()->company,
+                'url' => $faker->url,
+                'address' => $faker->address,
+                'logo' => Storage::url('images/test.jpg'),
+                'description' => $faker->catchPhrase,
+                'contact_person' => $faker->name,
+                'contact' => $faker->phoneNumber,
+            ]);
+        }
+
         foreach (range(3, $userNum) as $index) {
+            $company = null;
+            if ($faker->boolean) {
+                $company = Company::find($faker->numberBetween($min = 1, $max = $companyNum));
+            }
+
             User::create([
                 'avatar' => Storage::url('images/test.jpg'),
                 'email' => $faker->unique()->freeEmail,
@@ -67,19 +84,9 @@ class DatabaseSeeder extends Seeder {
                 'birthday' => $faker->date($format = 'Y-m-d', $max = 'now'),
                 'location' => $faker->address,
                 'sex' => $faker->numberBetween($min = 0, $max = 1),
-                'email_verified' => $faker->numberBetween($min = 0, $max = 1)
-            ]);
-        }
-
-        foreach (range(1, $companyNum) as $index) {
-            Company::create([
-                'name' => $faker->unique()->company,
-                'url' => $faker->url,
-                'address' => $faker->address,
-                'logo' => Storage::url('images/test.jpg'),
-                'description' => $faker->catchPhrase,
-                'contact_person' => $faker->name,
-                'contact' => $faker->phoneNumber,
+                'email_verified' => $faker->numberBetween($min = 0, $max = 1),
+                'company_id' => $company ? $company->id : null,
+                'company_name' => $company ? $company->name : null
             ]);
         }
 

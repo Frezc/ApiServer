@@ -1212,10 +1212,6 @@ paths:
           in: query
           description: '按某列进行排序(id, created_at), 默认id'
           type: string
-        - name: user_id
-          in: query
-          description: 用户筛选
-          type: integer
         - name: dir
           in: query
           description: "升序('asc')or降序('desc'), 默认升序"
@@ -1687,7 +1683,7 @@ paths:
           type: integer
         - name: action
           in: formData
-          description: ['acc': 通过， 'rej': 拒绝]
+          description: 'acc：通过，rej：拒绝'
           required: true
           type: string
         - name: reason
@@ -1747,7 +1743,7 @@ paths:
           type: integer
         - name: action
           in: formData
-          description: ['acc': 通过， 'rej': 拒绝]
+          description: 'acc:通过，rej:拒绝'
           required: true
           type: string
         - name: reason
@@ -1871,15 +1867,10 @@ definitions:
         type: integer
       phone:
         type: string
-      companies:
-        type: array
-        items:
-          type: object
-          properties:
-            id:
-              type: integer
-            name:
-              type: string
+      company_id:
+        type: integer
+      company_name:
+        type: string
       email_verified:
         type: integer
       created_at:

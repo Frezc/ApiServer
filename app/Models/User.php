@@ -84,9 +84,9 @@ class User extends Model implements AuthenticatableContract,
         return true;
     }
 
-    public function getCompanies() {
-        return UserCompany::where('user_id', $this->id)->get()->each(function ($item, $index) {
-            $item->setVisible(['company_id', 'company_name']);
-        });
-    }
+//    public function getCompanies() {
+//        return UserCompany::where('user_id', $this->id)->get()->each(function ($item, $index) {
+//            $item->setVisible(['company_id', 'company_name']);
+//        });
+//    }
 }

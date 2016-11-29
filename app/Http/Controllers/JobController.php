@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\PushNotifications;
+use App\Models\Company;
 use App\Models\Job;
 use App\Models\JobEvaluate;
 use App\Models\JobTime;
@@ -10,7 +11,6 @@ use App\Models\Message;
 use App\Models\Order;
 use App\Models\Resume;
 use App\Models\User;
-use App\Models\UserCompany;
 use Illuminate\Http\Request;
 use JWTAuth;
 
@@ -158,7 +158,7 @@ class JobController extends Controller {
 
         $to = $job->creator_id;
         if ($job->company_id) {
-            $to = UserCompany::getUserIds($job->company_id);
+            $to = Company::getUserIds($job->company_id);
         }
         $this->dispatch(new PushNotifications(
             Message::getSender(Message::$WORK_HELPER),

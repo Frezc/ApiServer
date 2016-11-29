@@ -16,12 +16,12 @@ class Company extends Model
       return $this->hasMany('App\Job');
     }
 
-    public function checkEmployee($user_id) {
-        return !!UserCompany::where('user_id', $user_id)->where('company_id', $this->id)->first();
-    }
+//    public function checkEmployee($user_id) {
+//        return !!UserCompany::where('user_id', $user_id)->where('company_id', $this->id)->first();
+//    }
 
     public function makeSureAccess(User $user) {
-        if ($user->isAdmin() || $this->checkEmployee($user->id)) {
+        if ($user->isAdmin() || $this->id == $user->company_id) {
             return true;
         }
 
@@ -46,5 +46,13 @@ class Company extends Model
         return $this->belongsToMany('App\Models\User', 'user_company', 'company_id', 'user_id');
     }
 
+    public static function getUserIds($company_id) {
+        return User::where('company_id', $company_id)
+            ->get()
+            ->map(function ($user) {
+                return $user->id;
+            })
+            ->toArray();
+    }
 }
 

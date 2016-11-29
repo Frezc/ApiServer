@@ -25,7 +25,7 @@ class Order extends Model
 
     public function getRecruiterIds() {
         if ($this->recruiter_type == 1) {
-            return UserCompany::getUserIds($this->recruiter_id);
+            return Company::getUserIds($this->recruiter_id);
         } else {
             return [$this->recruiter_id];
         }

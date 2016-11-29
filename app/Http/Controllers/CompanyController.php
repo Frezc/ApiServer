@@ -43,8 +43,8 @@ class CompanyController extends Controller {
           $user=JWTAuth::parseToken()->authenticate();
           $user_id=$user->id;
           $job->creator_id=$user_id;
-          $user_company=UserCompany::getCompanyId($user_id);
-          $company_id=$user_company[0];
+//          $user_company=UserCompany::getCompanyId($user_id);
+          $company_id=$user->company_id;
           $company=Company::find($company_id);
           $job->company_id=$company_id;
           $job->company_name=$company->name;
@@ -66,7 +66,6 @@ class CompanyController extends Controller {
             'kw' => 'string',
             'siz' => 'integer|min:0',
             'orderby' => 'in:id,created_at',
-            'user_id' => 'integer',
             'dir' => 'in:asc,desc',
             'off' => 'integer|min:0'
         ]);
@@ -76,15 +75,8 @@ class CompanyController extends Controller {
         $orderby = $request->input('orderby', 'id');
         $direction = $request->input('dir', 'asc');
         $offset = $request->input('off', 0);
-        $user_id = $request->input('user_id');
 
-        if ($user_id) {
-            $user = User::find($user_id);
-            if ($user) $builder = $user->companies();
-            else return response()->json(['total' => 0, 'list' => []]);
-        } else {
-            $builder = Company::search($keywords);
-        }
+        $builder = Company::search($keywords);
 
         $total = $builder->count();
 
