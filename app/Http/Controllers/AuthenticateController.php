@@ -31,6 +31,7 @@ class AuthenticateController extends Controller {
         $newToken = JWTAuth::refresh($token);
         
         $user = JWTAuth::authenticate($newToken);
+        $user->bindRoleName();
         return response()->json(['user' => $user, 'token' => $newToken]);
     }
 
@@ -62,9 +63,11 @@ class AuthenticateController extends Controller {
         $user = User::where('email', $request->input('email'))->firstOrFail();
         if ($user != null) {
             if ($user->email_verified == 0) {
-                return reponse()->json(['error' => 'email need to be verified.'], 430);
+                return response()->json(['error' => 'email need to be verified.'], 430);
             }
         }
+
+        $user->bindRoleName();
 
         // 4.登陆成功，返回json
         return response()->json([
@@ -92,8 +95,11 @@ class AuthenticateController extends Controller {
             return response()->json(['error' => 'could_not_create_token'], 500);
         }
 
+        $user = User::where('phone', $request->input('phone'))->firstOrFail();
+        $user->bindRoleName();
+
         return response()->json([
-            'user' => User::where('phone', $request->input('phone'))->firstOrFail(),
+            'user' => $user,
             'token' => $token
         ]);
     }

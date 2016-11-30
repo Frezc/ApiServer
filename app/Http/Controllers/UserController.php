@@ -27,6 +27,7 @@ class UserController extends Controller {
 
     public function self() {
         $self = JWTAuth::parseToken()->authenticate();
+        $self->bindRoleName();
         return $this->show($self->id);
     }
 

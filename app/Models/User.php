@@ -50,6 +50,12 @@ class User extends Model implements AuthenticatableContract,
         return $this->belongsToMany('App\Models\Company', 'user_company', 'user_id', 'company_id');
     }
 
+    public function bindRoleName() {
+        $role = Role::find($this->role_id);
+        if ($role)
+            $this->role_name = $role->name;
+    }
+
     /**
      * 检查某用户是否对其他用户有访问权
      * @param $owner_id 目标用户
