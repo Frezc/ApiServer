@@ -42,7 +42,16 @@ class CreateOrdersTable extends Migration
             // 是否已支付
             $table->tinyInteger('has_paid')->default(0);
 
+            // 评价情况 0：未评价 1：已评价，前面的数字代表应聘者，后面的数字代表商家
+            $table->string('evaluate_status', 4)->default('00');
+
             $table->timestamps();
+
+            $table->index('applicant_id');
+            $table->index(['recruiter_type', 'recruiter_id']);
+            $table->index('status');
+            $table->index('applicant_check');
+            $table->index('recruiter_check');
         });
     }
 

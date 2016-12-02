@@ -6,9 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserEvaluate extends Model
 {
-    //
-    protected $table = 'user_evaluate';
-
+    protected $table = 'user_evaluates';
     protected $guarded = ['id'];
-
 }

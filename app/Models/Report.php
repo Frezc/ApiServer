@@ -4,11 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Feedback extends Model
+class Report extends Model
 {
-    protected $table = 'feedbacks';
     protected $guarded = ['id'];
-    protected $hidden = ['updated_at'];
     protected $dates = [
         'created_at',
         'updated_at',

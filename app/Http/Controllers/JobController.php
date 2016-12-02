@@ -25,9 +25,6 @@ class JobController extends Controller {
         $job = Job::findOrFail($id);
         $job->visited++;
         $job->save();
-        $jobEva = JobEvaluate::where('job_id', $job->id);
-        $job->number_evaluate = $jobEva->count();
-        $job->average_score = $jobEva->avg('score');
         $job->time = JobTime::where('job_id', $job->id)->get();
         return response()->json($job);
     }

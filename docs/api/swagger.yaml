@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 0.7.5
+  version: 0.7.6
   title: 淘兼职api
   description: |
     Admin标签代表只能管理员使用;
@@ -457,7 +457,7 @@ paths:
             $ref: '#/definitions/ErrorModel'
   /job/completed:
     get:
-      description: 已完成的工作
+      description: '**请使用/users/{id}/orders来得到各个状态的订单** 已完成的工作'
       tags:
         - 用户模块
         - Auth
@@ -705,65 +705,6 @@ paths:
           description: resume updated
           schema:
             $ref: '#/definitions/Resume'
-  /users/{id}/orders:
-    get:
-      description: 得到该用户的订单信息
-      tags:
-        - 用户模块
-        - Auth
-      parameters:
-        - name: id
-          in: path
-          description: 用户id
-          required: true
-          type: integer
-        - name: orderby
-          in: query
-          description: 默认created_at
-          type: string
-        - name: dir
-          in: query
-          description: 升序('asc')or降序('desc'), 默认降序
-          type: string
-        - name: off
-          in: query
-          description: 查找结果的偏移量（用来分页）
-          type: integer
-        - name: siz
-          in: query
-          description: 最多返回的结果
-          type: integer
-        - name: status
-          in: query
-          description: 状态筛选，0：未确认，1：已确认，2：已完成，3：已取消
-          type: integer
-        - name: applicant_check
-          in: query
-          description: 申请者是否确认(0, 1)，默认无视
-          type: integer
-          enum: [0, 1]
-        - name: recruiter_check
-          in: query
-          description: 招聘者是否确认(0, 1)，默认无视
-          type: integer
-          enum: [0, 1]
-        - name: role
-          in: query
-          description: 为申请者(applicant)或应聘者(recruiter)
-          type: string
-          default: applicant
-      responses:
-        200:
-          description: 返回订单
-          schema:
-            type: object
-            properties:
-              total:
-                type: integer
-              list:
-                type: array
-                items:
-                  $ref: '#/definitions/Order'
   /users/{id}/logs:
     get:
       description: 得到用户的操作记录
@@ -927,7 +868,7 @@ paths:
             $ref: '#/definitions/Order'
   /job/apply:
     get:
-      description: 申请中的岗位
+      description: '**请使用/users/{id}/orders来得到各个状态的订单**申请中的岗位'
       tags:
         - 岗位模块
         - Auth
@@ -961,7 +902,7 @@ paths:
                 items:
                   $ref: '#/definitions/JobApply'
     post:
-      description: 创建申请
+      description: '**请使用/jobs/{id}/apply来申请岗位**创建申请'
       tags:
         - 岗位模块
         - Auth
@@ -1143,6 +1084,121 @@ paths:
           schema:
             $ref: '#/definitions/Order'
 
+  /users/{id}/orders:
+    get:
+      description: 得到该用户的订单信息
+      tags:
+        - 订单模块
+        - Auth
+      parameters:
+        - name: id
+          in: path
+          description: 用户id
+          required: true
+          type: integer
+        - name: orderby
+          in: query
+          description: 默认created_at
+          type: string
+        - name: dir
+          in: query
+          description: 升序('asc')or降序('desc'), 默认降序
+          type: string
+        - name: off
+          in: query
+          description: 查找结果的偏移量（用来分页）
+          type: integer
+        - name: siz
+          in: query
+          description: 最多返回的结果
+          type: integer
+        - name: status
+          in: query
+          description: 状态筛选，0：未确认，1：已确认，2：已完成，3：已取消
+          type: integer
+        - name: applicant_check
+          in: query
+          description: 申请者是否确认(0, 1)，默认无视
+          type: integer
+          enum: [0, 1]
+        - name: recruiter_check
+          in: query
+          description: 招聘者是否确认(0, 1)，默认无视
+          type: integer
+          enum: [0, 1]
+        - name: role
+          in: query
+          description: 为申请者(applicant)或应聘者(recruiter)
+          type: string
+          default: applicant
+      responses:
+        200:
+          description: 返回订单
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              list:
+                type: array
+                items:
+                  $ref: '#/definitions/Order'
+  /orders/{id}/evaluate:
+    get:
+      description: 得到订单的评价信息
+      tags:
+        - 订单模块
+        - Auth
+      parameters:
+        - name: id
+          in: path
+          description: 订单id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: 返回公司的详情信息
+          schema:
+            type: object
+            properties:
+              job_evaluate:
+                $ref: '#/definitions/Evaluate'
+              user_evaluate:
+                $ref: '#/definitions/Evaluate'
+  /orders/{id}:
+    delete:
+      description: 关闭订单
+      tags:
+        - 订单模块
+        - Auth
+      parameters:
+        - name: id
+          in: path
+          description: 订单id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: 关闭成功
+          schema:
+            $ref: '#/definitions/Order'
+    get:
+      description: 得到订单的详情信息
+      tags:
+        - 订单模块
+        - Auth
+      parameters:
+        - name: id
+          in: path
+          description: 订单id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: 返回订单的详情信息
+          schema:
+            $ref: '#/definitions/Order'
+
   /companies/{id}:
     get:
       description: 公司信息
@@ -1311,24 +1367,6 @@ paths:
           description: 提交申请成功
           schema:
             $ref: '#/definitions/CompanyApply'
-
-  /orders/{id}:
-    delete:
-      description: 关闭订单
-      tags:
-        - 订单模块
-        - Auth
-      parameters:
-        - name: id
-          in: path
-          description: 订单id
-          required: true
-          type: integer
-      responses:
-        '200':
-          description: 关闭成功
-          schema:
-            $ref: '#/definitions/Order'
 
   /upload/image:
     post:
@@ -1634,7 +1672,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/definitions/NotificationSendInfo'
-
   /real_name_applies:
     get:
       description: 得到实名认证申请列表
@@ -1842,6 +1879,64 @@ paths:
           description: 成功
           schema:
             type: string
+  /reports:
+    get:
+      description: 得到举报信息
+      tags:
+        - Admin
+      parameters:
+        - name: target_type
+          in: query
+          description: '类型筛选 order: 订单, user: 用户, company: 企业, job: 岗位, expect_job：公开简历'
+          type: string
+        - name: status
+          in: query
+          description: '状态筛选 1：未处理，2：已处理，3：搁置'
+          type: integer
+        - name: off
+          in: query
+          description: 查找结果的偏移量（用来分页）
+          type: integer
+        - name: siz
+          in: query
+          description: 最多返回的结果
+          type: integer
+      responses:
+        200:
+          description: 返回对应的举报列表
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              list:
+                type: array
+                items:
+                  $ref: '#/definitions/Report'
+  /reports/{id}:
+    post:
+      description: 更新举报信息
+      tags:
+        - Admin
+      parameters:
+        - name: id
+          in: path
+          description: 通知id
+          required: true
+          type: integer
+        - name: status
+          in: formData
+          description: 状态
+          type: integer
+        - name: message
+          in: formData
+          description: 留言
+          type: string
+      responses:
+        200:
+          description: 成功
+          schema:
+            $ref: '#/definitions/Report'
 
 definitions:
   User:
@@ -1873,10 +1968,11 @@ definitions:
         type: string
       email_verified:
         type: integer
-      created_at:
+      role_name:
         type: string
-        format: date
-      updated_at:
+      real_name_verified:
+        type: integer
+      created_at:
         type: string
         format: date
   Auth:
@@ -2087,14 +2183,11 @@ definitions:
         type: string
       user_id:
         type: integer
-      user_nickname:
+      user_name:
         type: string
-      user_avatar:
+      pictures:
         type: string
       created_at:
-        type: string
-        format: date
-      updated_at:
         type: string
         format: date
   Company:
@@ -2153,6 +2246,8 @@ definitions:
         type: integer
       has_paid:
         type: integer
+      evaluate_status:
+        type: string
       created_at:
         type: string
         format: date
@@ -2320,6 +2415,33 @@ definitions:
       p5:
         type: string
       type:
+        type: integer
+      status:
+        type: integer
+      dealt_at:
+        type: string
+        format: date
+      message:
+        type: string
+      created_at:
+        type: string
+        format: date
+  Report:
+    type: object
+    properties:
+      id:
+        type: integer
+      user_id:
+        type: integer
+      user_name:
+        type: string
+      content:
+        type: string
+      pictures:
+        type: string
+      target_type:
+        type: string
+      target_id:
         type: integer
       status:
         type: integer
