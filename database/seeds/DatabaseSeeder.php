@@ -148,6 +148,7 @@ class DatabaseSeeder extends Seeder {
             ExpectJob::create([
                 'user_id' => $user->id,
                 'user_name' => $user->nickname,
+                'title' => $faker->catchPhrase,
                 'name' => $faker->name,
                 'photo' => Storage::url('images/test.jpg'),
                 'school' => $faker->randomElement($array = array('杭州电子科技大学', '春田花花幼稚园', '断罪小学')),

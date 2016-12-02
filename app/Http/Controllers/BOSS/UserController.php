@@ -33,26 +33,15 @@ class UserController extends Controller {
             'off' => 'integer|min:0'
         ]);
 
-        $q = $request->input('kw', '');
+        $q = $request->input('kw');
         $direction = $request->input('dir', 'asc');
         $offset = $request->input('off', 0);
         $limit = $request->input('siz', 20);
         $company_id = $request->input('company_id');
 
-        $q_array = $q ? explode(" ", trim($q)) : [];
+        $builder = User::search($q);
 
-        if ($company_id) {
-            $builder = User::where('company_id', $company_id);
-        } else {
-            $builder = User::query();
-        }
-
-        foreach ($q_array as $qi) {
-            $builder->where(function ($query) use ($qi) {
-                $query->orWhere('nickname', 'like', '%' . $qi . '%')
-                    ->orWhere('email', 'like', '%' . $qi . '%');
-            });
-        }
+        $company_id && $builder->where('company_id', $company_id);
 
         $total = $builder->count();
 

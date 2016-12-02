@@ -17,6 +17,7 @@ class CreateExpectJobsTable extends Migration
             $table->integer('user_id')->unsigned();
             $table->string('user_name');
             // 简历标题
+            $table->string('title');
             $table->string('name', 16);
             // 照片的url
             $table->string('photo')->nullable();
@@ -39,6 +40,7 @@ class CreateExpectJobsTable extends Migration
             $table->index('is_public');
             $table->index('introduction');
             $table->index('expect_location');
+            $table->index('school');
         });
     }
 

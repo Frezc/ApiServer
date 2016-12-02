@@ -72,7 +72,6 @@ class ExpectJobController extends Controller {
         $expectJobs = $builder->get();
 
         $expectJobs->each(function ($expectJob) {
-            $expectJob->bindUserName();
             $expectJob->bindExpectTime();
         });
 

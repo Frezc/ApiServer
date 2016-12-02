@@ -14,21 +14,17 @@ class ExpectJob extends Model
         $builder = ExpectJob::where('is_public', 1);
 
         if ($q) {
-            $keywords = explode(" ", trim($q));
+            $keywords = array_slice(explode(" ", trim($q)), 0, 3);
             foreach ($keywords as $keyword) {
-                $builder->orWhere('expect_location', 'like', '%' . $keyword . '%')
-                    ->orWhere('introduction', 'like', '%' . $keyword . '%');
+                $builder->where(function ($query) use ($keyword) {
+                    $query->where('title', 'like', '%' . $keyword . '%')
+                        ->orWhere('school', 'like', '%' . $keyword . '%')
+                        ->orWhere('expect_location', 'like', '%' . $keyword . '%');
+                });
             }
         }
 
         return $builder;
-    }
-
-    public function bindUserName() {
-        $user = User::find($this->user_id);
-        if ($user) {
-            $this->user_name = $user->nickname;
-        }
     }
 
     public function bindExpectTime() {
