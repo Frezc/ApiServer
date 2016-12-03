@@ -15,6 +15,9 @@ class SmsController extends Controller {
         $this->middleware('sms', ['only' => ['getSmsCode', 'bindPhone', 'resetPassword']]);
     }
 
+    /*
+     * [GET] getSmsCode
+     */
     public function getSmsCode(Request $request) {
         $this->validate($request, [
             'phone' => 'required|regex:/[0-9]+/'
@@ -37,7 +40,9 @@ class SmsController extends Controller {
         return response()->json($curl->response);
     }
 
-
+    /*
+     * [POST] registerByPhone
+     */
     public function registerByPhone(Request $request) {
         $this->validate($request, [
             'phone' => 'required|regex:/[0-9]+/|unique:users,phone',
@@ -58,6 +63,9 @@ class SmsController extends Controller {
         return 'success';
     }
 
+    /*
+     * [POST] bindPhone
+     */
     public function bindPhone(Request $request) {
         $this->validate($request, [
             'phone' => 'required|regex:/[0-9]+/|unique:users,phone'
@@ -73,6 +81,9 @@ class SmsController extends Controller {
         }
     }
 
+    /*
+     * [POST] resetPassword
+     */
     public function resetPassword(Request $request) {
         $this->validate($request, [
             'password' => 'required|between:6,32'

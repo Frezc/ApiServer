@@ -16,11 +16,9 @@ class AuthenticateController extends Controller {
         $this->middleware('jwt.auth', ['except' => ['emailAuth', 'phoneAuth', 'refreshToken', 'register']]);
     }
 
-    public function index() {
-        $users = User::all();
-        return $users;
-    }
-
+    /*
+     * [GET] refresh
+     */
     public function refreshToken(Request $request) {
         $this->validate($request, [
             'token' => 'required'
@@ -35,6 +33,9 @@ class AuthenticateController extends Controller {
         return response()->json(['user' => $user, 'token' => $newToken]);
     }
 
+    /*
+     * [POST] auth
+     */
     public function emailAuth(Request $request) {
         // 1.验证输入参数
         $this->validate($request, [
@@ -76,6 +77,9 @@ class AuthenticateController extends Controller {
         ]);
     }
 
+    /*
+     * [POST] authPhone
+     */
     public function phoneAuth(Request $request) {
         $this->validate($request, [
             'phone' => 'required|regex:/[0-9]+/',
@@ -104,6 +108,9 @@ class AuthenticateController extends Controller {
         ]);
     }
 
+    /*
+     * [POST] register
+     */
     public function register(Request $request) {
         $this->validate($request, [
             'email' => 'required|email|unique:users,email',

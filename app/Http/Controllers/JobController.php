@@ -21,6 +21,9 @@ class JobController extends Controller {
         $this->middleware('log', ['only' => ['apply', 'update']]);
     }
 
+    /*
+     * [GET] jobs/{id}
+     */
     public function get($id) {
         $job = Job::findOrFail($id);
         $job->visited++;
@@ -29,6 +32,9 @@ class JobController extends Controller {
         return response()->json($job);
     }
 
+    /*
+     * [POST] jobs/{id}
+     */
     public function update(Request $request, $id) {
         $job = Job::findOrFail($id);
         $this->validate($request, [
@@ -47,6 +53,9 @@ class JobController extends Controller {
         return response()->json($job);
     }
 
+    /*
+     * [GET] job/evaluate
+     */
     public function getJobEvaluate(Request $request) {
         $this->validate($request, [
             'off' => 'integer|min:0',
@@ -75,6 +84,9 @@ class JobController extends Controller {
         return response()->json(['total' => $total, 'list' => $evaluates]);
     }
 
+    /*
+     * [GET] jobs
+     */
     public function query(Request $request) {
         $this->validate($request, [
             'kw' => 'string',
@@ -117,6 +129,9 @@ class JobController extends Controller {
         return response()->json(['total' => $total, 'list' => $jobs]);
     }
 
+    /*
+     * [POST] jobs/{id}/apply
+     */
     public function apply(Request $request, $id) {
         $job = Job::findOrFail($id);
 

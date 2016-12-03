@@ -19,6 +19,9 @@ class ExpectJobController extends Controller {
         $this->middleware('log', ['only' => ['create', 'apply', 'update']]);
     }
 
+    /*
+     * [POST] expect_jobs
+     */
     public function create(Request $request) {
         $this->validate($request, [
             'resume_id' => 'required|integer',
@@ -49,6 +52,9 @@ class ExpectJobController extends Controller {
         return response()->json($expectJob);
     }
 
+    /*
+     * [GET] expect_jobs
+     */
     public function query(Request $request) {
         $this->validate($request, [
             'kw' => 'string',
@@ -78,6 +84,9 @@ class ExpectJobController extends Controller {
         return response()->json(['total' => $count, 'list' => $expectJobs]);
     }
 
+    /*
+     * [POST] expect_jobs/{id}/apply
+     */
     public function apply(Request $request, $id) {
         $expectJob = ExpectJob::findOrFail($id);
 
@@ -115,12 +124,18 @@ class ExpectJobController extends Controller {
         return response()->json($order);
     }
 
+    /*
+     * [GET] expect_jobs/{id}
+     */
     public function get($id) {
         $expectJob = ExpectJob::findOrFail($id);
         $expectJob->bindExpectTime();
         return response()->json($expectJob);
     }
 
+    /*
+     * [POST] expect_jobs/{id}
+     */
     public function update(Request $request, $id) {
         $expectJob = ExpectJob::findOrFail($id);
         $this->validate($request, [

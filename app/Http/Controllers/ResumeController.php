@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Resume;
 use App\Models\Uploadfile;
+use App\Models\User;
 use Illuminate\Http\Request;
 use JWTAuth;
 use Response;
@@ -17,6 +18,9 @@ class ResumeController extends Controller {
         $this->middleware('log', ['only' => ['delete', 'add', 'update']]);
     }
 
+    /*
+     * [GET] users/{id}/resumes
+     */
     public function get() {
         $user = JWTAuth::parseToken()->authenticate();
 
@@ -26,9 +30,14 @@ class ResumeController extends Controller {
         return response()->json(['total' => $total, 'list' => $resumes]);
     }
 
+    /*
+     * [DELETE] users/{id}/resumes/{resumeId}
+     */
     public function delete($userId, $resumeId) {
-        $user = JWTAuth::parseToken()->authenticate();
+        $user = User::findOrFail($userId);
+        $self = JWTAuth::parseToken()->authenticate();
 
+        $self->checkAccess($user->id);
         $resume = $user->resumes()->findOrFail($resumeId);
 
         if ($resume->photo) {
@@ -40,6 +49,9 @@ class ResumeController extends Controller {
         return response()->json($resume);
     }
 
+    /*
+     * [POST] users/{id}/resumes
+     */
     public function add(Request $request) {
         $this->validate($request, [
             'title' => 'required',
@@ -69,6 +81,9 @@ class ResumeController extends Controller {
         return response()->json($resume);
     }
 
+    /*
+     * [POST] users/{id}/resumes/{resumeId}
+     */
     public function update(Request $request, $userId, $resumeId) {
         $this->validate($request, [
             'title' => 'string',

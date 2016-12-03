@@ -16,6 +16,9 @@ class UploadController extends Controller {
         $this->middleware('log', ['only' => ['uploadImage']]);
     }
 
+    /*
+     * [POST] upload/image
+     */
     public function uploadImage(Request $request) {
         $this->validate($request, [
             'file' => 'required|mimes:jpeg,bmp,png'

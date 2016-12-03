@@ -1,6 +1,5 @@
 <?php
 
-//Route::get('users', 'AuthenticateController@index');
 //Route::get('test', 'SmsController@test');
 //Route::post('testEmail', 'EmailController@emailSend');
 Route::post('resetPassword', 'SmsController@resetPassword');//重置密码
@@ -27,14 +26,14 @@ Route::get('users/{id}/logs', 'UserController@getLogs');
 Route::get('userGetOrder','UserController@user_get_order');
 Route::get('companyGetOrder','UserController@company_get_order');
 Route::get('jobs', 'JobController@query');
-Route::get('job/apply', 'UserController@getJobApply');
-Route::get('job/completed', 'UserController@getJobCompleted');
+Route::get('job/apply', 'UserController@getJobApply');         // use [GET] users/{id}/orders instead
+Route::get('job/completed', 'UserController@getJobCompleted'); // use [GET] users/{id}/orders instead
 Route::get('jobs/{id}', 'JobController@get')->where('id', '[0-9]+');
 Route::post('jobs/{id}', 'JobController@update')->where('id', '[0-9]+');
 Route::post('jobs/{id}/apply', 'JobController@apply')->where('id', '[0-9]+');
-Route::post('job/apply', 'UserController@postJobApply');
+Route::post('job/apply', 'UserController@postJobApply');       // use [POST] jobs/{id}/apply instead
 Route::get('job/evaluate', 'JobController@getJobEvaluate');
-Route::post('job/evaluate', 'UserController@postJobEvaluate');
+Route::post('job/evaluate', 'UserController@postJobEvaluate'); // use [POST] orders/{id}/evaluate instead
 Route::post('expect_jobs', 'ExpectJobController@create');
 Route::get('expect_jobs', 'ExpectJobController@query');
 Route::get('expect_jobs/{id}', 'ExpectJobController@get')->where('id', '[0-9]+');
@@ -77,7 +76,7 @@ Route::post('upload/image', 'UploadController@uploadImage');
 
 // 每分钟一次
 Route::group(['middleware' => 'throttle:1'], function ($api) {
-    Route::get('getSmsCode', 'SmsController@getSmsCode');
+//    Route::get('getSmsCode', 'SmsController@getSmsCode');
 });
 
 // 每分钟两次
@@ -101,6 +100,7 @@ Route::group(['namespace' => 'BOSS', 'middleware' => ['jwt.auth', 'role:admin']]
     Route::post('company_applies/{id}', 'UserController@updateCompanyApply')->where('id', '[0-9]+');
     Route::get('reports', 'MessageController@getReports');
     Route::post('reports/{id}', 'MessageController@updateReport');
+    Route::post('users/{id}/role', 'UserController@updateRole');
 });
 
 Route::get('/', function () {

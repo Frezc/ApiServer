@@ -20,6 +20,9 @@ class OrderController extends Controller
         $this->middleware('log', ['only' => ['close']]);
     }
 
+    /*
+     * [GET] users/{id}/orders
+     */
     public function query(Request $request, $id) {
         $user = User::findOrFail($id);
 
@@ -65,6 +68,9 @@ class OrderController extends Controller
         return response()->json(['total' => $total, 'list' => $builder->get()]);
     }
 
+    /*
+     * [DELETE] orders/{id}
+     */
     public function close($id) {
         $order = Order::findOrFail($id);
         $self = JWTAuth::parseToken()->authenticate();
@@ -95,6 +101,9 @@ class OrderController extends Controller
         return response()->json($order);
     }
 
+    /*
+     * [GET] orders/{id}/evaluate
+     */
     public function getEvaluate($id) {
         $order = Order::findOrFail($id);
         $self = JWTAuth::parseToken()->authenticate();
@@ -106,6 +115,9 @@ class OrderController extends Controller
         return response()->json(['job_evaluate' => $jobEvaluate, 'user_evaluate' => $userEvaluate]);
     }
 
+    /*
+     * [GET] orders/{id}
+     */
     public function get($id) {
         $order = Order::findOrFail($id);
         $self = JWTAuth::parseToken()->authenticate();

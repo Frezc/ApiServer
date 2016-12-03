@@ -25,12 +25,18 @@ class UserController extends Controller {
         $this->middleware('log', ['only' => ['update', 'createRealNameApplies', 'deleteRealNameApply']]);
     }
 
+    /*
+     * [GET] self
+     */
     public function self() {
         $self = JWTAuth::parseToken()->authenticate();
         $self->bindRoleName();
         return $this->show($self->id);
     }
 
+    /*
+     * [GET] users/{id}
+     */
     public function show($id) {
         $user = User::findOrFail($id);
         return response()->json($user);
@@ -266,6 +272,9 @@ class UserController extends Controller {
         return $this->response->errorInternal('evaluate save failed');
     }
 
+    /*
+     * [POST] users/{id}
+     */
     public function update(Request $request, $id) {
         $user = User::findOrFail($id);
         $this->validate($request, [
@@ -294,6 +303,9 @@ class UserController extends Controller {
         return response()->json($user);
     }
 
+    /*
+     * [GET] users/{id}/realNameApplies
+     */
     public function getRealNameApplies($id) {
         $user = User::findOrFail($id);
         $self = JWTAuth::parseToken()->authenticate();
@@ -304,6 +316,9 @@ class UserController extends Controller {
         return response()->json($rnvs);
     }
 
+    /*
+     * [POST] users/{id}/realNameApplie
+     */
     public function createRealNameApplies(Request $request, $id) {
         $user = User::findOrFail($id);
         $this->validate($request, [
@@ -333,6 +348,9 @@ class UserController extends Controller {
         return response()->json($rnv);
     }
 
+    /*
+     * [DELETE] users/{id}/realNameApplies/{rnaid}
+     */
     public function deleteRealNameApply($id, $rnaid) {
         $user = User::findOrFail($id);
         $self = JWTAuth::parseToken()->authenticate();
@@ -344,6 +362,9 @@ class UserController extends Controller {
         return response()->json($rnv);
     }
 
+    /*
+     * [GET] users/{id}/logs
+     */
     public function getLogs(Request $request, $id) {
         $user = User::findOrFail($id);
 

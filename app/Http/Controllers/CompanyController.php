@@ -17,13 +17,20 @@ class CompanyController extends Controller {
     function __construct(){
 
         $this->middleware('jwt.auth',['only'=>['releaseJob', 'getApply', 'postApply', 'update']]);
-        $this->middleware('log', ['only' => ['postApply', 'update']]);
+        $this->middleware('log', ['only' => ['postApply', 'update', 'releaseJob']]);
+        $this->middleware('role:user', ['only' => ['releaseJob', 'postApply']]);
     }
 
+    /*
+     * [GET] companies/{id}
+     */
     public function get($id) {
         return response()->json(Company::findOrFail($id));
     }
 
+    /*
+     * [GET] releaseJob
+     */
     public function releaseJob(Request $request){
 
         $this->validate($request, [
@@ -60,7 +67,9 @@ class CompanyController extends Controller {
           return  response()->json($job);
     }
 
-
+    /*
+     * [GET] companies
+     */
     public function query(Request $request) {
         $this->validate($request, [
             'kw' => 'string',
@@ -90,6 +99,9 @@ class CompanyController extends Controller {
         return response()->json(['total' => $total, 'list' => $builder->get()]);
     }
 
+    /*
+     * [GET] companies/apply
+     */
     public function getApply(Request $request) {
         $this->validate($request, [
             'siz' => 'integer|min:0',
@@ -108,6 +120,9 @@ class CompanyController extends Controller {
         return response()->json(['total' => $total, 'list' => $list]);
     }
 
+    /*
+     * [POST] companies/apply
+     */
     public function postApply(Request $request) {
         $this->validate($request, [
             'name' => 'required|between:1,50',
@@ -140,6 +155,9 @@ class CompanyController extends Controller {
         return response()->json($companyApply);
     }
 
+    /*
+     * [POST] companies/{id}
+     */
     public function update(Request $request, $id) {
         $company = Company::findOrFail($id);
         $this->validate($request, [
