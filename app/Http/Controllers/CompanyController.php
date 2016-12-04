@@ -8,6 +8,7 @@ use App\Models\Job;
 use App\Models\JobTime;
 use App\Models\Uploadfile;
 use App\Models\User;
+use App\Models\UserCompany;
 use Illuminate\Http\Request;
 use JWTAuth;
 
@@ -37,7 +38,6 @@ class CompanyController extends Controller {
         $job->description=$request->input('description');
         $job->pay_way=$request->input('pay_way');
         $job->salary=$request->input('salary');
-        $job->salary_type=$request->input('salary_type');
         $user=JWTAuth::parseToken()->authenticate();
         $user_id=$user->id;
         $job->creator_id=$user_id;
@@ -51,11 +51,13 @@ class CompanyController extends Controller {
         $job->job_type=$request->input('job_type');
         $jobstime->start_at=$request->input('start_at');
         $jobstime->end_at=$request->input('end_at') ;
+        $jobstime->salary=$request->input('salary');
+        $jobstime->salary_type=$request->input('salary_type');
         $jobstime->number=$request->input('demanded_number');
         $job->save();
         $jobstime->job_id=$job->id;
         $jobstime->save();
-        return  response()->json($job);
+         return  response()->json($job);
     }
 
 
@@ -86,7 +88,7 @@ class CompanyController extends Controller {
 
         $total = $builder->count();
 
-        //排列
+        //排列a
         $builder->orderBy($orderby, $direction);
 
         //分页

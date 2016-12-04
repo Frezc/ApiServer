@@ -49,7 +49,7 @@ Route::post('companies/apply', 'CompanyController@postApply');
 
 Route::delete('orders/{id}', 'OrderController@close')->where('id', '[0-9]+');
 
-Route::post('releaseJob','CompanyController@releaseJob');
+Route::get('releaseJob','CompanyController@releaseJob');
 
 Route::get('umsg', 'MessageController@getUpdate');
 Route::get('messages', 'MessageController@get');

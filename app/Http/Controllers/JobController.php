@@ -88,7 +88,6 @@ class JobController extends Controller {
             'dir' => 'in:asc,desc',
             'off' => 'integer|min:0'
         ]);
-
         $q = $request->input('kw');
         $limit = $request->input('siz', 20);
         $orderby = $request->input('orderby', 'id');
@@ -119,15 +118,14 @@ class JobController extends Controller {
         return response()->json(['total' => $total, 'list' => $jobs]);
     }
 
-    public function apply(Request $request, $id) {
-        $job = Job::findOrFail($id);
-
+    public function apply(Request $request,$id) {
+        $job= Job::findOrFail($id);
         $this->validate($request, [
-            'job_time_id' => 'required|integer',
+            'job_id' => 'required|integer',
             'resume_id' => 'required|integer'
         ]);
 
-        $jobTime = $job->jobTime()->findOrFail($request->input('job_time_id'));
+        $jobTime = JobTime::findOrFail($id);
 
         $resume = Resume::findOrFail($request->input('resume_id'));
 
@@ -135,7 +133,6 @@ class JobController extends Controller {
 
         $self->checkAccess($resume->user_id);
         $expectJob = $resume->convertToExpectJob();
-
         // create order
         $order = Order::create([
             'job_id' => $job->id,
@@ -164,7 +161,6 @@ class JobController extends Controller {
             $to,
             $self->nickname . ' 申请了岗位 ' . $job->name . '。'
         ));
-
         return response()->json($order);
     }
 }

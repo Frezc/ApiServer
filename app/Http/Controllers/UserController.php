@@ -41,7 +41,7 @@ class UserController extends Controller {
         $builder = Job::query();
         $builder->orderBy(
             $request->input('orderBytime', 'created_at'),
-            $request->input('order', 'asc')
+            $request->input('order', 'desc')
         );
         $total =$builder->count();
         if ($request->has('offset')) {
