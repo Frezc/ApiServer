@@ -9,6 +9,9 @@ use App\Http\Requests;
 
 class DataController extends Controller
 {
+    /*
+     * [GET] banners
+     */
     public function getBanners() {
         $data = Data::where('key', 'banners')->first();
         if ($data) $result = json_decode($data->value);

@@ -95,4 +95,19 @@ class User extends Model implements AuthenticatableContract,
 //            $item->setVisible(['company_id', 'company_name']);
 //        });
 //    }
+
+    public static function search($kw) {
+        $q_array = $kw ? array_slice(explode(" ", trim($kw)), 0, 3) : [];
+
+        $builder = User::query();
+        foreach ($q_array as $qi) {
+            $builder->where(function ($query) use ($qi) {
+                $query->where('nickname', 'like', '%' . $qi . '%')
+                    ->orWhere('email', 'like', '%' . $qi . '%')
+                    ->orWhere('phone', 'like', '%' . $qi . '%');
+            });
+        }
+
+        return $builder;
+    }
 }

@@ -25,6 +25,11 @@ class PresetSeeder extends Seeder
             'admin' => 1
         ]);
 
+        Role::create([
+            'name' => 'banned',
+            'mode' => ''
+        ]);
+
         User::create([
             'avatar' => null,
             'email' => 'work-helper@tjz.com',

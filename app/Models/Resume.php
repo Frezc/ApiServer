@@ -16,7 +16,7 @@ class Resume extends Model
 
         return ExpectJob::create(array_merge(
             array_only($this->toArray(),
-                ['user_id', 'name', 'photo', 'school', 'birthday', 'contact', 'sex', 'expect_location', 'introduction']),
+                ['user_id', 'title', 'name', 'photo', 'school', 'birthday', 'contact', 'sex', 'expect_location', 'introduction']),
             ['is_public' => $isPublic, 'user_name' => $user->nickname]
         ));
     }

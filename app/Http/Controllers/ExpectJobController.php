@@ -16,9 +16,13 @@ class ExpectJobController extends Controller {
 
     public function __construct() {
         $this->middleware('jwt.auth');
-        $this->middleware('log', ['only' => ['create', 'apply', 'update']]);
+        $this->middleware('log', ['only' => ['create', 'apply', 'update', 'delete']]);
+        $this->middleware('role:user', ['only' => ['create', 'apply', 'update', 'delete']]);
     }
 
+    /*
+     * [POST] expect_jobs
+     */
     public function create(Request $request) {
         $this->validate($request, [
             'resume_id' => 'required|integer',
@@ -49,6 +53,9 @@ class ExpectJobController extends Controller {
         return response()->json($expectJob);
     }
 
+    /*
+     * [GET] expect_jobs
+     */
     public function query(Request $request) {
         $this->validate($request, [
             'kw' => 'string',
@@ -56,10 +63,12 @@ class ExpectJobController extends Controller {
             'orderby' => 'in:created_at',
             'user_id' => 'integer',
             'dir' => 'in:asc,desc',
-            'off' => 'integer|min:0'
+            'off' => 'integer|min:0',
+            'exist' => 'integer|in:1,2'
         ]);
 
         $user_id = $request->input('user_id');
+        $exist = $request->input('exist');
 
         $builder = ExpectJob::search($request->input('kw'));
 
@@ -69,16 +78,30 @@ class ExpectJobController extends Controller {
         $builder->orderBy($request->input('orderby', 'created_at'), $request->input('dir', 'desc'))
                 ->skip($request->input('off', 0))
                 ->limit($request->input('siz', 20));
+
+        // 判断是否为管理员，如果是则包括删除的数据
+        if ($user = $this->getAuthenticatedUser()) {
+            if ($user->isAdmin()) {
+                if ($exist == 2) {
+                    $builder->onlyTrashed();
+                } else if (!$exist) {
+                    $builder->withTrashed();
+                }
+            }
+        }
+
         $expectJobs = $builder->get();
 
         $expectJobs->each(function ($expectJob) {
-            $expectJob->bindUserName();
             $expectJob->bindExpectTime();
         });
 
         return response()->json(['total' => $count, 'list' => $expectJobs]);
     }
 
+    /*
+     * [POST] expect_jobs/{id}/apply
+     */
     public function apply(Request $request, $id) {
         $expectJob = ExpectJob::findOrFail($id);
 
@@ -116,12 +139,18 @@ class ExpectJobController extends Controller {
         return response()->json($order);
     }
 
+    /*
+     * [GET] expect_jobs/{id}
+     */
     public function get($id) {
         $expectJob = ExpectJob::findOrFail($id);
         $expectJob->bindExpectTime();
         return response()->json($expectJob);
     }
 
+    /*
+     * [POST] expect_jobs/{id}
+     */
     public function update(Request $request, $id) {
         $expectJob = ExpectJob::findOrFail($id);
         $this->validate($request, [
@@ -140,6 +169,17 @@ class ExpectJobController extends Controller {
 
         $expectJob->update(array_only($request->all(),
             ['name', 'photo', 'school', 'introduction', 'birthday', 'contact', 'sex', 'expect_location']));
+        return response()->json($expectJob);
+    }
+
+    /*
+     * [POST] expect_jobs/{id}
+     */
+    public function delete($id) {
+        $expectJob = ExpectJob::findOrFail($id);
+        $self = JWTAuth::parseToken()->authenticate();
+        $expectJob->makeSureAccess($self);
+        $expectJob->delete();
         return response()->json($expectJob);
     }
 }

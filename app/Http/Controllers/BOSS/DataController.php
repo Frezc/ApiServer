@@ -13,6 +13,9 @@ class DataController extends Controller {
         $this->middleware('log', ['only' => ['setData']]);
     }
 
+    /*
+     * [POST] data
+     */
     public function setData(Request $request) {
         $this->validate($request, [
             'key' => 'required',

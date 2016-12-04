@@ -15,6 +15,7 @@ use App\Models\Company;
 use App\Models\CompanyApply;
 use App\Models\Order;
 use App\Models\RealNameVerification;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -24,6 +25,9 @@ class UserController extends Controller {
         $this->middleware('log', ['only' => ['updateRealNameApply', 'updateCompanyApply']]);
     }
 
+    /*
+     * [GET] users
+     */
     public function query(Request $request) {
         $this->validate($request, [
             'kw' => 'string',
@@ -33,26 +37,15 @@ class UserController extends Controller {
             'off' => 'integer|min:0'
         ]);
 
-        $q = $request->input('kw', '');
+        $q = $request->input('kw');
         $direction = $request->input('dir', 'asc');
         $offset = $request->input('off', 0);
         $limit = $request->input('siz', 20);
         $company_id = $request->input('company_id');
 
-        $q_array = $q ? explode(" ", trim($q)) : [];
+        $builder = User::search($q);
 
-        if ($company_id) {
-            $builder = User::where('company_id', $company_id);
-        } else {
-            $builder = User::query();
-        }
-
-        foreach ($q_array as $qi) {
-            $builder->where(function ($query) use ($qi) {
-                $query->orWhere('nickname', 'like', '%' . $qi . '%')
-                    ->orWhere('email', 'like', '%' . $qi . '%');
-            });
-        }
+        $company_id && $builder->where('company_id', $company_id);
 
         $total = $builder->count();
 
@@ -64,11 +57,15 @@ class UserController extends Controller {
 
         $users->each(function ($user) {
             $user->setHidden(['password']);
+            $user->bindRoleName();
         });
 
         return response()->json(['total' => $total, 'list' => $users]);
     }
 
+    /*
+     * [GET] real_name_applies
+     */
     public function getAllRealNameApplies(Request $request) {
         $this->validate($request, [
             'status' => 'integer|in:1,2,3',
@@ -92,6 +89,9 @@ class UserController extends Controller {
         return response()->json(['total' => $total, 'list' => $result]);
     }
 
+    /*
+     * [GET] company_applies
+     */
     public function getAllCompanyApplies(Request $request) {
         $this->validate($request, [
             'status' => 'integer|in:1,2,3',
@@ -115,6 +115,9 @@ class UserController extends Controller {
         return response()->json(['total' => $total, 'list' => $result]);
     }
 
+    /*
+     * [GET] orders
+     */
     public function getOrders(Request $request) {
         $this->validate($request, [
             'siz' => 'integer|min:0',
@@ -136,6 +139,9 @@ class UserController extends Controller {
         return response()->json(['total' => $total, 'list' => $result]);
     }
 
+    /*
+     * [POST] real_name_applies/{id}
+     */
     public function updateRealNameApply(Request $request, $id) {
         $rna = RealNameVerification::findOrFail($id);
         $this->validate($request, [
@@ -166,6 +172,9 @@ class UserController extends Controller {
         return response()->json($rna);
     }
 
+    /*
+     * [POST] company_applies/{id}
+     */
     public function updateCompanyApply(Request $request, $id) {
         $ca = CompanyApply::findOrFail($id);
         $this->validate($request, [
@@ -199,5 +208,21 @@ class UserController extends Controller {
 
         $ca->save();
         return response()->json($ca);
+    }
+
+    /*
+     * [POST] users/{id}/role
+     */
+    public function updateRole(Request $request, $id) {
+        $user = User::findOrFail($id);
+        $this->validate($request, [
+            'role' => 'required|in:user,banned'
+        ]);
+        $roleName = $request->input('role');
+        $role = Role::where('name', $roleName)->first();
+        $user->role_id = $role->id;
+        $user->save();
+        $user->bindRoleName();
+        return response()->json($user);
     }
 }

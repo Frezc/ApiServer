@@ -4,12 +4,17 @@ namespace App\Models;
 
 use App\Exceptions\MsgException;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Job extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'tjz_jobs';
     protected $guarded = ['id'];
     protected $hidden = ['updated_at'];
+
+    protected $dates = ['deleted_at'];
 
     public function jobTime() {
         return JobTime::where('job_id', $this->id);
@@ -31,12 +36,14 @@ class Job extends Model
     public static function search($keyword) {
         $builder = Job::query();
         if ($keyword) {
-            $q_array = explode(" ", trim($keyword));
+            $q_array = array_slice(explode(" ", trim($keyword)), 0, 3);
 
             foreach ($q_array as $qi) {
-                $builder->orWhere('name', 'like', '%' . $qi . '%')
-                    ->orWhere('description', 'like', '%' . $qi . '%')
-                    ->orWhere('company_name', 'like', '%' . $qi . '%');
+                $builder->where(function ($query) use ($qi) {
+                    $query->where('name', 'like', '%' . $qi . '%')
+                        ->orWhere('creator_name', 'like', '%' . $qi . '%')
+                        ->orWhere('company_name', 'like', '%' . $qi . '%');
+                });
             }
         }
 

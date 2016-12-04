@@ -18,6 +18,9 @@ class MessageController extends Controller {
         $this->middleware('log', ['only' => ['postNotifications', 'updateFeedback', 'updateReport']]);
     }
 
+    /*
+     * [POST] notifications
+     */
     public function postNotifications(Request $request) {
         $this->validate($request, [
             'content' => 'required',
@@ -37,6 +40,9 @@ class MessageController extends Controller {
         return 'success';
     }
 
+    /*
+     * [GET] notifications/history
+     */
     public function getHistory(Request $request) {
         $this->validate($request, [
             'off' => 'integer|min:0',
@@ -66,6 +72,9 @@ class MessageController extends Controller {
         return response()->json(['total' => $total, 'list' => $list]);
     }
 
+    /*
+     * [GET] feedbacks
+     */
     public function getFeedbacks(Request $request) {
         $this->validate($request, [
             'off' => 'integer|min:0',
@@ -92,6 +101,9 @@ class MessageController extends Controller {
         return response()->json(['total' => $total, 'list' => $list]);
     }
 
+    /*
+     * [POST] feedbacks/{id}
+     */
     public function updateFeedback(Request $request, $id) {
         $fb = Feedback::findOrFail($id);
         $this->validate($request, [
@@ -114,6 +126,9 @@ class MessageController extends Controller {
         return response()->json($fb);
     }
 
+    /*
+     * [GET] reports
+     */
     public function getReports(Request $request) {
         $this->validate($request, [
             'target_type' => 'in:order,user,company,job,expect_job',
@@ -140,6 +155,9 @@ class MessageController extends Controller {
         return response()->json(['total' => $total, 'list' => $list]);
     }
 
+    /*
+     * [POST] reports/{id}
+     */
     public function updateReport(Request $request, $id) {
         $report = Report::findOrFail($id);
         $this->validate($request, [

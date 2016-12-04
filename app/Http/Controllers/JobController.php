@@ -17,10 +17,14 @@ use JWTAuth;
 class JobController extends Controller {
 
     public function __construct() {
-        $this->middleware('jwt.auth', ['only' => ['apply']]);
-        $this->middleware('log', ['only' => ['apply', 'update']]);
+        $this->middleware('jwt.auth', ['only' => ['apply', 'update', 'delete']]);
+        $this->middleware('log', ['only' => ['apply', 'update', 'delete']]);
+        $this->middleware('role:user', ['only' => ['apply', 'update', 'delete']]);
     }
 
+    /*
+     * [GET] jobs/{id}
+     */
     public function get($id) {
         $job = Job::findOrFail($id);
         $job->visited++;
@@ -29,6 +33,9 @@ class JobController extends Controller {
         return response()->json($job);
     }
 
+    /*
+     * [POST] jobs/{id}
+     */
     public function update(Request $request, $id) {
         $job = Job::findOrFail($id);
         $this->validate($request, [
@@ -47,34 +54,40 @@ class JobController extends Controller {
         return response()->json($job);
     }
 
-    public function getJobEvaluate(Request $request) {
+    /*
+     * [GET] jobs/{id}/evaluate
+     */
+    public function getEvaluate(Request $request, $id) {
+        $job = Job::findOrFail($id);
         $this->validate($request, [
             'off' => 'integer|min:0',
-            'siz' => 'required|min:0|integer',
-            'job_id' => 'required'
+            'siz' => 'min:0|integer'
         ]);
 
         // 第二个参数为默认值
         $offset = $request->input('off', 0);
-        $job_id = $request->query('job_id');
-        $limit = $request->input('siz');
+        $limit = $request->input('siz', 20);
 
-        $builder = JobEvaluate::where('job_id', $job_id);
+        $builder = JobEvaluate::where('job_id', $job->id);
 
         $total = $builder->count();
 
-        $evaluates = $builder->skip($offset)->limit($limit)->get();
+        $evaluates = $builder
+            ->skip($offset)
+            ->limit($limit)
+            ->orderBy('id', 'desc')
+            ->get();
 
         foreach ($evaluates as $evaluate) {
-            $eva_user = User::find($evaluate->user_id);
-            $evaluate->user_nickname = $eva_user->nickname;
-            $evaluate->user_avatar = $eva_user->avatar;
-            $evaluate->setHidden(['id', 'job_id']);
+            $evaluate->makeHidden('job_id');
         }
 
         return response()->json(['total' => $total, 'list' => $evaluates]);
     }
 
+    /*
+     * [GET] jobs
+     */
     public function query(Request $request) {
         $this->validate($request, [
             'kw' => 'string',
@@ -83,7 +96,8 @@ class JobController extends Controller {
             'company_id' => 'integer',
             'user_id' => 'integer',
             'dir' => 'in:asc,desc',
-            'off' => 'integer|min:0'
+            'off' => 'integer|min:0',
+            'exist' => 'integer|in:1,2'
         ]);
         $q = $request->input('kw');
         $limit = $request->input('siz', 20);
@@ -92,6 +106,7 @@ class JobController extends Controller {
         $offset = $request->input('off', 0);
         $company_id = $request->input('company_id');
         $user_id = $request->input('user_id');
+        $exist = $request->input('exist');
 
         $builder = Job::search($q);
 
@@ -107,6 +122,17 @@ class JobController extends Controller {
         $builder->skip($offset);
         $builder->limit($limit);
 
+        // 判断是否为管理员，如果是则包括删除的数据
+        if ($user = $this->getAuthenticatedUser()) {
+            if ($user->isAdmin()) {
+                if ($exist == 2) {
+                    $builder->onlyTrashed();
+                } else if (!$exist) {
+                    $builder->withTrashed();
+                }
+            }
+        }
+
         $jobs = $builder->get();
         
         foreach ($jobs as $job) {
@@ -116,8 +142,12 @@ class JobController extends Controller {
         return response()->json(['total' => $total, 'list' => $jobs]);
     }
 
-    public function apply(Request $request,$id) {
-        $job= Job::findOrFail($id);
+    /*
+     * [POST] jobs/{id}/apply
+     */
+    public function apply(Request $request, $id) {
+        $job = Job::findOrFail($id);
+
         $this->validate($request, [
             'job_id' => 'required|integer',
             'resume_id' => 'required|integer'
@@ -160,5 +190,17 @@ class JobController extends Controller {
             $self->nickname . ' 申请了岗位 ' . $job->name . '。'
         ));
         return response()->json($order);
+    }
+
+    /*
+     * [DELETE] jobs/{id}
+     */
+    public function delete($id) {
+        $job = Job::findOrFail($id);
+        $self = JWTAuth::parseToken()->authenticate();
+        $job->checkAccess($self);
+
+        $job->delete();
+        return response()->json($job);
     }
 }

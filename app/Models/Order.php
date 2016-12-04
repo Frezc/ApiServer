@@ -41,6 +41,14 @@ class Order extends Model
         throw new MsgException('You have no access to this order.', 401);
     }
 
+    public function isRecruiter(User $user) {
+        if ($this->recruiter_type == 1) {
+            return $this->applicant_id == $user->company_id;
+        } else {
+            return $this->applicant_id == $user->id;
+        }
+    }
+
     public static function closeTypeText($type) {
         switch ($type) {
             case 1: return '应聘者';

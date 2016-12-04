@@ -17,12 +17,18 @@ class MessageController extends Controller
         $this->middleware('log', ['only' => ['postConversation', 'postFeedback']]);
     }
 
+    /*
+     * [GET] umsg
+     */
     public function getUpdate() {
         $self = JWTAuth::parseToken()->authenticate();
         $count = Message::where('receiver_id', $self->id)->sum('unread');
         return response()->json(['messages_count' => $count]);
     }
 
+    /*
+     * [GET] messages
+     */
     public function get(Request $request) {
         $this->validate($request, [
             'off' => 'integer',
@@ -42,6 +48,9 @@ class MessageController extends Controller
         return response()->json(['total' => $total, 'list' => $list]);
     }
 
+    /*
+     * [GET] notifications/{id}
+     */
     public function getNotification(Request $request, $id) {
         $message = Message::findOrFail($id);
 
@@ -67,6 +76,9 @@ class MessageController extends Controller
         return response()->json(['total' => $total, 'list' => $list]);
     }
 
+    /*
+     * [GET] conversations
+     */
     public function getConversation(Request $request) {
         $this->validate($request, [
             'target_id' => 'required|integer',
@@ -95,6 +107,9 @@ class MessageController extends Controller
         return response()->json(['total' => $total, 'list' => $list]);
     }
 
+    /*
+     * [GET] conversations
+     */
     public function postConversation(Request $request) {
         $this->validate($request, [
             'receiver_id' => 'required|integer',
@@ -140,6 +155,9 @@ class MessageController extends Controller
         return response()->json($conversation);
     }
 
+    /*
+     * [POST] feedbacks
+     */
     public function postFeedback(Request $request) {
         $this->validate($request, [
             'content' => 'required|string',

@@ -29,13 +29,17 @@ class Company extends Model
     }
 
     public static function search($keywords) {
-$builder = Company::query()
-->when($keywords, function ($query) use ($keywords) {
-                $q_array = explode(" ", trim($keywords));
+
+        $builder = Company::query()
+            ->when($keywords, function ($query) use ($keywords) {
+                $q_array = array_slice(explode(" ", trim($keywords)), 0, 3);
                 foreach ($q_array as $qi) {
-                    $query->orWhere('name', 'like', '%' . $qi . '%')
-                        ->orWhere('description', 'like', '%' . $qi . '%')
-                        ->orWhere('contact_person', 'like', '%' . $qi . '%');
+                    $query->where(function ($query) use ($qi) {
+                        $query->where('name', 'like', '%' . $qi . '%')
+                            ->orWhere('address', 'like', '%' . $qi . '%')
+                            ->orWhere('contact', 'like', '%' . $qi . '%')
+                            ->orWhere('contact_person', 'like', '%' . $qi . '%');
+                    });
                 }
 return $query;
 });
