@@ -43,7 +43,6 @@ class CompanyController extends Controller {
           $user=JWTAuth::parseToken()->authenticate();
           $user_id=$user->id;
           $job->creator_id=$user_id;
-//          $user_company=UserCompany::getCompanyId($user_id);
           $company_id=$user->company_id;
           $company=Company::find($company_id);
           $job->company_id=$company_id;

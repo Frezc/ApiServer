@@ -34,12 +34,10 @@ class CreateTjzJobsTable extends Migration
             // 创建者
             $table->integer('creator_id')->unsigned();
             $table->string('creator_name');
-<<<<<<< HEAD
-            $table->integer('salary')->unsigned();
-=======
+
             // 工资
             $table->string('salary')->nullable();
->>>>>>> 20e6a2f46d4ab5fcffccf349a64a69f2e940774a
+
             // 岗位是否活跃，0表示不活跃（下架）,1表示活跃
             $table->tinyInteger('active')->default(1);
              //工作类型

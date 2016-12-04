@@ -53,7 +53,7 @@ class UserController extends Controller {
         $builder->orderBy(
             $request->input('orderBytime', 'created_at'),
 
-            $request->input('order', 'asc')
+            $request->input('order', 'desc')
 
         );
         $total =$builder->count();
