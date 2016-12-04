@@ -4,7 +4,7 @@ namespace App\Http\Controllers\BOSS;
 
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Request;
+use Illuminate\Http\Request;
 use App\Models\Data;
 
 class DataController extends Controller {
@@ -16,13 +16,13 @@ class DataController extends Controller {
     public function setData(Request $request) {
         $this->validate($request, [
             'key' => 'required',
-            'data' => 'required'
+            'value' => 'required'
         ]);
 
         $key = $request->input('key');
-        $data = $request->input('data');
+        $value = $request->input('value');
 
-        Data::updateOrCreate(['key' => $key], ['data' => $data]);
+        Data::updateOrCreate(['key' => $key], ['value' => $value]);
         return '保存成功';
     }
 }

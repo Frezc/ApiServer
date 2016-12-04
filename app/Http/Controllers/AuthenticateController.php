@@ -31,6 +31,7 @@ class AuthenticateController extends Controller {
         $newToken = JWTAuth::refresh($token);
         
         $user = JWTAuth::authenticate($newToken);
+        $user->bindRoleName();
         return response()->json(['user' => $user, 'token' => $newToken]);
     }
 
@@ -43,7 +44,7 @@ class AuthenticateController extends Controller {
 
         // 2.获得输入的参数(如果要在这个方法里使用)
         $email = $request->input('email');
-
+       
         // 3.处理逻辑
         // 验证email和password是否对应
         $credentials = $request->only('email', 'password');
@@ -62,9 +63,11 @@ class AuthenticateController extends Controller {
         $user = User::where('email', $request->input('email'))->firstOrFail();
         if ($user != null) {
             if ($user->email_verified == 0) {
-                return reponse()->json(['error' => 'email need to be verified.'], 430);
+                return response()->json(['error' => 'email need to be verified.'], 430);
             }
         }
+
+        $user->bindRoleName();
 
         // 4.登陆成功，返回json
         return response()->json([
@@ -92,8 +95,11 @@ class AuthenticateController extends Controller {
             return response()->json(['error' => 'could_not_create_token'], 500);
         }
 
+        $user = User::where('phone', $request->input('phone'))->firstOrFail();
+        $user->bindRoleName();
+
         return response()->json([
-            'user' => User::where('phone', $request->input('phone'))->firstOrFail(),
+            'user' => $user,
             'token' => $token
         ]);
     }
@@ -106,6 +112,7 @@ class AuthenticateController extends Controller {
         ]);
 
         $user = new User;
+        
         $user->email = $request->input('email');
         $user->nickname = $request->input('nickname');
         $user->password = Hash::make($request->input('password'));

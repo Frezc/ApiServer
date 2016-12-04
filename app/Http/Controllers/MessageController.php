@@ -32,7 +32,6 @@ class MessageController extends Controller
         $offset = $request->input('off', 0);
         $limit = $request->input('siz', 20);
         $self = JWTAuth::parseToken()->authenticate();
-
         $builder = Message::where('receiver_id', $self->id);
         $total = $builder->count();
         $list = $builder

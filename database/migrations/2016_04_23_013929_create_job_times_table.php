@@ -26,10 +26,11 @@ class CreateJobTimesTable extends Migration
             // 申请截止时间（默认为开始时间）
             $table->integer('apply_end_at')->unsigned();
             // 开始时间
-            $table->integer('start_at')->unsigned();
+            $table->integer('start_at')->unsigned()->nullable();
             // 结束时间
-            $table->integer('end_at')->unsigned()->nullable();
 
+            $table->integer('end_at')->unsigned()->nullable();
+        
 //            $table->smallInteger('year')->unsigned();
 //            $table->tinyInteger('month')->unsigned();
 //            $table->tinyInteger('dayS')->unsigned();

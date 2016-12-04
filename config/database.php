@@ -46,7 +46,7 @@ return [
 
     'connections' => [
 
-        'sqlite' => [
+            'sqlite' => [
             'driver'   => 'sqlite',
             'database' => storage_path('database.sqlite'),
             'prefix'   => '',

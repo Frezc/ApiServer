@@ -7,14 +7,15 @@ use App\Models\CompanyApply;
 use App\Models\Job;
 use App\Models\JobTime;
 use App\Models\Uploadfile;
-use App\Models\User;
 use App\Models\UserCompany;
+use App\Models\User;
 use Illuminate\Http\Request;
 use JWTAuth;
 
 class CompanyController extends Controller {
 
     function __construct(){
+
         $this->middleware('jwt.auth',['only'=>['releaseJob', 'getApply', 'postApply', 'update']]);
         $this->middleware('log', ['only' => ['postApply', 'update']]);
     }
@@ -32,32 +33,32 @@ class CompanyController extends Controller {
             'salary'=>'integer|min:0',
             'demanded_number'=>'integer|min:0'
         ]);
-        $job=new Job;
-        $jobstime =new JobTime;
-        $job->name=$request->input('name');
-        $job->description=$request->input('description');
-        $job->pay_way=$request->input('pay_way');
-        $job->salary=$request->input('salary');
-        $user=JWTAuth::parseToken()->authenticate();
-        $user_id=$user->id;
-        $job->creator_id=$user_id;
-        $user_company=UserCompany::getCompanyId($user_id);
-        $company_id=$user_company[0];
-        $company=Company::find($company_id);
-        $job->company_id=$company_id;
-        $job->company_name=$company->name;
-        $job->creator_name=$company->contact_person;
-        $job->contact=$company->contact;
-        $job->job_type=$request->input('job_type');
-        $jobstime->start_at=$request->input('start_at');
-        $jobstime->end_at=$request->input('end_at') ;
-        $jobstime->salary=$request->input('salary');
-        $jobstime->salary_type=$request->input('salary_type');
-        $jobstime->number=$request->input('demanded_number');
-        $job->save();
-        $jobstime->job_id=$job->id;
-        $jobstime->save();
-         return  response()->json($job);
+          $job=new Job;
+          $jobstime =new JobTime;
+          $job->name=$request->input('name');
+          $job->description=$request->input('description');
+          $job->pay_way=$request->input('pay_way');
+          $job->salary=$request->input('salary');
+          $job->salary_type=$request->input('salary_type');
+          $user=JWTAuth::parseToken()->authenticate();
+          $user_id=$user->id;
+          $job->creator_id=$user_id;
+//          $user_company=UserCompany::getCompanyId($user_id);
+          $company_id=$user->company_id;
+          $company=Company::find($company_id);
+          $job->company_id=$company_id;
+          $job->company_name=$company->name;
+          $job->creator_name=$company->contact_person;
+          $job->contact=$company->contact;
+          $job->job_type=$request->input('job_type');
+          $jobstime->start_at=$request->input('start_at');
+          $jobstime->end_at=$request->input('end_at') ;
+          $jobstime->number=$request->input('demanded_number');
+          $job->save();
+          $jobstime->job_id=$job->id;
+          $jobstime->save();
+          return  response()->json($job);
+
     }
 
 
@@ -66,7 +67,6 @@ class CompanyController extends Controller {
             'kw' => 'string',
             'siz' => 'integer|min:0',
             'orderby' => 'in:id,created_at',
-            'user_id' => 'integer',
             'dir' => 'in:asc,desc',
             'off' => 'integer|min:0'
         ]);
@@ -76,15 +76,8 @@ class CompanyController extends Controller {
         $orderby = $request->input('orderby', 'id');
         $direction = $request->input('dir', 'asc');
         $offset = $request->input('off', 0);
-        $user_id = $request->input('user_id');
 
-        if ($user_id) {
-            $user = User::find($user_id);
-            if ($user) $builder = $user->companies();
-            else return response()->json(['total' => 0, 'list' => []]);
-        } else {
-            $builder = Company::search($keywords);
-        }
+        $builder = Company::search($keywords);
 
         $total = $builder->count();
 

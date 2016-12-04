@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\PushNotifications;
+use App\Models\Company;
 use App\Models\Job;
 use App\Models\JobEvaluate;
 use App\Models\JobTime;
@@ -10,7 +11,6 @@ use App\Models\Message;
 use App\Models\Order;
 use App\Models\Resume;
 use App\Models\User;
-use App\Models\UserCompany;
 use Illuminate\Http\Request;
 use JWTAuth;
 
@@ -25,9 +25,6 @@ class JobController extends Controller {
         $job = Job::findOrFail($id);
         $job->visited++;
         $job->save();
-        $jobEva = JobEvaluate::where('job_id', $job->id);
-        $job->number_evaluate = $jobEva->count();
-        $job->average_score = $jobEva->avg('score');
         $job->time = JobTime::where('job_id', $job->id)->get();
         return response()->json($job);
     }
@@ -111,6 +108,7 @@ class JobController extends Controller {
         $builder->limit($limit);
 
         $jobs = $builder->get();
+        
         foreach ($jobs as $job) {
             $job->number_evaluate = JobEvaluate::where('job_id', $job->id)->count();
             $job->average_score = JobEvaluate::where('job_id', $job->id)->avg('score');
@@ -154,7 +152,7 @@ class JobController extends Controller {
 
         $to = $job->creator_id;
         if ($job->company_id) {
-            $to = UserCompany::getUserIds($job->company_id);
+            $to = Company::getUserIds($job->company_id);
         }
         $this->dispatch(new PushNotifications(
             Message::getSender(Message::$WORK_HELPER),

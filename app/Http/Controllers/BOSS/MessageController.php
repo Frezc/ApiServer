@@ -7,13 +7,15 @@ use App\Jobs\PushNotifications;
 use App\Models\Feedback;
 use App\Models\Log;
 use App\Models\Message;
+use App\Models\Report;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use JWTAuth;
 
 class MessageController extends Controller {
 
     public function __construct() {
-        $this->middleware('log', ['only' => ['postNotifications']]);
+        $this->middleware('log', ['only' => ['postNotifications', 'updateFeedback', 'updateReport']]);
     }
 
     public function postNotifications(Request $request) {
@@ -99,6 +101,62 @@ class MessageController extends Controller {
         ]);
 
         $fb->update(array_only($request->all(), ['type', 'status', 'message']));
+
+        $status = $request->input('status');
+        if ($status == 2) {
+            $this->dispatch(new PushNotifications(
+                Message::getSender(Message::$NOTI_HELPER), $fb->user_id, '反馈已被处理！感谢您对本产品的支持。'));
+        }
+        if ($status == 2 || $status == 3) {
+            $fb->dealt_at = Carbon::now();
+            $fb->save();
+        }
         return response()->json($fb);
+    }
+
+    public function getReports(Request $request) {
+        $this->validate($request, [
+            'target_type' => 'in:order,user,company,job,expect_job',
+            'status' => 'in:1,2,3',
+            'off' => 'integer|min:0',
+            'siz' => 'min:0|integer'
+        ]);
+
+        $type = $request->input('target_type');
+        $status = $request->input('status');
+        $offset = $request->input('off', 0);
+        $size = $request->input('siz', 20);
+
+        $builder = Report::query();
+        $status && $builder->where('status', $status);
+        $type && $builder->where('target_type', $type);
+
+        $total = $builder->count();
+        $list = $builder
+            ->orderBy('id', 'desc')
+            ->skip($offset)
+            ->limit($size)
+            ->get();
+        return response()->json(['total' => $total, 'list' => $list]);
+    }
+
+    public function updateReport(Request $request, $id) {
+        $report = Report::findOrFail($id);
+        $this->validate($request, [
+            'status' => 'in:1,2,3',
+            'message' => 'string'
+        ]);
+
+        $report->update(array_only($request->all(), ['status', 'message']));
+        $status = $request->input('status');
+        if ($status == 2) {
+            $this->dispatch(new PushNotifications(
+                Message::getSender(Message::$NOTI_HELPER), $report->user_id, '举报已被处理！感谢您对本产品的支持。'));
+        }
+        if ($status == 2 || $status == 3) {
+            $report->dealt_at = Carbon::now();
+            $report->save();
+        }
+        return response()->json($report);
     }
 }

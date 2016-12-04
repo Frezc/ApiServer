@@ -18,13 +18,14 @@ Route::get('users/{id}/resumes', 'ResumeController@get');//获取简历
 Route::delete('users/{id}/resumes/{resumeId}', 'ResumeController@delete');//建立删除
 Route::post('users/{id}/resumes', 'ResumeController@add');//添加简历
 Route::post('users/{id}/resumes/{resumeId}', 'ResumeController@update');//更新简历
-Route::get('users/{id}/orders', 'OrderController@get');//
+Route::get('users/{id}/orders', 'OrderController@query');//
 //Route::post('avatar', 'AuthenticateController@updateAvatar');
 Route::get('users/{id}/realNameApplies', 'UserController@getRealNameApplies');
 Route::post('users/{id}/realNameApplies', 'UserController@createRealNameApplies');
 Route::delete('users/{id}/realNameApplies/{rnaid}', 'UserController@deleteRealNameApply');
 Route::get('users/{id}/logs', 'UserController@getLogs');
-
+Route::get('userGetOrder','UserController@user_get_order');
+Route::get('companyGetOrder','UserController@company_get_order');
 Route::get('jobs', 'JobController@query');
 Route::get('job/apply', 'UserController@getJobApply');
 Route::get('job/completed', 'UserController@getJobCompleted');
@@ -47,9 +48,12 @@ Route::post('companies/{id}', 'CompanyController@update')->where('id', '[0-9]+')
 Route::get('companies/apply', 'CompanyController@getApply');
 Route::post('companies/apply', 'CompanyController@postApply');
 
-Route::delete('orders/{id}', 'OrderController@close')->where('id', '[0-9]+');
-
 Route::get('releaseJob','CompanyController@releaseJob');
+
+
+Route::delete('orders/{id}', 'OrderController@close')->where('id', '[0-9]+');
+Route::get('orders/{id}', 'OrderController@get')->where('id', '[0-9]+');
+Route::get('orders/{id}/evaluate', 'OrderController@getEvaluate')->where('id', '[0-9]+');
 
 Route::get('umsg', 'MessageController@getUpdate');
 Route::get('messages', 'MessageController@get');
@@ -94,6 +98,10 @@ Route::group(['namespace' => 'BOSS', 'middleware' => ['jwt.auth', 'role:admin']]
     Route::get('feedbacks', 'MessageController@getFeedbacks');
     Route::post('data', 'DataController@setData');
     Route::post('feedbacks/{id}', 'MessageController@updateFeedback');
+    Route::post('real_name_applies/{id}', 'UserController@updateRealNameApply')->where('id', '[0-9]+');
+    Route::post('company_applies/{id}', 'UserController@updateCompanyApply')->where('id', '[0-9]+');
+    Route::get('reports', 'MessageController@getReports');
+    Route::post('reports/{id}', 'MessageController@updateReport');
 });
 
 Route::get('/', function () {

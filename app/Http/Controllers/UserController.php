@@ -8,6 +8,7 @@ use App\Models\JobApply;
 use App\Models\JobCompleted;
 use App\Models\JobEvaluate;
 use App\Models\Log;
+use App\Models\Order;
 use App\Models\RealNameVerification;
 use App\Models\Resume;
 use App\Models\Uploadfile;
@@ -26,22 +27,34 @@ class UserController extends Controller {
 
     public function self() {
         $self = JWTAuth::parseToken()->authenticate();
+        $self->bindRoleName();
         return $this->show($self->id);
     }
 
     public function show($id) {
         $user = User::findOrFail($id);
-//        $user->companies = $user->getCompanies();
         return response()->json($user);
     }
+  public  function  user_get_order(Request $request){
 
+         $user=JWTAuth::parseToken()->authenticate();
+         $builder=Order::orderBy('created_at','desc')->get()->where('applicant_id',$user->id);
+         return response()->json($builder);
+}
+    public  function  company_get_order(Request $request){
+        $user=JWTAuth::parseToken()->authenticate();
+        $builder=Order::orderBy('created_at','desc')->get()->where('recruiter_id',$user->id);
+        return response()->json($builder);
+    }
 
     public function mainPage(Request $request)
     {
         $builder = Job::query();
         $builder->orderBy(
             $request->input('orderBytime', 'created_at'),
-            $request->input('order', 'desc')
+
+            $request->input('order', 'asc')
+
         );
         $total =$builder->count();
         if ($request->has('offset')) {
@@ -50,7 +63,8 @@ class UserController extends Controller {
         $builder->limit($request->input('limit'));
         return response()->json(['list'=> $builder->get(), 'total'=>  $total]);
 
-    }
+
+}
 
 
     public function idCardVerify(Request $request) {

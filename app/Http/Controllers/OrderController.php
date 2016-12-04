@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\MsgException;
 use App\Jobs\PushNotifications;
+use App\Models\JobEvaluate;
 use App\Models\Message;
 use App\Models\Order;
 use App\Models\User;
 use App\Models\UserCompany;
+use App\Models\UserEvaluate;
 use Illuminate\Http\Request;
 use JWTAuth;
 
@@ -18,7 +20,7 @@ class OrderController extends Controller
         $this->middleware('log', ['only' => ['close']]);
     }
 
-    public function get(Request $request, $id) {
+    public function query(Request $request, $id) {
         $user = User::findOrFail($id);
 
         $this->validate($request, [
@@ -70,7 +72,7 @@ class OrderController extends Controller
         if ($order->applicant_id == $self->id) {
             $close_type = 1;
         } elseif ($order->recruiter_type == 0 && $order->recruiter_id == $self->id
-            || $order->recruiter_type == 1 && UserCompany::checkUC($self->id, $order->recruiter_id)) {
+            || $order->recruiter_type == 1 && $self->company_id == $order->recruiter_id) {
             $close_type = 2;
         } elseif ($self->isAdmin()) {
             $close_type = 3;
@@ -90,6 +92,26 @@ class OrderController extends Controller
         $order->close_type = $close_type;
         $order->status = 3;
         $order->save();
+        return response()->json($order);
+    }
+
+    public function getEvaluate($id) {
+        $order = Order::findOrFail($id);
+        $self = JWTAuth::parseToken()->authenticate();
+        $order->makeSureAccess($self);
+
+        $jobEvaluate = JobEvaluate::where('order_id', $order->id)->first();
+        $userEvaluate = UserEvaluate::where('order_id', $order->id)->first();
+
+        return response()->json(['job_evaluate' => $jobEvaluate, 'user_evaluate' => $userEvaluate]);
+    }
+
+    public function get($id) {
+        $order = Order::findOrFail($id);
+        $self = JWTAuth::parseToken()->authenticate();
+        $order->makeSureAccess($self);
+        $order->bindExpectJob();
+
         return response()->json($order);
     }
 }
