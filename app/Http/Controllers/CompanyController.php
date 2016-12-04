@@ -33,6 +33,7 @@ class CompanyController extends Controller {
             'salary'=>'integer|min:0',
             'demanded_number'=>'integer|min:0'
         ]);
+
           $job=new Job;
           $jobstime =new JobTime;
           $job->name=$request->input('name');
@@ -41,8 +42,7 @@ class CompanyController extends Controller {
           $job->salary=$request->input('salary');
           $job->salary_type=$request->input('salary_type');
           $user=JWTAuth::parseToken()->authenticate();
-          $user_id=$user->id;
-          $job->creator_id=$user_id;
+          $job->creator_id=$user->id;
           $company_id=$user->company_id;
           $company=Company::find($company_id);
           $job->company_id=$company_id;
@@ -56,7 +56,7 @@ class CompanyController extends Controller {
           $job->save();
           $jobstime->job_id=$job->id;
           $jobstime->save();
-          return  response()->json($job);
+      return  response()->json($job);
 
     }
 
