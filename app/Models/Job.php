@@ -4,12 +4,17 @@ namespace App\Models;
 
 use App\Exceptions\MsgException;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Job extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'tjz_jobs';
     protected $guarded = ['id'];
     protected $hidden = ['updated_at'];
+
+    protected $dates = ['deleted_at'];
 
     public function jobTime() {
         return JobTime::where('job_id', $this->id);

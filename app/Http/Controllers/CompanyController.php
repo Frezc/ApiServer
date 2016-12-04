@@ -18,7 +18,7 @@ class CompanyController extends Controller {
 
         $this->middleware('jwt.auth',['only'=>['releaseJob', 'getApply', 'postApply', 'update']]);
         $this->middleware('log', ['only' => ['postApply', 'update', 'releaseJob']]);
-        $this->middleware('role:user', ['only' => ['releaseJob', 'postApply']]);
+        $this->middleware('role:user', ['only' => ['releaseJob', 'postApply', 'update']]);
     }
 
     /*

@@ -384,9 +384,9 @@ class UserController extends Controller {
         $builder = Log::where('user_id', $user->id);
 
         $total = $builder->count();
-        $builder->orderBy('created_at', $direction);
-        $builder->skip($offset);
-        $builder->limit($limit);
+        $builder->orderBy('id', $direction)
+                ->skip($offset)
+                ->limit($limit);
         return response()->json(['total' => $total, 'list' => $builder->get()]);
     }
 }

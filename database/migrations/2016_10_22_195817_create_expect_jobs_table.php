@@ -34,6 +34,7 @@ class CreateExpectJobsTable extends Migration
             // 是否公开
             $table->tinyInteger('is_public')->default(0);
 
+            $table->softDeletes();
             $table->timestamps();
 
             $table->index('user_id');

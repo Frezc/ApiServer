@@ -17,7 +17,8 @@ class OrderController extends Controller
 {
     public function __construct() {
         $this->middleware('jwt.auth');
-        $this->middleware('log', ['only' => ['close']]);
+        $this->middleware('log', ['only' => ['close', 'postEvaluate']]);
+        $this->middleware('role:user', ['only' => ['close', 'postEvaluate']]);
     }
 
     /*
@@ -125,5 +126,51 @@ class OrderController extends Controller
         $order->bindExpectJob();
 
         return response()->json($order);
+    }
+
+    /*
+     * [POSt] orders/{id}/evaluate
+     */
+    public function postEvaluate(Request $request, $id) {
+        $order = Order::findOrFail($id);
+
+        $this->validate($request, [
+            'score' => 'required|integer|between:1,5',
+            'comment' => 'string',
+            'pictures' => 'string'
+        ]);
+
+        $self = JWTAuth::parseToken()->authenticate();
+        $order->makeSureAccess($self);
+
+        if ($self->id == $order->applicant_id) {
+            if (JobEvaluate::where('order_id', $order->id)->count() > 0) {
+                throw new MsgException('Order has been evaluated.', 400);
+            } else {
+                JobEvaluate::create(array_merge(array_only($request->all(), ['score', 'comment', 'pictures']), [
+                    'user_id' => $self->id,
+                    'user_name' => $self->nickname,
+                    'order_id' => $order->id,
+                    'job_id' => $order->job_id
+                ]));
+                return '评价成功';
+            }
+        }
+
+        if ($order->isRecruiter($self)) {
+            if (UserEvaluate::where('order_id', $order->id)->count() > 0) {
+                throw new MsgException('Order has been evaluated.', 400);
+            } else {
+                UserEvaluate::create(array_merge(array_only($request->all(), ['score', 'comment', 'pictures']), [
+                    'user_id' => $self->id,
+                    'user_name' => $self->nickname,
+                    'order_id' => $order->id,
+                    'target_id' => $order->applicant_id
+                ]));
+                return '评价成功';
+            }
+        }
+
+        throw new MsgException('You cannot evaluate this order', 400);
     }
 }

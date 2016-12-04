@@ -48,7 +48,8 @@ class CreateTjzJobsTable extends Migration
             // 为了能按照分数高低来排序所以加入字段
             $table->integer('number_evaluate')->default(0);
             $table->float('average_score')->default(0);
-                
+
+            $table->softDeletes();
             $table->timestamps();
             $table->index('name');
             $table->index('company_id');
