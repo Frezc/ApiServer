@@ -2,14 +2,29 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\MsgException;
+use App\Jobs\PushNotifications;
+use App\Models\JobEvaluate;
+use App\Models\Message;
 use App\Models\Order;
 use App\Models\User;
+use App\Models\UserCompany;
+use App\Models\UserEvaluate;
 use Illuminate\Http\Request;
 use JWTAuth;
 
 class OrderController extends Controller
 {
-    public function get(Request $request, $id) {
+    public function __construct() {
+        $this->middleware('jwt.auth');
+        $this->middleware('log', ['only' => ['close', 'postEvaluate']]);
+        $this->middleware('role:user', ['only' => ['close', 'postEvaluate']]);
+    }
+
+    /*
+     * [GET] users/{id}/orders
+     */
+    public function query(Request $request, $id) {
         $user = User::findOrFail($id);
 
         $this->validate($request, [
@@ -52,5 +67,110 @@ class OrderController extends Controller
             ->skip($offset)
             ->limit($limit);
         return response()->json(['total' => $total, 'list' => $builder->get()]);
+    }
+
+    /*
+     * [DELETE] orders/{id}
+     */
+    public function close($id) {
+        $order = Order::findOrFail($id);
+        $self = JWTAuth::parseToken()->authenticate();
+
+        if ($order->applicant_id == $self->id) {
+            $close_type = 1;
+        } elseif ($order->recruiter_type == 0 && $order->recruiter_id == $self->id
+            || $order->recruiter_type == 1 && $self->company_id == $order->recruiter_id) {
+            $close_type = 2;
+        } elseif ($self->isAdmin()) {
+            $close_type = 3;
+        } else {
+            throw new MsgException('You have no access to this order.', 401);
+        }
+
+        if ($order->isOver()) {
+            throw new MsgException('You cannot close this order.', 400);
+        }
+
+        $this->dispatch(new PushNotifications(
+            Message::getSender(Message::$WORK_HELPER), array_merge([$order->applicant_id], $order->getRecruiterIds()),
+            '订单 ' . $order->id . ' 已被' . Order::closeTypeText($close_type) . '关闭。'
+        ));
+
+        $order->close_type = $close_type;
+        $order->status = 3;
+        $order->save();
+        return response()->json($order);
+    }
+
+    /*
+     * [GET] orders/{id}/evaluate
+     */
+    public function getEvaluate($id) {
+        $order = Order::findOrFail($id);
+        $self = JWTAuth::parseToken()->authenticate();
+        $order->makeSureAccess($self);
+
+        $jobEvaluate = JobEvaluate::where('order_id', $order->id)->first();
+        $userEvaluate = UserEvaluate::where('order_id', $order->id)->first();
+
+        return response()->json(['job_evaluate' => $jobEvaluate, 'user_evaluate' => $userEvaluate]);
+    }
+
+    /*
+     * [GET] orders/{id}
+     */
+    public function get($id) {
+        $order = Order::findOrFail($id);
+        $self = JWTAuth::parseToken()->authenticate();
+        $order->makeSureAccess($self);
+        $order->bindExpectJob();
+
+        return response()->json($order);
+    }
+
+    /*
+     * [POSt] orders/{id}/evaluate
+     */
+    public function postEvaluate(Request $request, $id) {
+        $order = Order::findOrFail($id);
+
+        $this->validate($request, [
+            'score' => 'required|integer|between:1,5',
+            'comment' => 'string',
+            'pictures' => 'string'
+        ]);
+
+        $self = JWTAuth::parseToken()->authenticate();
+        $order->makeSureAccess($self);
+
+        if ($self->id == $order->applicant_id) {
+            if (JobEvaluate::where('order_id', $order->id)->count() > 0) {
+                throw new MsgException('Order has been evaluated.', 400);
+            } else {
+                JobEvaluate::create(array_merge(array_only($request->all(), ['score', 'comment', 'pictures']), [
+                    'user_id' => $self->id,
+                    'user_name' => $self->nickname,
+                    'order_id' => $order->id,
+                    'job_id' => $order->job_id
+                ]));
+                return '评价成功';
+            }
+        }
+
+        if ($order->isRecruiter($self)) {
+            if (UserEvaluate::where('order_id', $order->id)->count() > 0) {
+                throw new MsgException('Order has been evaluated.', 400);
+            } else {
+                UserEvaluate::create(array_merge(array_only($request->all(), ['score', 'comment', 'pictures']), [
+                    'user_id' => $self->id,
+                    'user_name' => $self->nickname,
+                    'order_id' => $order->id,
+                    'target_id' => $order->applicant_id
+                ]));
+                return '评价成功';
+            }
+        }
+
+        throw new MsgException('You cannot evaluate this order', 400);
     }
 }

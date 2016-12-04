@@ -1,6 +1,5 @@
 <?php
 
-//Route::get('users', 'AuthenticateController@index');
 //Route::get('test', 'SmsController@test');
 //Route::post('testEmail', 'EmailController@emailSend');
 Route::post('resetPassword', 'SmsController@resetPassword');//重置密码
@@ -18,7 +17,7 @@ Route::get('users/{id}/resumes', 'ResumeController@get');//获取简历
 Route::delete('users/{id}/resumes/{resumeId}', 'ResumeController@delete');//建立删除
 Route::post('users/{id}/resumes', 'ResumeController@add');//添加简历
 Route::post('users/{id}/resumes/{resumeId}', 'ResumeController@update');//更新简历
-Route::get('users/{id}/orders', 'OrderController@get');//
+Route::get('users/{id}/orders', 'OrderController@query');//
 //Route::post('avatar', 'AuthenticateController@updateAvatar');
 Route::get('users/{id}/realNameApplies', 'UserController@getRealNameApplies');
 Route::post('users/{id}/realNameApplies', 'UserController@createRealNameApplies');
@@ -27,18 +26,21 @@ Route::get('users/{id}/logs', 'UserController@getLogs');
 Route::get('userGetOrder','UserController@user_get_order');
 Route::get('companyGetOrder','UserController@company_get_order');
 Route::get('jobs', 'JobController@query');
-Route::get('job/apply', 'UserController@getJobApply');
-Route::get('job/completed', 'UserController@getJobCompleted');
+Route::get('job/apply', 'UserController@getJobApply');         // use [GET] users/{id}/orders instead
+Route::get('job/completed', 'UserController@getJobCompleted'); // use [GET] users/{id}/orders instead
 Route::get('jobs/{id}', 'JobController@get')->where('id', '[0-9]+');
-Route::post('jobs/{id}/apply', 'JobController@apply');
-Route::post('job/apply', 'UserController@postJobApply');
-Route::get('job/evaluate', 'JobController@getJobEvaluate');
-Route::post('job/evaluate', 'UserController@postJobEvaluate');
-
+Route::post('jobs/{id}', 'JobController@update')->where('id', '[0-9]+');
+Route::delete('jobs/{id}', 'JobController@delete')->where('id', '[0-9]+');
+Route::post('jobs/{id}/apply', 'JobController@apply')->where('id', '[0-9]+');
+Route::post('job/apply', 'UserController@postJobApply');       // use [POST] jobs/{id}/apply instead
+Route::get('jobs/{id}/evaluate', 'JobController@getEvaluate');
+Route::post('job/evaluate', 'UserController@postJobEvaluate'); // use [POST] orders/{id}/evaluate instead
 Route::post('expect_jobs', 'ExpectJobController@create');
 
 Route::get('expect_jobs', 'ExpectJobController@query');
-
+Route::get('expect_jobs/{id}', 'ExpectJobController@get')->where('id', '[0-9]+');
+Route::post('expect_jobs/{id}', 'ExpectJobController@update')->where('id', '[0-9]+');
+Route::delete('expect_jobs/{id}', 'ExpectJobController@delete')->where('id', '[0-9]+');
 Route::post('expect_jobs/{id}/apply', 'ExpectJobController@apply');
 Route::get('getAllJob', 'UserController@mainPage');
 
@@ -50,12 +52,18 @@ Route::post('companies/apply', 'CompanyController@postApply');
 
 Route::get('releaseJob','CompanyController@releaseJob');
 
+Route::delete('orders/{id}', 'OrderController@close')->where('id', '[0-9]+');
+Route::get('orders/{id}', 'OrderController@get')->where('id', '[0-9]+');
+Route::get('orders/{id}/evaluate', 'OrderController@getEvaluate')->where('id', '[0-9]+');
+Route::post('orders/{id}/evaluate', 'OrderController@postEvaluate')->where('id', '[0-9]+');
+
 Route::get('umsg', 'MessageController@getUpdate');
 Route::get('messages', 'MessageController@get');
 Route::get('notifications/{id}', 'MessageController@getNotification')->where('id', '[0-9]+');
 Route::get('conversations', 'MessageController@getConversation');
 Route::post('conversations', 'MessageController@postConversation');
-
+Route::post('feedbacks', 'MessageController@postFeedback');
+Route::get('banners', 'DataController@getBanners');
 
 // 需要限制次数的请求
 // 每分钟三次
@@ -72,7 +80,7 @@ Route::post('upload/image', 'UploadController@uploadImage');
 
 // 每分钟一次
 Route::group(['middleware' => 'throttle:1'], function ($api) {
-    Route::get('getSmsCode', 'SmsController@getSmsCode');
+//    Route::get('getSmsCode', 'SmsController@getSmsCode');
 });
 
 // 每分钟两次
@@ -88,6 +96,17 @@ Route::group(['namespace' => 'BOSS', 'middleware' => ['jwt.auth', 'role:admin']]
     Route::get('real_name_applies', 'UserController@getAllRealNameApplies');
     Route::get('notifications/history', 'MessageController@getHistory');
     Route::get('company_applies', 'UserController@getAllCompanyApplies');
+    Route::get('orders', 'UserController@getOrders');
+    Route::get('feedbacks', 'MessageController@getFeedbacks');
+    Route::post('data', 'DataController@setData');
+    Route::post('feedbacks/{id}', 'MessageController@updateFeedback');
+    Route::post('real_name_applies/{id}', 'UserController@updateRealNameApply')->where('id', '[0-9]+');
+    Route::post('company_applies/{id}', 'UserController@updateCompanyApply')->where('id', '[0-9]+');
+    Route::get('reports', 'MessageController@getReports');
+    Route::post('reports/{id}', 'MessageController@updateReport');
+    Route::post('users/{id}/role', 'UserController@updateRole');
+    Route::post('jobs/{id}/restore', 'JobController@restore');
+    Route::post('expect_jobs/{id}/restore', 'ExpectJobController@restore');
 });
 
 Route::get('/', function () {

@@ -20,6 +20,7 @@ class CreateTjzJobsTable extends Migration
             $table->tinyInteger('pay_way')->default(1)->nullable();
             // 工资类型，1：面议, 2：固定数值
             $table->tinyInteger('salary_type')->default(1)->nullable();
+
             // 工资 放到 job_time里
 //            $table->string('salary', 16);
             $table->string('description')->nullable();
@@ -43,7 +44,12 @@ class CreateTjzJobsTable extends Migration
             //联系人的电话
             $table->string('contact');
             $table->string('position');
-                
+
+            // 为了能按照分数高低来排序所以加入字段
+            $table->integer('number_evaluate')->default(0);
+            $table->float('average_score')->default(0);
+
+            $table->softDeletes();
             $table->timestamps();
             $table->index('name');
             $table->index('company_id');

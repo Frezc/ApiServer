@@ -16,11 +16,9 @@ class AuthenticateController extends Controller {
         $this->middleware('jwt.auth', ['except' => ['emailAuth', 'phoneAuth', 'refreshToken', 'register']]);
     }
 
-    public function index() {
-        $users = User::all();
-        return $users;
-    }
-
+    /*
+     * [GET] refresh
+     */
     public function refreshToken(Request $request) {
         $this->validate($request, [
             'token' => 'required'
@@ -31,9 +29,13 @@ class AuthenticateController extends Controller {
         $newToken = JWTAuth::refresh($token);
         
         $user = JWTAuth::authenticate($newToken);
+        $user->bindRoleName();
         return response()->json(['user' => $user, 'token' => $newToken]);
     }
 
+    /*
+     * [POST] auth
+     */
     public function emailAuth(Request $request) {
         // 1.验证输入参数
         $this->validate($request, [
@@ -62,9 +64,11 @@ class AuthenticateController extends Controller {
         $user = User::where('email', $request->input('email'))->firstOrFail();
         if ($user != null) {
             if ($user->email_verified == 0) {
-                return reponse()->json(['error' => 'email need to be verified.'], 430);
+                return response()->json(['error' => 'email need to be verified.'], 430);
             }
         }
+
+        $user->bindRoleName();
 
         // 4.登陆成功，返回json
         return response()->json([
@@ -73,6 +77,9 @@ class AuthenticateController extends Controller {
         ]);
     }
 
+    /*
+     * [POST] authPhone
+     */
     public function phoneAuth(Request $request) {
         $this->validate($request, [
             'phone' => 'required|regex:/[0-9]+/',
@@ -92,12 +99,18 @@ class AuthenticateController extends Controller {
             return response()->json(['error' => 'could_not_create_token'], 500);
         }
 
+        $user = User::where('phone', $request->input('phone'))->firstOrFail();
+        $user->bindRoleName();
+
         return response()->json([
-            'user' => User::where('phone', $request->input('phone'))->firstOrFail(),
+            'user' => $user,
             'token' => $token
         ]);
     }
 
+    /*
+     * [POST] register
+     */
     public function register(Request $request) {
         $this->validate($request, [
             'email' => 'required|email|unique:users,email',

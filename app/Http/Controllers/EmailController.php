@@ -20,6 +20,9 @@ class EmailController extends Controller {
         $this->middleware('log', ['only' => ['sendVerifyEmail', 'verifyEmail', 'bindEmail']]);
     }
 
+    /*
+     * [POST] sendVerifyEmail
+     */
     public function sendVerifyEmail(Request $request) {
         $this->validate($request, [
             'email' => 'required|email'
@@ -55,6 +58,9 @@ class EmailController extends Controller {
         return 'success';
     }
 
+    /*
+     * [POST] verifyEmail
+     */
     public function verifyEmail(Request $request) {
         /* validate at middleware */
         $user = User::where('email', $request->input('email'))->firstOrFail();
@@ -63,6 +69,9 @@ class EmailController extends Controller {
         return 'success';
     }
 
+    /*
+     * [POST] bindEmail
+     */
     public function bindEmail(Request $request) {
         /* validate at middleware */
         $user = JWTAuth::parseToken()->authenticate();

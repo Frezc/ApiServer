@@ -25,14 +25,20 @@ class UserController extends Controller {
         $this->middleware('log', ['only' => ['update', 'createRealNameApplies', 'deleteRealNameApply']]);
     }
 
+    /*
+     * [GET] self
+     */
     public function self() {
         $self = JWTAuth::parseToken()->authenticate();
+        $self->bindRoleName();
         return $this->show($self->id);
     }
 
+    /*
+     * [GET] users/{id}
+     */
     public function show($id) {
         $user = User::findOrFail($id);
-//        $user->companies = $user->getCompanies();
         return response()->json($user);
     }
   public  function  user_get_order(Request $request){
@@ -266,6 +272,9 @@ class UserController extends Controller {
         return $this->response->errorInternal('evaluate save failed');
     }
 
+    /*
+     * [POST] users/{id}
+     */
     public function update(Request $request, $id) {
         $user = User::findOrFail($id);
         $this->validate($request, [
@@ -294,6 +303,9 @@ class UserController extends Controller {
         return response()->json($user);
     }
 
+    /*
+     * [GET] users/{id}/realNameApplies
+     */
     public function getRealNameApplies($id) {
         $user = User::findOrFail($id);
         $self = JWTAuth::parseToken()->authenticate();
@@ -304,6 +316,9 @@ class UserController extends Controller {
         return response()->json($rnvs);
     }
 
+    /*
+     * [POST] users/{id}/realNameApplie
+     */
     public function createRealNameApplies(Request $request, $id) {
         $user = User::findOrFail($id);
         $this->validate($request, [
@@ -333,6 +348,9 @@ class UserController extends Controller {
         return response()->json($rnv);
     }
 
+    /*
+     * [DELETE] users/{id}/realNameApplies/{rnaid}
+     */
     public function deleteRealNameApply($id, $rnaid) {
         $user = User::findOrFail($id);
         $self = JWTAuth::parseToken()->authenticate();
@@ -344,6 +362,9 @@ class UserController extends Controller {
         return response()->json($rnv);
     }
 
+    /*
+     * [GET] users/{id}/logs
+     */
     public function getLogs(Request $request, $id) {
         $user = User::findOrFail($id);
 
@@ -363,9 +384,9 @@ class UserController extends Controller {
         $builder = Log::where('user_id', $user->id);
 
         $total = $builder->count();
-        $builder->orderBy('created_at', $direction);
-        $builder->skip($offset);
-        $builder->limit($limit);
+        $builder->orderBy('id', $direction)
+                ->skip($offset)
+                ->limit($limit);
         return response()->json(['total' => $total, 'list' => $builder->get()]);
     }
 }

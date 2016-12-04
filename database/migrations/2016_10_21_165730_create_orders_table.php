@@ -29,8 +29,11 @@ class CreateOrdersTable extends Migration
             $table->integer('recruiter_id')->unsigned();
             $table->string('recruiter_name');
 
-            // 订单状态 0：创建，1：确认、未开始、进行中、已结束，2：已完成，3：已取消
+            // 订单状态 0：创建，1：确认、未开始、进行中，2：已完成，3：已关闭
             $table->tinyInteger('status')->default(0);
+
+            // 用来区分订单是由谁关闭的 1： 应聘者 2： 招聘者 3：管理员
+            $table->tinyInteger('close_type')->nullable();
 
             // 用户和招聘者的确认情况
             $table->tinyInteger('applicant_check')->default(0);
@@ -39,7 +42,16 @@ class CreateOrdersTable extends Migration
             // 是否已支付
             $table->tinyInteger('has_paid')->default(0);
 
+            // 评价情况 0：未评价 1：已评价，前面的数字代表应聘者，后面的数字代表商家
+            $table->string('evaluate_status', 4)->default('00');
+
             $table->timestamps();
+
+            $table->index('applicant_id');
+            $table->index(['recruiter_type', 'recruiter_id']);
+            $table->index('status');
+            $table->index('applicant_check');
+            $table->index('recruiter_check');
         });
     }
 

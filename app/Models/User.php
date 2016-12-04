@@ -39,11 +39,21 @@ class User extends Model implements AuthenticatableContract,
     }
 
     public function jobApplies() {
-        return $this->hasMany('App\JobApply');
+        return $this->hasMany('App\Models\JobApply');
     }
 
     public function jobCompleteds() {
-        return $this->hasMany('App\JobCompleted');
+        return $this->hasMany('App\Models\JobCompleted');
+    }
+
+    public function companies() {
+        return $this->belongsToMany('App\Models\Company', 'user_company', 'user_id', 'company_id');
+    }
+
+    public function bindRoleName() {
+        $role = Role::find($this->role_id);
+        if ($role)
+            $this->role_name = $role->name;
     }
 
     /**
@@ -80,9 +90,24 @@ class User extends Model implements AuthenticatableContract,
         return true;
     }
 
-    public function getCompanies() {
-        return UserCompany::where('user_id', $this->id)->get()->each(function ($item, $index) {
-            $item->setVisible(['company_id', 'company_name']);
-        });
+//    public function getCompanies() {
+//        return UserCompany::where('user_id', $this->id)->get()->each(function ($item, $index) {
+//            $item->setVisible(['company_id', 'company_name']);
+//        });
+//    }
+
+    public static function search($kw) {
+        $q_array = $kw ? array_slice(explode(" ", trim($kw)), 0, 3) : [];
+
+        $builder = User::query();
+        foreach ($q_array as $qi) {
+            $builder->where(function ($query) use ($qi) {
+                $query->where('nickname', 'like', '%' . $qi . '%')
+                    ->orWhere('email', 'like', '%' . $qi . '%')
+                    ->orWhere('phone', 'like', '%' . $qi . '%');
+            });
+        }
+
+        return $builder;
     }
 }

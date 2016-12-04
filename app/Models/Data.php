@@ -4,8 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class UserEvaluate extends Model
+class Data extends Model
 {
-    protected $table = 'user_evaluates';
+    protected $table = 'data';
     protected $guarded = ['id'];
+    protected $hidden = ['updated_at'];
 }
