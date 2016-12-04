@@ -29,6 +29,7 @@ class Company extends Model
     }
 
     public static function search($keywords) {
+
         $builder = Company::query()
             ->when($keywords, function ($query) use ($keywords) {
                 $q_array = array_slice(explode(" ", trim($keywords)), 0, 3);
@@ -40,10 +41,10 @@ class Company extends Model
                             ->orWhere('contact_person', 'like', '%' . $qi . '%');
                     });
                 }
-                return $query;
-            });
-        return $builder;
-    }
+return $query;
+});
+return $builder;
+}
 
     public function users() {
         return $this->belongsToMany('App\Models\User', 'user_company', 'company_id', 'user_id');

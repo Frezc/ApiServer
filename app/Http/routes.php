@@ -52,6 +52,7 @@ Route::post('companies/apply', 'CompanyController@postApply');
 
 Route::get('releaseJob','CompanyController@releaseJob');
 
+
 Route::delete('orders/{id}', 'OrderController@close')->where('id', '[0-9]+');
 Route::get('orders/{id}', 'OrderController@get')->where('id', '[0-9]+');
 Route::get('orders/{id}/evaluate', 'OrderController@getEvaluate')->where('id', '[0-9]+');

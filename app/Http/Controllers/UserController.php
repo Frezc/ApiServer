@@ -58,7 +58,9 @@ class UserController extends Controller {
         $builder = Job::query();
         $builder->orderBy(
             $request->input('orderBytime', 'created_at'),
-            $request->input('order', 'asc')
+
+            $request->input('order', 'desc')
+
         );
         $total =$builder->count();
         if ($request->has('offset')) {
@@ -67,7 +69,9 @@ class UserController extends Controller {
         $builder->limit($request->input('limit'));
         return response()->json(['list'=> $builder->get(), 'total'=>  $total]);
 
+
 }
+
 
     public function idCardVerify(Request $request) {
         $this->validate($request, [
