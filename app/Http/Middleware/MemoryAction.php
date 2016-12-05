@@ -18,16 +18,19 @@ class MemoryAction
      */
     public function handle($request, Closure $next)
     {
-        $self = JWTAuth::parseToken()->authenticate();
-        $data = [
-            'ip' => $request->ip(),
-            'user_id' => $self->id,
-            'user_name' => $self->nickname,
-            'method' => $request->method(),
-            'path' => $request->path(),
-            'params' => json_encode($request->all())
-        ];
-        Log::create($data);
-        return $next($request);
+        $response = $next($request);
+        if ($response->getStatusCode() == 200) {
+            $self = JWTAuth::parseToken()->authenticate();
+            $data = [
+                'ip' => $request->ip(),
+                'user_id' => $self->id,
+                'user_name' => $self->nickname,
+                'method' => $request->method(),
+                'path' => $request->path(),
+                'params' => json_encode($request->all())
+            ];
+            Log::create($data);
+        }
+        return $response;
     }
 }

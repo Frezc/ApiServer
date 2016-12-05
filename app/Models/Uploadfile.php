@@ -12,13 +12,15 @@ class Uploadfile extends Model
     protected $guarded = ['id'];
 
     public function replace($oldPath = null) {
-        if ($oldPath) {
-            $old = Uploadfile::where('path', $oldPath)->first();
-            $old->used--;
-            $old->save();
+        if ($oldPath != $this->path) {
+            if ($oldPath) {
+                $old = Uploadfile::where('path', $oldPath)->first();
+                $old->used--;
+                $old->save();
+            }
+            $this->used++;
+            $this->save();
         }
-        $this->used++;
-        $this->save();
     }
 
     public function makeSureAccess($user) {

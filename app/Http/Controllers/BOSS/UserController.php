@@ -22,7 +22,7 @@ use Illuminate\Http\Request;
 class UserController extends Controller {
 
     public function __construct() {
-        $this->middleware('log', ['only' => ['updateRealNameApply', 'updateCompanyApply']]);
+        $this->middleware('log', ['only' => ['updateRealNameApply', 'updateCompanyApply', 'updateRole']]);
     }
 
     /*
@@ -32,6 +32,7 @@ class UserController extends Controller {
         $this->validate($request, [
             'kw' => 'string',
             'company_id' => 'integer',
+            'role_name' => 'in:user,admin,banned',
             'siz' => 'integer|min:0',
             'dir' => 'in:asc,desc',
             'off' => 'integer|min:0'
@@ -42,10 +43,15 @@ class UserController extends Controller {
         $offset = $request->input('off', 0);
         $limit = $request->input('siz', 20);
         $company_id = $request->input('company_id');
+        $role_name = $request->input('role_name');
 
         $builder = User::search($q);
 
         $company_id && $builder->where('company_id', $company_id);
+        if ($role_name) {
+            $role = Role::where('name', $role_name)->first();
+            $builder->where('role_id', $role->id);
+        }
 
         $total = $builder->count();
 

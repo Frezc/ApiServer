@@ -37,7 +37,12 @@ class JobController extends Controller {
      * [POST] jobs/{id}
      */
     public function update(Request $request, $id) {
-        $job = Job::findOrFail($id);
+        $self = JWTAuth::parseToken()->authenticate();
+        if ($self->isAdmin()) {
+            $job = Job::withTrashed()->findOrFail($id);
+        } else {
+            $job = Job::findOrFail($id);
+        }
         $this->validate($request, [
             'name' => 'string|between:1,250',
             'pay_way' => 'integer|in:1,2',
@@ -47,7 +52,6 @@ class JobController extends Controller {
             'contact' => 'string|max:250'
         ]);
 
-        $self = JWTAuth::parseToken()->authenticate();
         $job->checkAccess($self);
 
         $job->update(array_only($request->all(), ['name', 'pay_way', 'salary_type', 'description', 'active', 'contact']));
