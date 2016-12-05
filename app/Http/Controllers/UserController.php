@@ -296,7 +296,7 @@ class UserController extends Controller {
         $avatar = $request->input('avatar');
         if ($avatar) {
             $uploadFile = Uploadfile::where('path', $avatar)->first();
-            $uploadFile->makeSureAccess($user);
+            $uploadFile->makeSureAccess($self);
             $uploadFile->replace($user->avatar);
         }
         

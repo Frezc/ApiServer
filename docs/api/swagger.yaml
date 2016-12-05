@@ -778,7 +778,7 @@ paths:
           in: formData
           description: 岗位是否活跃，0表示不活跃（下架）,1表示活跃
           type: integer
-        - name: contactr
+        - name: contact
           in: formData
           description: 联系方式
           type: string
@@ -1876,6 +1876,10 @@ paths:
           in: query
           description: 对应企业的用户
           type: integer
+        - name: role_name
+          in: query
+          description: '权限筛选 [user, admin, banned]'
+          type: string
         - name: dir
           in: query
           description: 升序('asc')or降序('desc'), 默认升序
@@ -2028,6 +2032,32 @@ paths:
           description: 成功
           schema:
             $ref: '#/definitions/User'
+  /boss/umsg:
+    get:
+      description: 得到提醒信息
+      tags:
+        - Admin
+      parameters:
+        - name: after
+          in: query
+          description: 得到某个时间后的消息
+          type: string
+      responses:
+        200:
+          description: success
+          schema:
+            type: object
+            properties:
+              real_name_applies:
+                type: integer
+              company_applise:
+                type: integer
+              feedbacks:
+                type: integer
+              reports:
+                type: integer
+              end_at:
+                type: string
 
 definitions:
   User:

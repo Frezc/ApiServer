@@ -152,7 +152,12 @@ class ExpectJobController extends Controller {
      * [POST] expect_jobs/{id}
      */
     public function update(Request $request, $id) {
-        $expectJob = ExpectJob::findOrFail($id);
+        $self = JWTAuth::parseToken()->authenticate();
+        if ($self->isAdmin()) {
+            $expectJob = ExpectJob::withTrashed()->findOrFail($id);
+        } else {
+            $expectJob = ExpectJob::findOrFail($id);
+        }
         $this->validate($request, [
             'name' => 'string|between:1, 16',
             'photo' => 'exists:uploadfiles,path',
@@ -164,7 +169,6 @@ class ExpectJobController extends Controller {
             'expect_location' => 'string'
         ]);
 
-        $self = JWTAuth::parseToken()->authenticate();
         $expectJob->makeSureAccess($self);
 
         $expectJob->update(array_only($request->all(),
