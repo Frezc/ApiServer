@@ -88,7 +88,7 @@ class UserController extends Controller {
         $builder = RealNameVerification::where('status', $status);
         if ($user_id) $builder->where('user_id', $user_id);
         $total = $builder->count();
-        $builder->orderBy('created_at', 'desc')
+        $builder->orderBy('id', 'desc')
                 ->skip($offset)
                 ->limit($size);
         $result = $builder->get();
@@ -114,7 +114,7 @@ class UserController extends Controller {
         $builder = CompanyApply::where('status', $status);
         if ($user_id) $builder->where('user_id', $user_id);
         $total = $builder->count();
-        $builder->orderBy('created_at', 'desc')
+        $builder->orderBy('id', 'desc')
             ->skip($offset)
             ->limit($size);
         $result = $builder->get();
