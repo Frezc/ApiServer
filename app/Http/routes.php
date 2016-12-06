@@ -107,6 +107,7 @@ Route::group(['namespace' => 'BOSS', 'middleware' => ['jwt.auth', 'role:admin']]
     Route::post('users/{id}/role', 'UserController@updateRole');
     Route::post('jobs/{id}/restore', 'JobController@restore');
     Route::post('expect_jobs/{id}/restore', 'ExpectJobController@restore');
+    Route::get('boss/umsg', 'MessageController@getUpdate');
 });
 
 Route::get('/', function () {

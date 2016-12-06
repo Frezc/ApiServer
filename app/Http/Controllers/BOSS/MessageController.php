@@ -4,9 +4,11 @@ namespace App\Http\Controllers\BOSS;
 
 use App\Http\Controllers\Controller;
 use App\Jobs\PushNotifications;
+use App\Models\CompanyApply;
 use App\Models\Feedback;
 use App\Models\Log;
 use App\Models\Message;
+use App\Models\RealNameVerification;
 use App\Models\Report;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -56,6 +58,7 @@ class MessageController extends Controller {
             ->where('path', 'notifications');
         $total = $builder->count();
         $list = $builder
+            ->orderBy('id', 'desc')
             ->skip($offset)
             ->limit($size)
             ->get()
@@ -176,5 +179,24 @@ class MessageController extends Controller {
             $report->save();
         }
         return response()->json($report);
+    }
+
+    /*
+     * [GET] boss/umsg
+     */
+    public function getUpdate() {
+        $rnac = RealNameVerification::where('status', 1)->count();
+        $cac = CompanyApply::where('status', 1)->count();
+        $fc = Feedback::where('status', 1)->count();
+        $rc = Report::where('status', 1)->count();
+        $end_at = Carbon::now()->toDateTimeString();
+
+        return response()->json([
+            'real_name_applies' => $rnac,
+            'company_applies' => $cac,
+            'feedbacks' => $fc,
+            'reports' => $rc,
+            'end_at' => $end_at
+        ]);
     }
 }
