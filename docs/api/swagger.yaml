@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 0.7.6
+  version: 0.7.7
   title: 淘兼职api
   description: |
     Admin标签代表只能管理员使用;
@@ -685,6 +685,38 @@ paths:
                 type: array
                 items:
                   $ref: '#/definitions/Log'
+  /evaluates/{id}:
+    post:
+      description: 修改岗位评价
+      consumes:
+        - multipart/form-data
+      tags:
+        - 用户模块
+        - Auth
+      parameters:
+        - name: id
+          in: path
+          description: 评价id
+          required: true
+          type: integer
+        - name: score
+          in: formData
+          description: 评分(1~5)
+          required: true
+          type: integer
+        - name: comment
+          in: formData
+          description: 评论
+          type: string
+        - name: pictures
+          in: formData
+          description: 晒图 格式为 {链接},{链接2} ，多个链接间用逗号隔开
+          type: string
+      responses:
+        '200':
+          description: evaluate updated
+          schema:
+            $ref: '#/definitions/Evaluate'
 
   /jobs:
     get:
@@ -2058,6 +2090,40 @@ paths:
                 type: integer
               end_at:
                 type: string
+  /evaluates:
+    get:
+      description: 得到评价信息
+      tags:
+        - Admin
+      parameters:
+        - name: user_id
+          in: query
+          description: 用户筛选
+          type: integer
+        - name: job_id
+          in: query
+          description: 岗位筛选
+          type: integer
+        - name: off
+          in: query
+          description: 查找结果的偏移量（用来分页）
+          type: integer
+        - name: siz
+          in: query
+          description: 最多返回的结果
+          type: integer
+      responses:
+        200:
+          description: 返回对应的评价列表
+          schema:
+            type: object
+            properties:
+              total:
+                type: integer
+              list:
+                type: array
+                items:
+                  $ref: '#/definitions/Evaluate'
 
 definitions:
   User:

@@ -22,7 +22,7 @@ class UserController extends Controller {
 
     public function __construct() {
         $this->middleware('jwt.auth', ['except' => ['show', 'mainPage']]);
-        $this->middleware('log', ['only' => ['update', 'createRealNameApplies', 'deleteRealNameApply']]);
+        $this->middleware('log', ['only' => ['update', 'createRealNameApplies', 'deleteRealNameApply', 'updateEvaluate']]);
     }
 
     /*
@@ -392,5 +392,23 @@ class UserController extends Controller {
                 ->skip($offset)
                 ->limit($limit);
         return response()->json(['total' => $total, 'list' => $builder->get()]);
+    }
+
+    /*
+     * [POST] evaluates/{id}
+     */
+    public function updateEvaluate(Request $request, $id) {
+        $evaluate = JobEvaluate::findOrFail($id);
+        $this->validate($request, [
+            'score' => 'required|integer|between:1,5',
+            'comment' => 'string',
+            'pictures' => 'string'
+        ]);
+
+        $self = JWTAuth::parseToken()->authenticate();
+        $evaluate->makeSureAccess($self);
+
+        $evaluate->update(array_only($request->all(), ['score', 'comment', 'pictures']));
+        return response()->json($evaluate);
     }
 }

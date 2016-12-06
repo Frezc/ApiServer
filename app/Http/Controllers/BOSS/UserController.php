@@ -11,8 +11,11 @@ namespace App\Http\Controllers\BOSS;
 
 use App\Exceptions\MsgException;
 use App\Http\Controllers\Controller;
+use App\Jobs\PushNotifications;
 use App\Models\Company;
 use App\Models\CompanyApply;
+use App\Models\JobEvaluate;
+use App\Models\Message;
 use App\Models\Order;
 use App\Models\RealNameVerification;
 use App\Models\Role;
@@ -169,9 +172,13 @@ class UserController extends Controller {
                 $user->real_name_verified = 1;
                 $user->save();
             }
+            $this->dispatch(new PushNotifications(
+                Message::getSender(Message::$NOTI_HELPER), $user->id, '您的实名认证已通过。'));
         } else {
             $rna->status = 3;
             $rna->reason = $reason;
+            $this->dispatch(new PushNotifications(
+                Message::getSender(Message::$NOTI_HELPER), $rna->user_id, '您的实名认证已被拒绝。理由为 ' . $reason));
         }
         $rna->save();
 
@@ -207,9 +214,13 @@ class UserController extends Controller {
                 $user->company_name = $company->name;
                 $user->save();
             }
+            $this->dispatch(new PushNotifications(
+                Message::getSender(Message::$NOTI_HELPER), $user->id, '您的企业认证已通过。'));
         } else {
             $ca->status = 3;
             $ca->reason = $reason;
+            $this->dispatch(new PushNotifications(
+                Message::getSender(Message::$NOTI_HELPER), $ca->user_id, '您的企业认证已被拒绝。理由为 ' . $reason));
         }
 
         $ca->save();
@@ -230,5 +241,35 @@ class UserController extends Controller {
         $user->save();
         $user->bindRoleName();
         return response()->json($user);
+    }
+
+    /*
+     * [GET] evaluates
+     */
+    public function getEvaluates(Request $request) {
+        $this->validate($request, [
+            'user_id' => 'integer|exists:users,id',
+            'job_id' => 'integer|exists:tjz_jobs,id',
+            'siz' => 'integer|min:0',
+            'off' => 'integer|min:0'
+        ]);
+
+        $user_id = $request->input('user_id');
+        $job_id = $request->input('job_id');
+        $off = $request->input('off');
+        $siz = $request->input('siz');
+
+        $builder = JobEvaluate::query();
+        $builder->when($user_id, function ($query) use ($user_id) {
+            return $query->where('user_id', $user_id);
+        })->when($job_id, function ($query) use ($job_id) {
+            return $query->where('job_id', $job_id);
+        })->orderBy('id', 'desc');
+
+        $total = $builder->count();
+        $list = $builder->skip($off)->limit($siz)->get()->each(function ($item) {
+            $item->setHidden(['updated_at']);
+        });
+        return response()->json(['total' => $total, 'list' => $list]);
     }
 }

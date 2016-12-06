@@ -143,7 +143,12 @@ class ExpectJobController extends Controller {
      * [GET] expect_jobs/{id}
      */
     public function get($id) {
-        $expectJob = ExpectJob::findOrFail($id);
+        $user = $this->getAuthenticatedUser();
+        if ($user->isAdmin()) {
+            $expectJob = ExpectJob::withTrashed()->findOrFail($id);
+        } else {
+            $expectJob = ExpectJob::findOrFail($id);
+        }
         $expectJob->bindExpectTime();
         return response()->json($expectJob);
     }

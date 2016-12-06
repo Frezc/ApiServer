@@ -26,7 +26,12 @@ class JobController extends Controller {
      * [GET] jobs/{id}
      */
     public function get($id) {
-        $job = Job::findOrFail($id);
+        $user = $this->getAuthenticatedUser();
+        if ($user->isAdmin()) {
+            $job = Job::withTrashed()->findOrFail($id);
+        } else {
+            $job = Job::findOrFail($id);
+        }
         $job->visited++;
         $job->save();
         $job->time = JobTime::where('job_id', $job->id)->get();

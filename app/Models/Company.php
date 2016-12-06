@@ -41,10 +41,10 @@ class Company extends Model
                             ->orWhere('contact_person', 'like', '%' . $qi . '%');
                     });
                 }
-return $query;
-});
-return $builder;
-}
+                return $query;
+            });
+        return $builder;
+    }
 
     public function users() {
         return $this->belongsToMany('App\Models\User', 'user_company', 'company_id', 'user_id');

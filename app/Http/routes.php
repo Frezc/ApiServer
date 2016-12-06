@@ -25,6 +25,8 @@ Route::delete('users/{id}/realNameApplies/{rnaid}', 'UserController@deleteRealNa
 Route::get('users/{id}/logs', 'UserController@getLogs');
 Route::get('userGetOrder','UserController@user_get_order');
 Route::get('companyGetOrder','UserController@company_get_order');
+Route::post('evaluates/{id}', 'UserController@updateEvaluate');
+
 Route::get('jobs', 'JobController@query');
 Route::get('job/apply', 'UserController@getJobApply');         // use [GET] users/{id}/orders instead
 Route::get('job/completed', 'UserController@getJobCompleted'); // use [GET] users/{id}/orders instead
@@ -109,6 +111,7 @@ Route::group(['namespace' => 'BOSS', 'middleware' => ['jwt.auth', 'role:admin']]
     Route::post('jobs/{id}/restore', 'JobController@restore');
     Route::post('expect_jobs/{id}/restore', 'ExpectJobController@restore');
     Route::get('boss/umsg', 'MessageController@getUpdate');
+    Route::get('evaluates', 'UserController@getEvaluates');
 });
 
 Route::get('/', function () {
