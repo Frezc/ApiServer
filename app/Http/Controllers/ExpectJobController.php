@@ -27,12 +27,14 @@ class ExpectJobController extends Controller {
         $this->validate($request, [
             'resume_id' => 'required|integer',
             'expect_times' => 'array',
-            'expect_times.*.year' => 'required|integer|between:2016,2099',
-            'expect_times.*.month' => 'required|integer|between:0,12',
-            'expect_times.*.dayS' => 'required|integer|min:0',
-            'expect_times.*.dayE' => 'integer|min:0',
-            'expect_times.*.hourS' => 'integer|between:0,23',
-            'expect_times.*.hourE' => 'integer|min:0,23'
+            'expect_times.*.start_at' => 'required|date',
+            'expect_times.*.end_at' => 'required|date'
+//            'expect_times.*.year' => 'required|integer|between:2016,2099',
+//            'expect_times.*.month' => 'required|integer|between:0,12',
+//            'expect_times.*.dayS' => 'required|integer|min:0',
+//            'expect_times.*.dayE' => 'integer|min:0',
+//            'expect_times.*.hourS' => 'integer|between:0,23',
+//            'expect_times.*.hourE' => 'integer|min:0,23'
         ]);
 
         $self = JWTAuth::parseToken()->authenticate();
@@ -62,6 +64,8 @@ class ExpectJobController extends Controller {
             'siz' => 'integer|min:0',
             'orderby' => 'in:created_at',
             'user_id' => 'integer',
+            'time_s' => 'string|date',
+            'time_e' => 'string|date',
             'dir' => 'in:asc,desc',
             'off' => 'integer|min:0',
             'exist' => 'integer|in:1,2'
@@ -69,10 +73,34 @@ class ExpectJobController extends Controller {
 
         $user_id = $request->input('user_id');
         $exist = $request->input('exist');
+        $time_s = $request->input('time_s');
+        $time_e = $request->input('time_e');
 
         $builder = ExpectJob::search($request->input('kw'));
 
         if ($user_id) $builder->where('user_id', $user_id);
+        if ($time_s) {
+            $targetTime = ExpectTime::where(function ($query) use ($time_s) {
+                $query->where('start_at', '<=', $time_s)
+                    ->where('end_at', '>=', $time_s);
+            });
+            if ($time_e) {
+                $targetTime->orWhere(function ($query) use ($time_e) {
+                    $query->where('start_at', '<=', $time_e)
+                        ->where('end_at', '>=', $time_e);
+                })->orWhere(function ($query) use ($time_s, $time_e) {
+                    $query->where('start_at', '>', $time_s)
+                        ->where('end_at', '<', $time_e);
+                });
+            }
+            $target = $targetTime ->select('expect_job_id')
+                ->distinct()
+                ->get()
+                ->map(function ($item) {
+                    return $item->expect_job_id;
+                });
+            $builder->whereIn('id', $target);
+        }
 
         $count = $builder->count();
         $builder->orderBy($request->input('orderby', 'created_at'), $request->input('dir', 'desc'))

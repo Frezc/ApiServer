@@ -58,9 +58,23 @@ class OrderController extends Controller
                 return $query->where('applicant_check', $applicant_check);
             })->when($recruiter_check >= 0, function ($query) use ($recruiter_check) {
                 return $query->where('recruiter_check', $recruiter_check);
-            })->when($role, function ($query) use ($role, $id) {
-                return $query->where($role . '_id', $id);
             });
+
+        if ($role == 'applicant') {
+            $builder->where('applicant_id', $user->id);
+        } else {
+            $builder->where(function ($query) use ($user) {
+                $query->where(function ($query) use ($user) {
+                    $query->where('recruiter_type', 0)
+                        ->where('recruiter_id', $user->id);
+                });
+                $user->company_id && $query->orWhere(function ($query) use ($user) {
+                    $query->where('recruiter_type', 1)
+                        ->where('recruiter_id', $user->company_id);
+                });
+            });
+        }
+
         $total = $builder->count();
 
         $builder

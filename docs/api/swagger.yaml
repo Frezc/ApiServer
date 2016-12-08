@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 0.7.7
+  version: 0.7.8
   title: 淘兼职api
   description: |
     Admin标签代表只能管理员使用;
@@ -752,6 +752,10 @@ paths:
           in: query
           description: 城市
           type: string
+        - name: by_company
+          in: query
+          description: 筛选是否是由企业发布
+          type: integer
         - name: exist
           in: query
           description: 筛选存在与否，只有管理员权限才有用
@@ -776,6 +780,59 @@ paths:
                 type: array
                 items:
                   $ref: '#/definitions/Job'
+    post:
+      description: 创建岗位
+      tags:
+        - 岗位模块
+        - Auth
+      parameters:
+        - name: name
+          in: formData
+          description: 岗位名称
+          required: true
+          type: string
+        - name: pay_way
+          in: formData
+          description: 支付方式 1：线下支付，2：在线支付
+          required: true
+          type: integer
+        - name: description
+          in: formData
+          description: 描述信息
+          type: string
+        - name: contact
+          in: formData
+          description: 联系方式
+          required: true
+          type: string
+        - name: contact_person
+          in: formData
+          description: 联系人
+          required: true
+          type: string
+        - name: type
+          in: formData
+          description: 类型
+          required: true
+          type: string
+        - name: city
+          in: formData
+          description: 城市
+          required: true
+          type: string
+        - name: address
+          in: formData
+          description: 地址
+          type: string
+        - name: by_company
+          in: formData
+          description: 是否使用企业名义发布
+          type: integer
+      responses:
+        '200':
+          description: 返回创建的岗位信息
+          schema:
+            $ref: '#/definitions/Job'
   /jobs/{id}:
     get:
       description: 查找岗位
@@ -796,6 +853,7 @@ paths:
       description: 修改岗位信息
       tags:
         - 岗位模块
+        - Auth
       parameters:
         - name: id
           in: path
@@ -835,6 +893,7 @@ paths:
       description: 删除岗位
       tags:
         - 岗位模块
+        - Auth
       parameters:
         - name: id
           in: path
@@ -844,6 +903,38 @@ paths:
       responses:
         '200':
           description: 返回岗位详情
+          schema:
+            $ref: '#/definitions/Job'
+  /jobs/{id}/time:
+    post:
+      description: 添加时间
+      tags:
+        - 岗位模块
+        - Auth
+      consumes:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: 岗位id
+          required: true
+          type: integer
+        - name: time
+          in: body
+          description: 添加工作时间
+          required: true
+          schema:
+            type: object
+            properties:
+              action:
+                type: string
+              time:
+                type: array
+                items:
+                  $ref: '#/definitions/JobTime'
+      responses:
+        '200':
+          description: 返回修改后的岗位详情
           schema:
             $ref: '#/definitions/Job'
   /jobs/{id}/evaluate:
@@ -1022,6 +1113,16 @@ paths:
           in: query
           description: 筛选用户
           type: integer
+        - name: time_s
+          in: query
+          description: 筛选时间
+          type: string
+          format: date
+        - name: time_e
+          in: query
+          description: 筛选时间段时用到 (结束时间)
+          type: string
+          format: date
         - name: orderby
           in: query
           description: 默认created_at
@@ -1315,7 +1416,7 @@ paths:
 
   /companies/{id}:
     get:
-      description: 公司信息
+      description: 企业信息
       tags:
         - 商家模块
       parameters:
@@ -1330,9 +1431,10 @@ paths:
           schema:
             $ref: '#/definitions/Company'
     post:
-      description: 更新公司信息
+      description: 更新企业信息
       tags:
         - 商家模块
+        - Auth
       parameters:
         - name: id
           in: path
@@ -1368,6 +1470,40 @@ paths:
           description: 返回修改后的信息
           schema:
             $ref: '#/definitions/Company'
+  /companies/{id}/users:
+    post:
+      description: 为企业添加管理者
+      tags:
+        - 商家模块
+        - Auth
+      parameters:
+        - name: id
+          in: path
+          description: 企业id
+          required: true
+          type: integer
+        - name: user_id
+          in: formData
+          description: 用户的id
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: 添加成功
+          schema:
+            type: string
+  /unlink_company:
+    post:
+      description: 将自己从当前企业中移除
+      tags:
+        - 商家模块
+        - Auth
+      parameters: []
+      responses:
+        '200':
+          description: 移除成功
+          schema:
+            type: string
   /companies:
     get:
       description: 搜索公司
@@ -2258,6 +2394,8 @@ definitions:
         type: integer
       contact:
         type: string
+      contact_person:
+        type: string
       number_evaluate:
         type: integer
       average_score:
@@ -2307,22 +2445,12 @@ definitions:
   Time:
     type: object
     properties:
-      year:
-        type: integer
-      month:
-        type: integer
-      dayS:
-        type: integer
-      dayE:
-        type: integer
-#      hourS:
-#        type: integer
-#      hourE:
-#        type: integer
-#      minuteS:
-#        type: integer
-#      minuteE:
-#        type: integer
+      start_at:
+        type: string
+        format: date
+      end_at:
+        type: string
+        format: date
   JobTime:
     type: object
     properties:

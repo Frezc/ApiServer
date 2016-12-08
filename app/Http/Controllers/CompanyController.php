@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\MsgException;
+use App\Jobs\PushNotifications;
 use App\Models\Company;
 use App\Models\CompanyApply;
 use App\Models\Job;
 use App\Models\JobTime;
+use App\Models\Message;
 use App\Models\Uploadfile;
 use App\Models\UserCompany;
 use App\Models\User;
@@ -16,9 +19,9 @@ class CompanyController extends Controller {
 
     function __construct(){
 
-        $this->middleware('jwt.auth',['only'=>['releaseJob', 'getApply', 'postApply', 'update']]);
-        $this->middleware('log', ['only' => ['postApply', 'update', 'releaseJob']]);
-        $this->middleware('role:user', ['only' => ['releaseJob', 'postApply', 'update']]);
+        $this->middleware('jwt.auth',['only'=>['releaseJob', 'getApply', 'postApply', 'update', 'addUser', 'unlink']]);
+        $this->middleware('log', ['only' => ['postApply', 'update', 'releaseJob', 'addUser', 'unlink']]);
+        $this->middleware('role:user', ['only' => ['releaseJob', 'postApply', 'update', 'addUser', 'unlink']]);
     }
 
     /*
@@ -174,5 +177,47 @@ class CompanyController extends Controller {
 
         $company->update(array_only($request->all(), ['url', 'address', 'logo', 'description', 'contact_person', 'contact']));
         return response()->json($company);
+    }
+
+    /*
+     * [POST] companies/{id}/users
+     */
+    public function addUser(Request $request, $id) {
+        $company = Company::findOrFail($id);
+        $self = JWTAuth::parseToken()->authenticate();
+        $company->makeSureAccess($self);
+        $this->validate($request, [
+            'user_id' => 'exists:users,id'
+        ]);
+
+        $user = User::find($request->input('user_id'));
+        if ($user->company_id) {
+            throw new MsgException('你不能添加已经有企业的用户了', 400);
+        }
+
+        $user->company_id = $company->id;
+        $user->company_name = $company->name;
+        $user->save();
+
+        $this->dispatch(
+            new PushNotifications(Message::getSender(Message::$NOTI_HELPER), $user->id,
+                '你被用户 ' . $self->nickname . ' 添加进了企业 ' . $company->name));
+
+        return '添加成功';
+    }
+
+    /*
+     * [POST] unlink_company
+     */
+    public function unlink() {
+        $self = JWTAuth::parseToken()->authenticate();
+        if (!$self->company_id) {
+            throw new MsgException('你没有从属的企业。', 400);
+        }
+        $self->company_id = null;
+        $self->company_name = null;
+        $self->save();
+
+        return '移除成功';
     }
 }

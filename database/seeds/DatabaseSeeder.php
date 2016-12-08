@@ -167,13 +167,15 @@ class DatabaseSeeder extends Seeder {
         }
 
         foreach (range(1, $this->expectTimeNum) as $i) {
-            $time = time() + 60 * 60 * 24 * $faker->numberBetween($min = 1, $max = 180);
+            $start_at = $faker->date($format = 'Y-m-d', $min = 'now');
             ExpectTime::create([
                 'expect_job_id' => $faker->numberBetween($min = 1, $max = $this->expectJobNum),
-                'year' => date('Y', $time),
-                'month' => date('n', $time),
-                'dayS' => date('j', $time),
-                'dayE' => date('j', $time + 60 * 60 * 24 * 7),
+                'start_at' => $start_at,
+                'end_at' => (new Carbon($start_at))->addDays(3)->toDateString()
+//                'year' => date('Y', $time),
+//                'month' => date('n', $time),
+//                'dayS' => date('j', $time),
+//                'dayE' => date('j', $time + 60 * 60 * 24 * 7),
 //                'hourS' => 8,
 //                'hourE' => 20,
 //                'minuteS' => 30

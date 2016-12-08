@@ -237,11 +237,11 @@ class JobController extends Controller {
         $job = Job::findOrFail($id);
 
         $this->validate($request, [
-            'job_id' => 'required|integer',
+            'job_time_id' => 'required|integer',
             'resume_id' => 'required|integer'
         ]);
 
-        $jobTime = JobTime::findOrFail($id);
+        $jobTime = JobTime::where('job_id', $job->id)->findOrFail($request->input('job_time_id'));
 
         $resume = Resume::findOrFail($request->input('resume_id'));
 

@@ -51,8 +51,10 @@ Route::get('getAllJob', 'UserController@mainPage');
 Route::get('companies', 'CompanyController@query');
 Route::get('companies/{id}', 'CompanyController@get')->where('id', '[0-9]+');
 Route::post('companies/{id}', 'CompanyController@update')->where('id', '[0-9]+');
+Route::post('companies/{id}/users', 'CompanyController@addUser')->where('id', '[0-9]+');
 Route::get('companies/apply', 'CompanyController@getApply');
 Route::post('companies/apply', 'CompanyController@postApply');
+Route::post('unlink_company', 'CompanyController@unlink');
 
 Route::get('releaseJob','CompanyController@releaseJob');
 
