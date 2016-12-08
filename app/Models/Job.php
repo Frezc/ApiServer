@@ -20,6 +20,13 @@ class Job extends Model
         return JobTime::where('job_id', $this->id);
     }
 
+    public function bindTime() {
+        $this->time = JobTime::where('job_id', $this->id)
+            ->where('apply_end_at', '>', Carbon::now()->toDateTimeString())
+            ->orderBy('id', 'desc')
+            ->get();
+    }
+
     public function checkAccess(User $user) {
         if ($this->creator_id == $user->id || $user->isAdmin()) {
             return true;
@@ -43,11 +50,20 @@ class Job extends Model
                     $query->where('name', 'like', '%' . $qi . '%')
                         ->orWhere('creator_name', 'like', '%' . $qi . '%')
                         ->orWhere('company_name', 'like', '%' . $qi . '%')
+                        ->orWhere('city', 'like', '%' . $qi . '%')
                         ->orWhere('address', 'like', '%' . $qi . '%');
                 });
             }
         }
 
         return $builder;
+    }
+
+    public function updateScore() {
+        $builder = JobEvaluate::where('job_id', $this->id);
+        $this->update([
+            'number_evaluate' => $builder->count(),
+            'average_score' => $builder->average('score')
+        ]);
     }
 }

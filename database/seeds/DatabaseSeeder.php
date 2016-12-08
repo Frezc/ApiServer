@@ -16,6 +16,7 @@ use App\Models\Uploadfile;
 use App\Models\User;
 use App\Models\UserCompany;
 use App\Models\UserEvaluate;
+use Carbon\Carbon;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
 
@@ -121,6 +122,7 @@ class DatabaseSeeder extends Seeder {
                 'creator_id' => $user->id,
                 'creator_name' => $user->nickname,
                 'contact' => $faker->phoneNumber,
+                'contact_person' => $faker->name,
                 'active' => 1,
                 'number_evaluate' => $faker->numberBetween($min = 1, $max = 100),
                 'average_score' => 4.2,
@@ -132,7 +134,7 @@ class DatabaseSeeder extends Seeder {
 
         foreach (range(1, $this->jobTimeNum) as $i) {
             $number = $faker->numberBetween($min = 1, $max = 100);
-            $start_at = time() + 60 * 60 * 24 * $faker->numberBetween($min = 1, $max = 180);
+            $start_at = Carbon::now()->addDays($faker->numberBetween($min = 1, $max = 180));
             $st = $faker->numberBetween($min = 1, $max = 2);
             $salary = $st == 2 ? $faker->numberBetween($min = 1, $max = 1000) : 0;
             JobTime::create([
@@ -141,9 +143,9 @@ class DatabaseSeeder extends Seeder {
                 'number_applied' => $faker->numberBetween($min = 0, $max = $number),
                 'salary_type' => $st,
                 'salary' => $salary,
-                'apply_end_at' => $faker->numberBetween($min = $start_at - 60 * 60 * 2, $max = $start_at),
-                'start_at' => $start_at,
-                'end_at' => $faker->numberBetween($min = $start_at, $max = $start_at + 60 * 60 * 3)
+                'apply_end_at' => $start_at->subDays($faker->numberBetween($min = 0, $max = 2))->toDateTimeString(),
+                'start_at' => $start_at->toDateTimeString(),
+                'end_at' => $start_at->addDays($faker->numberBetween($min = 1, $max = 3))->toDateTimeString()
             ]);
         }
 

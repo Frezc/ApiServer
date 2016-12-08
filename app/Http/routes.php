@@ -28,17 +28,19 @@ Route::get('companyGetOrder','UserController@company_get_order');
 Route::post('evaluates/{id}', 'UserController@updateEvaluate');
 
 Route::get('jobs', 'JobController@query');
+Route::post('jobs', 'JobController@create');
 Route::get('job/apply', 'UserController@getJobApply');         // use [GET] users/{id}/orders instead
 Route::get('job/completed', 'UserController@getJobCompleted'); // use [GET] users/{id}/orders instead
 Route::get('jobs/{id}', 'JobController@get')->where('id', '[0-9]+');
 Route::post('jobs/{id}', 'JobController@update')->where('id', '[0-9]+');
 Route::delete('jobs/{id}', 'JobController@delete')->where('id', '[0-9]+');
+Route::post('jobs/{id}/time', 'JobController@addTime')->where('id', '[0-9]+');
 Route::post('jobs/{id}/apply', 'JobController@apply')->where('id', '[0-9]+');
 Route::post('job/apply', 'UserController@postJobApply');       // use [POST] jobs/{id}/apply instead
 Route::get('jobs/{id}/evaluate', 'JobController@getEvaluate');
 Route::post('job/evaluate', 'UserController@postJobEvaluate'); // use [POST] orders/{id}/evaluate instead
-Route::post('expect_jobs', 'ExpectJobController@create');
 
+Route::post('expect_jobs', 'ExpectJobController@create');
 Route::get('expect_jobs', 'ExpectJobController@query');
 Route::get('expect_jobs/{id}', 'ExpectJobController@get')->where('id', '[0-9]+');
 Route::post('expect_jobs/{id}', 'ExpectJobController@update')->where('id', '[0-9]+');

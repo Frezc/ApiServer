@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\MsgException;
+use App\Jobs\Job;
 use App\Jobs\PushNotifications;
 use App\Models\JobEvaluate;
 use App\Models\Message;
@@ -153,6 +154,8 @@ class OrderController extends Controller
                     'order_id' => $order->id,
                     'job_id' => $order->job_id
                 ]));
+                $job = Job::find($order->job_id);
+                $job && $job->updateScore();
                 return '评价成功';
             }
         }

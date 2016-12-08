@@ -46,10 +46,12 @@ class CreateTjzJobsTable extends Migration
             // 所在城市
             $table->string('city');
             // 详细地址
-            $table->string('address');
+            $table->string('address')->nullable();
           
             //联系人的电话
             $table->string('contact');
+            // 联系人的名字
+            $table->string('contact_person', 16);
             $table->string('position');
 
             // 为了能按照分数高低来排序所以加入字段
