@@ -42,6 +42,11 @@ class CreateTjzJobsTable extends Migration
             $table->tinyInteger('active')->default(1);
              //工作类型
             $table->string('job_type');
+
+            // 所在城市
+            $table->string('city');
+            // 详细地址
+            $table->string('address');
           
             //联系人的电话
             $table->string('contact');
@@ -50,6 +55,9 @@ class CreateTjzJobsTable extends Migration
             // 为了能按照分数高低来排序所以加入字段
             $table->integer('number_evaluate')->default(0);
             $table->float('average_score')->default(0);
+
+            // 岗位类型
+            $table->string('type')->default('其他');
 
             $table->softDeletes();
             $table->timestamps();
@@ -60,6 +68,8 @@ class CreateTjzJobsTable extends Migration
             $table->index('creator_name');
             $table->index('active');
             $table->index('job_type');
+            $table->index('type');
+            $table->index('city');
         });
     }
 

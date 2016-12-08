@@ -109,6 +109,7 @@ class DatabaseSeeder extends Seeder {
             $company = Company::findOrNew($faker->numberBetween($min = 1, $max = $this->companyNum));
             $user = User::find($faker->numberBetween($min = 1001, $max = 1000 + $this->userNum));
             $hasCom = $faker->boolean;
+            $type = \App\Models\JobType::find($faker->numberBetween($min = 1, $max = 24));
             Job::create([
                 'salary_type' => $faker->numberBetween($min = 1, $max = 2),
                 'salary' => '100',
@@ -122,7 +123,10 @@ class DatabaseSeeder extends Seeder {
                 'contact' => $faker->phoneNumber,
                 'active' => 1,
                 'number_evaluate' => $faker->numberBetween($min = 1, $max = 100),
-                'average_score' => 4.2
+                'average_score' => 4.2,
+                'type' => $type->name,
+                'city' => $faker->city,
+                'address' => $faker->address
             ]);
         }
 

@@ -54,12 +54,13 @@ class JobController extends Controller {
             'salary_type' => 'integer|in:1,2',
             'description' => 'string',
             'active' => 'integer|in:0,1',
-            'contact' => 'string|max:250'
+            'contact' => 'string|max:250',
+            'type' => 'exists:job_types,name'
         ]);
 
         $job->checkAccess($self);
 
-        $job->update(array_only($request->all(), ['name', 'pay_way', 'salary_type', 'description', 'active', 'contact']));
+        $job->update(array_only($request->all(), ['name', 'pay_way', 'salary_type', 'description', 'active', 'contact', 'type']));
         return response()->json($job);
     }
 
@@ -106,21 +107,27 @@ class JobController extends Controller {
             'user_id' => 'integer',
             'dir' => 'in:asc,desc',
             'off' => 'integer|min:0',
-            'exist' => 'integer|in:1,2'
+            'exist' => 'integer|in:1,2',
+            'type' => 'exists:job_types,name',
+            'city' => 'string'
         ]);
         $q = $request->input('kw');
         $limit = $request->input('siz', 20);
         $orderby = $request->input('orderby', 'id');
-        $direction = $request->input('dir', 'asc');
+        $direction = $request->input('dir', 'desc');
         $offset = $request->input('off', 0);
         $company_id = $request->input('company_id');
         $user_id = $request->input('user_id');
         $exist = $request->input('exist');
+        $type = $request->input('type');
+        $city = $request->input('city');
 
         $builder = Job::search($q);
 
         $user_id && $builder->where('creator_id', $user_id);
         $company_id && $builder->where('company_id', $company_id);
+        $type && $builder->where('type', $type);
+        $city && $builder->where('city', $city);
 
         $total = $builder->count();
 

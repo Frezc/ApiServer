@@ -84,5 +84,32 @@ class PresetSeeder extends Seeder
                 Storage::url('images/__banner3.jpg'),
                 Storage::url('images/__banner4.jpg')])
         ]);
+
+        \App\Models\JobType::insert([
+            ['name' => '传单派发'],
+            ['name' => '促销导购'],
+            ['name' => '话务客服'],
+            ['name' => '礼仪模特'],
+            ['name' => '家教助教'],
+            ['name' => '服务员'],
+            ['name' => '问卷调查'],
+            ['name' => '审核录入'],
+            ['name' => '地推拉访'],
+            ['name' => '打包分拣'],
+            ['name' => '展会协助'],
+            ['name' => '充场'],
+            ['name' => '安保'],
+            ['name' => '送餐员'],
+            ['name' => '演出'],
+            ['name' => '翻译'],
+            ['name' => '校园代理'],
+            ['name' => '技师技工'],
+            ['name' => '美容美发'],
+            ['name' => '餐饮工'],
+            ['name' => '兼职司机'],
+            ['name' => '义工'],
+            ['name' => '在线兼职'],
+            ['name' => '其他']
+        ]);
     }
 }

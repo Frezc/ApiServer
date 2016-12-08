@@ -67,6 +67,7 @@ Route::get('conversations', 'MessageController@getConversation');
 Route::post('conversations', 'MessageController@postConversation');
 Route::post('feedbacks', 'MessageController@postFeedback');
 Route::get('banners', 'DataController@getBanners');
+Route::get('job_types', 'DataController@getJobTypes');
 
 // 需要限制次数的请求
 // 每分钟三次

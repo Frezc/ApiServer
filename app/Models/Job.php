@@ -42,7 +42,8 @@ class Job extends Model
                 $builder->where(function ($query) use ($qi) {
                     $query->where('name', 'like', '%' . $qi . '%')
                         ->orWhere('creator_name', 'like', '%' . $qi . '%')
-                        ->orWhere('company_name', 'like', '%' . $qi . '%');
+                        ->orWhere('company_name', 'like', '%' . $qi . '%')
+                        ->orWhere('address', 'like', '%' . $qi . '%');
                 });
             }
         }
