@@ -9,6 +9,7 @@ use App\Models\Job;
 use App\Models\Message;
 use App\Models\Order;
 use App\Models\Resume;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use JWTAuth;
 
@@ -25,33 +26,28 @@ class ExpectJobController extends Controller {
      */
     public function create(Request $request) {
         $this->validate($request, [
-            'resume_id' => 'required|integer',
-            'expect_times' => 'array',
-            'expect_times.*.start_at' => 'required|date',
-            'expect_times.*.end_at' => 'required|date'
-//            'expect_times.*.year' => 'required|integer|between:2016,2099',
-//            'expect_times.*.month' => 'required|integer|between:0,12',
-//            'expect_times.*.dayS' => 'required|integer|min:0',
-//            'expect_times.*.dayE' => 'integer|min:0',
-//            'expect_times.*.hourS' => 'integer|between:0,23',
-//            'expect_times.*.hourE' => 'integer|min:0,23'
+            'resume_id' => 'required|integer',  // 简历id
+            'expect_times' => 'array',          // 期望时间
+            'expect_times.*.start_at' => 'required|date', // 开始时间
+            'expect_times.*.end_at' => 'required|date'    // 结束时间
         ]);
 
         $self = JWTAuth::parseToken()->authenticate();
         $resume_id = $request->input('resume_id');
+        // 找到对应简历
         $resume = Resume::findOrFail($resume_id);
         $expect_times = $request->input('expect_times', []);
-
+        // 验证权限
         $self->checkAccess($resume->user_id);
-
+        // 将简历转为求职信息
         $expectJob = $resume->convertToExpectJob(1);
-
+        // 将期望时间保存
         foreach ($expect_times as $expect_time) {
             ExpectTime::create(array_merge($expect_time, [ 'expect_job_id' => $expectJob->id ]));
         }
 
+        // 返回生成的求职信息
         $expectJob->expect_time = $expect_times;
-
         return response()->json($expectJob);
     }
 
@@ -79,8 +75,9 @@ class ExpectJobController extends Controller {
         $builder = ExpectJob::search($request->input('kw'));
 
         if ($user_id) $builder->where('user_id', $user_id);
+        $targetTime = ExpectTime::where('end_at', '>', Carbon::now()->toDateString());
         if ($time_s) {
-            $targetTime = ExpectTime::where(function ($query) use ($time_s) {
+            $targetTime->where(function ($query) use ($time_s) {
                 $query->where('start_at', '<=', $time_s)
                     ->where('end_at', '>=', $time_s);
             });
@@ -93,14 +90,14 @@ class ExpectJobController extends Controller {
                         ->where('end_at', '<', $time_e);
                 });
             }
-            $target = $targetTime ->select('expect_job_id')
-                ->distinct()
-                ->get()
-                ->map(function ($item) {
-                    return $item->expect_job_id;
-                });
-            $builder->whereIn('id', $target);
         }
+        $target = $targetTime ->select('expect_job_id')
+            ->distinct()
+            ->get()
+            ->map(function ($item) {
+                return $item->expect_job_id;
+            });
+        $builder->whereIn('id', $target);
 
         $count = $builder->count();
         $builder->orderBy($request->input('orderby', 'created_at'), $request->input('dir', 'desc'))
@@ -145,6 +142,7 @@ class ExpectJobController extends Controller {
             'job_id' => $job->id,
             'job_name' => $job->name,
             'job_time_id' => null,
+            'pay_way' => $job->pay_way,
             'expect_job_id' => $expectJob->id,
             'applicant_id' => $expectJob->user_id,
             'applicant_name' => $expectJob->user_name,
@@ -172,7 +170,7 @@ class ExpectJobController extends Controller {
      */
     public function get($id) {
         $user = $this->getAuthenticatedUser();
-        if ($user->isAdmin()) {
+        if ($user && $user->isAdmin()) {
             $expectJob = ExpectJob::withTrashed()->findOrFail($id);
         } else {
             $expectJob = ExpectJob::findOrFail($id);

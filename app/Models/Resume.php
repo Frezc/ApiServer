@@ -13,7 +13,7 @@ class Resume extends Model
 
     public function convertToExpectJob($isPublic = 0) {
         $user = User::find($this->user_id);
-
+        // 筛选并创建求职信息
         return ExpectJob::create(array_merge(
             array_only($this->toArray(),
                 ['user_id', 'title', 'name', 'photo', 'school', 'birthday', 'contact', 'sex', 'expect_location', 'introduction']),

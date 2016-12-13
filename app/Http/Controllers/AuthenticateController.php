@@ -27,7 +27,7 @@ class AuthenticateController extends Controller {
         $token = $request->input('token');
 
         $newToken = JWTAuth::refresh($token);
-        
+
         $user = JWTAuth::authenticate($newToken);
         $user->bindRoleName();
         return response()->json(['user' => $user, 'token' => $newToken]);

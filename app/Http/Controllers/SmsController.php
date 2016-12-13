@@ -22,21 +22,16 @@ class SmsController extends Controller {
         $this->validate($request, [
             'phone' => 'required|regex:/[0-9]+/'
         ]);
-
         $phoneNumber = $request->input('phone');
-
         $curl = new Curl();
         $curl->setHeader('Content-Type', 'application/json');
         $curl->setHeader('X-LC-Id', env('SMS_APPID', ''));
         $curl->setHeader('X-LC-Key', env('SMS_APPKEY', ''));
-
         $body = json_encode([
             'mobilePhoneNumber' => $phoneNumber,
             'ttl' => 60
         ]);
-
         $curl->post('https://api.leancloud.cn/1.1/requestSmsCode', $body);
-
         return response()->json($curl->response);
     }
 

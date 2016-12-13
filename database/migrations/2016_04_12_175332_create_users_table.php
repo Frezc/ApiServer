@@ -15,10 +15,12 @@ class CreateUsersTable extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->increments('id');
             $table->string('email')->nullable();
+
+            $table->double('money')->unsigned()->default(0);
             // 手机号
             $table->string('phone', 20)->nullable(); 
             // 昵称
-            $table->string('nickname', 32)->default('guy');    
+            $table->string('nickname', 32)->default('guy');
             $table->string('password');
             // 头像url
             $table->string('avatar')->nullable();
@@ -41,7 +43,6 @@ class CreateUsersTable extends Migration
             // 是否通过实名验证
             $table->tinyInteger('real_name_verified')->default(0);
 
-            // $table->rememberToken();
             $table->timestamps();
 
             $table->unique('email');

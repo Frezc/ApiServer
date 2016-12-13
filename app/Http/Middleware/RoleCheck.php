@@ -24,7 +24,6 @@ class RoleCheck {
         if (!$selfRole || !$targetRole || $selfRole->mode < $targetRole->mode) {
             throw new MsgException('You have no access to this resource.', 401);
         }
-
         return $next($request);
     }
 }

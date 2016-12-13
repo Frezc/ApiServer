@@ -91,7 +91,8 @@ class DatabaseSeeder extends Seeder {
                 'sex' => $faker->numberBetween($min = 0, $max = 1),
                 'email_verified' => $faker->numberBetween($min = 0, $max = 1),
                 'company_id' => $company ? $company->id : null,
-                'company_name' => $company ? $company->name : null
+                'company_name' => $company ? $company->name : null,
+                'money' => $faker->numberBetween($min = 0, $max = 100000)
             ]);
         }
 
@@ -160,6 +161,7 @@ class DatabaseSeeder extends Seeder {
                 'school' => $faker->randomElement($array = array('杭州电子科技大学', '春田花花幼稚园', '断罪小学')),
                 'birthday' => $faker->date($format = 'Y-m-d', $max = 'now'),
                 'sex' => $faker->numberBetween($min = 0, $max = 1),
+                'city' => $faker->city,
                 'expect_location' => $faker->address,
                 'introduction' => $faker->sentence(4, false),
                 'is_public' => 1
@@ -167,7 +169,7 @@ class DatabaseSeeder extends Seeder {
         }
 
         foreach (range(1, $this->expectTimeNum) as $i) {
-            $start_at = $faker->date($format = 'Y-m-d', $min = 'now');
+            $start_at = Carbon::now()->addDays($faker->numberBetween($min = 1, $max = 180));
             ExpectTime::create([
                 'expect_job_id' => $faker->numberBetween($min = 1, $max = $this->expectJobNum),
                 'start_at' => $start_at,
@@ -191,6 +193,7 @@ class DatabaseSeeder extends Seeder {
                 'school' => $faker->randomElement($array = array('杭州电子科技大学', '春田花花幼稚园', '断罪小学')),
                 'birthday' => $faker->date($format = 'Y-m-d', $max = 'now'),
                 'sex' => $faker->numberBetween($min = 0, $max = 1),
+                'city' => $faker->city,
                 'expect_location' => $faker->address,
                 'introduction' => $faker->sentence(4, false),
             ]);
@@ -208,6 +211,7 @@ class DatabaseSeeder extends Seeder {
                 'job_id' => $job->id,
                 'job_name' => $job->name,
                 'job_time_id' => $jobTime->id,
+                'pay_way' => $job->pay_way,
                 'expect_job_id' => $expectJob->id,
                 'applicant_id' => $expectJob->user_id,
                 'applicant_name' => $expectJob->user_name,
@@ -217,7 +221,7 @@ class DatabaseSeeder extends Seeder {
                 'status' => $status,
                 'close_type' => $closeType,
                 'applicant_check' => $status == 0 ? $faker->numberBetween($min = 0, $max = 1) : 1,
-                'recruiter_check' => $status == 0
+                'recruiter_check' => $status == 0 ? $faker->numberBetween($min = 0, $max = 1) : 1
             ]);
         }
 

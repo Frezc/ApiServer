@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Exceptions\MsgException;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -43,9 +44,11 @@ class Job extends Model
     public static function search($keyword) {
         $builder = Job::query();
         if ($keyword) {
+            // 最多只允许3个关键字
             $q_array = array_slice(explode(" ", trim($keyword)), 0, 3);
 
             foreach ($q_array as $qi) {
+                // 搜索岗位名称、创建者名称、企业名称、城市和地址
                 $builder->where(function ($query) use ($qi) {
                     $query->where('name', 'like', '%' . $qi . '%')
                         ->orWhere('creator_name', 'like', '%' . $qi . '%')

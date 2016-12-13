@@ -6,6 +6,7 @@ use App\Models\Conversation;
 use App\Models\Feedback;
 use App\Models\Message;
 use App\Models\Notification;
+use App\Models\Report;
 use App\Models\User;
 use Illuminate\Http\Request;
 use JWTAuth;
@@ -14,7 +15,7 @@ class MessageController extends Controller
 {
     public function __construct() {
         $this->middleware('jwt.auth');
-        $this->middleware('log', ['only' => ['postConversation', 'postFeedback']]);
+        $this->middleware('log', ['only' => ['postConversation', 'postFeedback', 'createReport']]);
     }
 
     /*
@@ -177,6 +178,28 @@ class MessageController extends Controller
         ]));
 
         return '感谢您的反馈！';
+    }
+
+    /*
+     * [POST] reports
+     */
+    public function createReport(Request $request) {
+        $this->validate($request, [
+            'target_type' => 'required|in:order,user,company,job,expect_job',
+            'target_id' => 'required|integer',
+            'content' => 'required|string',
+            'pictures' => 'string'
+        ]);
+
+        $self = JWTAuth::parseToken()->authenticate();
+        $report = Report::create(
+            array_merge(array_only($request->all(), ['target_type', 'target_id', 'content', 'pictures']), [
+                'user_id' => $self->id,
+                'user_name' => $self->nickname
+            ])
+        );
+
+        return response()->json($report);
     }
 
     private function getConversationId($id1, $id2) {

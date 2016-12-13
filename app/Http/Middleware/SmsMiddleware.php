@@ -21,23 +21,19 @@ class SmsMiddleware
           'phone' => 'required|regex:/[0-9]+/',
           'verification_code' => 'required|regex:/[0-9]+/'
       ]);
-
       if ($v->fails()) {
         return response()->json(['error' => $v->errors()], 400);
       }
-
       //验证短信验证码
       $curl = new Curl();
       $curl->setHeader('Content-Type', 'application/json');
       $curl->setHeader('X-LC-Id', env('SMS_APPID', ''));
       $curl->setHeader('X-LC-Key', env('SMS_APPKEY', ''));
-
-      $curl->post('https://api.leancloud.cn/1.1/verifySmsCode/'.$request->input('verification_code').'?mobilePhoneNumber='.$request->input('phone'));
-      // dd($curl->response);
+      $curl->post('https://api.leancloud.cn/1.1/verifySmsCode/'
+          .$request->input('verification_code').'?mobilePhoneNumber='.$request->input('phone'));
       if (isset($curl->response->code)) {
         return response()->json(['error' => '无效的验证码'], 430);
       }
-
       return $next($request);
     }
 }

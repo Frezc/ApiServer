@@ -26,6 +26,8 @@ class CreateExpectJobsTable extends Migration
             $table->string('contact')->nullable();
             // 性别 0 为男 1为女
             $table->tinyInteger('sex')->default(0);
+            // 期望工作城市
+            $table->string('city');
             // 期望工作地点
             $table->string('expect_location')->nullable();
             // 自我介绍
@@ -42,6 +44,7 @@ class CreateExpectJobsTable extends Migration
             $table->index('introduction');
             $table->index('expect_location');
             $table->index('school');
+            $table->index('city');
         });
     }
 

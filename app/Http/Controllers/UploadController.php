@@ -23,7 +23,6 @@ class UploadController extends Controller {
         $this->validate($request, [
             'file' => 'required|mimes:jpeg,bmp,png'
         ]);
-
         $user = JWTAuth::parseToken()->authenticate();
         $file = $request->file('file');
         $content = file_get_contents($file->getRealPath());
@@ -32,7 +31,6 @@ class UploadController extends Controller {
         $path = Storage::url($path);
         $uploadedFile = Uploadfile::where('path', $path)->first();
         if ($uploadedFile) {
-//            $uploadedFile->uploader_id = $user->id;
             $uploadedFile->exist = 1;
             $uploadedFile->save();
         } else {
@@ -41,15 +39,6 @@ class UploadController extends Controller {
                 'uploader_id' => $user->id
             ]);
         }
-
-        Log::create([
-            'ip' => $request->ip(),
-            'user_id' => $user->id,
-            'method' => $request->method(),
-            'path' => $request->path(),
-            'params' => json_encode(['file' => $path])
-        ]);
-
         return $path;
     }
 }

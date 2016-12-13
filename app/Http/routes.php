@@ -63,6 +63,9 @@ Route::delete('orders/{id}', 'OrderController@close')->where('id', '[0-9]+');
 Route::get('orders/{id}', 'OrderController@get')->where('id', '[0-9]+');
 Route::get('orders/{id}/evaluate', 'OrderController@getEvaluate')->where('id', '[0-9]+');
 Route::post('orders/{id}/evaluate', 'OrderController@postEvaluate')->where('id', '[0-9]+');
+Route::post('orders/{id}/check', 'OrderController@check')->where('id', '[0-9]+');
+Route::post('orders/{id}/payment', 'OrderController@pay')->where('id', '[0-9]+');
+Route::post('orders/{id}/completed', 'OrderController@completed')->where('id', '[0-9]+');
 
 Route::get('umsg', 'MessageController@getUpdate');
 Route::get('messages', 'MessageController@get');
@@ -72,6 +75,7 @@ Route::post('conversations', 'MessageController@postConversation');
 Route::post('feedbacks', 'MessageController@postFeedback');
 Route::get('banners', 'DataController@getBanners');
 Route::get('job_types', 'DataController@getJobTypes');
+Route::post('reports', 'MessageController@createReport');
 
 // 需要限制次数的请求
 // 每分钟三次

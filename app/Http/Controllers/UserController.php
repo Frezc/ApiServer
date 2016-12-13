@@ -31,7 +31,8 @@ class UserController extends Controller {
     public function self() {
         $self = JWTAuth::parseToken()->authenticate();
         $self->bindRoleName();
-        return $this->show($self->id);
+        $self->setHidden(['password']);
+        return response()->json($self);
     }
 
     /*
@@ -289,21 +290,16 @@ class UserController extends Controller {
             'location' => 'string',
             'avatar' => 'exists:uploadfiles,path'
         ]);
-
         $self = JWTAuth::parseToken()->authenticate();
         $self->checkAccess($user->id);
-
         $avatar = $request->input('avatar');
         if ($avatar) {
             $uploadFile = Uploadfile::where('path', $avatar)->first();
             $uploadFile->makeSureAccess($self);
             $uploadFile->replace($user->avatar);
         }
-        
         $user->update(array_only($request->all(),
             ['nickname', 'sex', 'sign', 'birthday', 'location', 'avatar']));
-
-
         return response()->json($user);
     }
 

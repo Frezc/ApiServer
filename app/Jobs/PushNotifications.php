@@ -9,45 +9,38 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class PushNotifications extends Job implements ShouldQueue
-{
+class PushNotifications extends Job implements ShouldQueue {
     use InteractsWithQueue, SerializesModels;
 
     protected $from;
     protected $to;
     protected $content;
 
-    /**
-     * Create a new job instance.
-     *
-     * @return void
-     */
-    public function __construct($from, $to, $content)
-    {
+    public function __construct($from, $to, $content) {
         $this->from = $from;
         $this->to = $to;
         $this->content = $content;
     }
 
-    /**
-     * Execute the job.
-     *
-     * @return void
-     */
-    public function handle()
-    {
+    public function handle() {
         if ($this->to) {
             if (is_array($this->to)) {
+                // 发送对象是数组
                 foreach ($this->to as $to) {
-                    Message::pushNotification($this->from, $to, $this->content);
+                    Message::pushNotification(
+                        $this->from, $to, $this->content);
                 }
             } else {
-                Message::pushNotification($this->from, $this->to, $this->content);
+                // 发送对象是单个用户
+                Message::pushNotification(
+                    $this->from, $this->to, $this->content);
             }
         } else {
+            // 没有发送对象，默认向所有人发送
             $userCount = User::where('id', '>', 1000)->count();
             for ($i = 1001; $i <= 1000 + $userCount; $i++) {
-                Message::pushNotification($this->from, $i, $this->content);
+                Message::pushNotification(
+                    $this->from, $i, $this->content);
             }
         }
     }
