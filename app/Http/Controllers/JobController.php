@@ -145,9 +145,34 @@ class JobController extends Controller {
         }
 
         // 绑定岗位的时间
-        $job->bindTime();
-        return response()->json($job);
+//        $job->bindTime();
+        $jobTime = JobTime::withTrashed()->where('job_id', $job->id)->orderBy('apply_end_at', 'desc')->get();
+        return response()->json($jobTime);
     }
+
+    /*
+     * [DELETE] jobs/{id}/time
+     */
+    public function closeTime(Request $request, $id) {
+        // 找到岗位，否则返回404
+        $job = Job::findOrFail($id);
+        $self = JWTAuth::parseToken()->authenticate();
+        // 检查当前用户是否有修改权限
+        $job->checkAccess($self);
+        // json格式
+        $this->validate($request, [
+            'time' => 'required|string'         // 用逗号隔开
+        ]);
+
+        $time = $request->input('time');
+        $timeArr = explode(',', $time);
+        JobTime::where('job_id', $job->id)->whereIn('id', $timeArr)->delete();
+        // 绑定岗位的时间
+//        $job->bindTime();
+        $jobTime = JobTime::withTrashed()->where('job_id', $job->id)->orderBy('apply_end_at', 'desc')->get();
+        return response()->json($jobTime);
+    }
+
 
     /*
      * [GET] jobs/{id}/evaluate
@@ -280,63 +305,63 @@ class JobController extends Controller {
         return response()->json(['total' => $total, 'list' => $jobs]);
     }
 
-/*
- * [POST] jobs/{id}/apply
- */
-public function apply(Request $request, $id) {
-    $job = Job::findOrFail($id);
+    /*
+     * [POST] jobs/{id}/apply
+     */
+    public function apply(Request $request, $id) {
+        $job = Job::findOrFail($id);
 
-    $this->validate($request, [
-        'job_time_id' => 'required|integer',  // 工作时间的id
-        'resume_id' => 'required|integer'     // 简历id
-    ]);
-    // 获取工作时间
-    $jobTime = JobTime::where('job_id', $job->id)
-        ->findOrFail($request->input('job_time_id'));
-    // 获取简历
-    $resume = Resume::findOrFail($request->input('resume_id'));
+        $this->validate($request, [
+            'job_time_id' => 'required|integer',  // 工作时间的id
+            'resume_id' => 'required|integer'     // 简历id
+        ]);
+        // 获取工作时间
+        $jobTime = JobTime::where('job_id', $job->id)
+            ->findOrFail($request->input('job_time_id'));
+        // 获取简历
+        $resume = Resume::findOrFail($request->input('resume_id'));
 
-    $self = JWTAuth::parseToken()->authenticate();
-    // 验证权限
-    $self->checkAccess($resume->user_id);
-    // 将简历转为求职资料
-    $expectJob = $resume->convertToExpectJob();
-    // 创建订单
-    $order = Order::create([
-        'job_id' => $job->id,      // 岗位id
-        'job_name' => $job->name,  // 岗位名称
-        'job_time_id' => $jobTime->id, // 工作时间id
-        'pay_way' => $job->pay_way,    // 支付方式
-        'expect_job_id' => $expectJob->id, // 求职资料id
-        'applicant_id' => $resume->user_id, // 申请者Id
-        'applicant_name' => $self->nickname, // 申请者名称
-        'recruiter_type' => $job->company_id ? 1 : 0, // 招聘者类型
-        'recruiter_id' => $job->company_id ?
-            $job->company_id : $job->creator_id,  // 招聘者id
-        'recruiter_name' => $job->company_id ?
-            $job->company_name : $job->creator_name, // 招聘者名称
-        'status' => 0,                    // 状态
-        'applicant_check' => 1,           // 申请者是否确认
-        'recruiter_check' => 0            // 招聘方是否确认
-    ]);
+        $self = JWTAuth::parseToken()->authenticate();
+        // 验证权限
+        $self->checkAccess($resume->user_id);
+        // 将简历转为求职资料
+        $expectJob = $resume->convertToExpectJob();
+        // 创建订单
+        $order = Order::create([
+            'job_id' => $job->id,      // 岗位id
+            'job_name' => $job->name,  // 岗位名称
+            'job_time_id' => $jobTime->id, // 工作时间id
+            'pay_way' => $job->pay_way,    // 支付方式
+            'expect_job_id' => $expectJob->id, // 求职资料id
+            'applicant_id' => $resume->user_id, // 申请者Id
+            'applicant_name' => $self->nickname, // 申请者名称
+            'recruiter_type' => $job->company_id ? 1 : 0, // 招聘者类型
+            'recruiter_id' => $job->company_id ?
+                $job->company_id : $job->creator_id,  // 招聘者id
+            'recruiter_name' => $job->company_id ?
+                $job->company_name : $job->creator_name, // 招聘者名称
+            'status' => 0,                    // 状态
+            'applicant_check' => 1,           // 申请者是否确认
+            'recruiter_check' => 0            // 招聘方是否确认
+        ]);
 
-    $order->expect_job = $expectJob;
-    $order->job_time = $jobTime;
+        $order->expect_job = $expectJob;
+        $order->job_time = $jobTime;
 
-    // 得到招聘方的id，如果是企业的话会得到企业下的所有人id
-    $to = $job->creator_id;
-    if ($job->company_id) {
-        $to = Company::getUserIds($job->company_id);
+        // 得到招聘方的id，如果是企业的话会得到企业下的所有人id
+        $to = $job->creator_id;
+        if ($job->company_id) {
+            $to = Company::getUserIds($job->company_id);
+        }
+        // 发送消息
+        $this->dispatch(new PushNotifications(
+            Message::getSender(Message::$WORK_HELPER),
+            $to,
+            $self->nickname . ' 申请了岗位 ' . $job->name . '。'
+        ));
+        // 返回创建的订单信息
+        return response()->json($order);
     }
-    // 发送消息
-    $this->dispatch(new PushNotifications(
-        Message::getSender(Message::$WORK_HELPER),
-        $to,
-        $self->nickname . ' 申请了岗位 ' . $job->name . '。'
-    ));
-    // 返回创建的订单信息
-    return response()->json($order);
-}
 
     /*
      * [DELETE] jobs/{id}

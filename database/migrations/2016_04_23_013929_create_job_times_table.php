@@ -39,6 +39,7 @@ class CreateJobTimesTable extends Migration
 //            $table->tinyInteger('hourE')->nullable()->unsigned();
 //            $table->tinyInteger('minuteS')->nullable()->unsigned();
 //            $table->tinyInteger('minuteE')->nullable()->unsigned();
+            $table->softDeletes();
             $table->timestamps();
 
             $table->index(['job_id']);

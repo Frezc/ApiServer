@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 0.7.8
+  version: 0.8.0
   title: 淘兼职api
   description: |
     Admin标签代表只能管理员使用;
@@ -975,6 +975,28 @@ paths:
           schema:
             $ref: '#/definitions/Job'
   /jobs/{id}/time:
+    get:
+      description: 得到该岗位的所有时间
+      tags:
+        - 岗位模块
+        - Admin
+      parameters:
+        - name: id
+          in: path
+          description: 岗位id
+          required: true
+          type: integer
+        - name: expire
+          in: query
+          description: 是否显示过期项 0 不显示，1 显示
+          type: integer
+      responses:
+        '200':
+          description: 返回所有时间
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/JobTime'
     post:
       description: 添加时间
       tags:
@@ -1006,9 +1028,39 @@ paths:
                   $ref: '#/definitions/JobTime'
       responses:
         '200':
-          description: 返回修改后的岗位详情
+          description: 返回修改后的时间
           schema:
-            $ref: '#/definitions/Job'
+            type: array
+            items:
+              $ref: '#/definitions/JobTime'
+    delete:
+      description: 关闭某些时间
+      tags:
+        - 岗位模块
+      consumes:
+        - application/json
+      parameters:
+        - name: token
+          in: query
+          required: true
+          type: string
+        - name: id
+          in: path
+          description: 岗位id
+          required: true
+          type: integer
+        - name: time
+          in: query
+          description: 关闭的job time id
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 返回修改后的时间
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/JobTime'
   /jobs/{id}/evaluate:
     get:
       description: 得到岗位的评价

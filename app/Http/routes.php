@@ -35,6 +35,7 @@ Route::get('jobs/{id}', 'JobController@get')->where('id', '[0-9]+');
 Route::post('jobs/{id}', 'JobController@update')->where('id', '[0-9]+');
 Route::delete('jobs/{id}', 'JobController@delete')->where('id', '[0-9]+');
 Route::post('jobs/{id}/time', 'JobController@addTime')->where('id', '[0-9]+');
+Route::delete('jobs/{id}/time', 'JobController@closeTime')->where('id', '[0-9]+');
 Route::post('jobs/{id}/apply', 'JobController@apply')->where('id', '[0-9]+');
 Route::post('job/apply', 'UserController@postJobApply');       // use [POST] jobs/{id}/apply instead
 Route::get('jobs/{id}/evaluate', 'JobController@getEvaluate');
@@ -121,6 +122,7 @@ Route::group(['namespace' => 'BOSS', 'middleware' => ['jwt.auth', 'role:admin']]
     Route::post('expect_jobs/{id}/restore', 'ExpectJobController@restore');
     Route::get('boss/umsg', 'MessageController@getUpdate');
     Route::get('evaluates', 'UserController@getEvaluates');
+    Route::get('jobs/{id}/time', 'JobController@getTime')->where('id', '[0-9]+');
 });
 
 Route::get('/', function () {
