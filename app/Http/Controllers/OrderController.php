@@ -246,6 +246,7 @@ class OrderController extends Controller
         $self = JWTAuth::parseToken()->authenticate();
         // 检查权限
         $order->makeSureAccess($self);
+        dd($order->isRecruiter($self));
         if ($order->applicant_id == $self->id && !$order->applicant_check) {
             // 当前用户为求职者且求职者未确认时，选择一个工作时间确认
             $jobTimeId = $request->input('job_time_id');

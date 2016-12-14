@@ -43,9 +43,9 @@ class Order extends Model
 
     public function isRecruiter(User $user) {
         if ($this->recruiter_type == 1) {
-            return $this->applicant_id == $user->company_id;
+            return $this->recruiter_id == $user->company_id;
         } else {
-            return $this->applicant_id == $user->id;
+            return $this->recruiter_id == $user->id;
         }
     }
 
