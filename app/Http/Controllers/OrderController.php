@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\MsgException;
 use App\Jobs\CloseOrderWhenNotPay;
-use App\Jobs\Job;
 use App\Jobs\PushNotifications;
+use App\Models\Job;
 use App\Models\JobEvaluate;
 use App\Models\JobTime;
 use App\Models\Log;
