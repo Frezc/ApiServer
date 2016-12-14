@@ -66,7 +66,7 @@ class Job extends Model
         $builder = JobEvaluate::where('job_id', $this->id);
         $this->update([
             'number_evaluate' => $builder->count(),
-            'average_score' => $builder->average('score')
+            'average_score' => $builder->avg('score')
         ]);
     }
 }
