@@ -316,7 +316,7 @@ paths:
       description: 得到当前登录用户的信息
       tags:
         - 用户模块
-      parameters:
+      parameters: 
         - name: token
           in: query
           required: true
@@ -1426,7 +1426,7 @@ paths:
           description: 返回创建成功的订单
           schema:
             $ref: '#/definitions/ExpectJob'
-
+            
   /users/{id}/orders:
     get:
       description: 得到该用户的订单信息
@@ -1743,7 +1743,7 @@ paths:
       description: 离开当前企业。
       tags:
         - 商家模块
-      parameters:
+      parameters: 
         - name: token
           in: query
           required: true
@@ -1872,7 +1872,7 @@ paths:
           description: 提交申请成功
           schema:
             $ref: '#/definitions/CompanyApply'
-
+            
   /upload/image:
     post:
       description: 上传图片
@@ -1901,7 +1901,7 @@ paths:
       description: 得到提醒等更新信息
       tags:
         - 其他模块
-      parameters:
+      parameters: 
         - name: token
           in: query
           required: true
@@ -2934,7 +2934,7 @@ definitions:
         type: string
       members:
         type: array
-        items:
+        items: 
           $ref: '#/definitions/User'
       created_at:
         type: string

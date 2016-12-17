@@ -20,9 +20,9 @@ class SmsController extends Controller {
      */
     public function getSmsCode(Request $request) {
         $this->validate($request, [
-            'phone' => 'required|regex:/[0-9]+/'
+            'phone' => 'required|regex:/[0-9]+/'  // 验证输入的手机号
         ]);
-        $phoneNumber = $request->input('phone');
+        $phoneNumber = $request->input('phone');  // 获取手机号
         $curl = new Curl();
         $curl->setHeader('Content-Type', 'application/json');
         $curl->setHeader('X-LC-Id', env('SMS_APPID', ''));
@@ -31,6 +31,7 @@ class SmsController extends Controller {
             'mobilePhoneNumber' => $phoneNumber,
             'ttl' => 60
         ]);
+        // 向第三方接口发送请求
         $curl->post('https://api.leancloud.cn/1.1/requestSmsCode', $body);
         return response()->json($curl->response);
     }

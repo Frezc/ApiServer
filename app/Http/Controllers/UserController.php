@@ -283,18 +283,19 @@ class UserController extends Controller {
     public function update(Request $request, $id) {
         $user = User::findOrFail($id);
         $this->validate($request, [
-            'nickname' => 'max:32',
-            'sex' => 'in:0,1',
-            'sign' => 'string',
-            'birthday' => 'date_format:Y-m-d',
-            'location' => 'string',
-            'avatar' => 'exists:uploadfiles,path'
+            'nickname' => 'max:32',      // 昵称不能超过32位
+            'sex' => 'in:0,1',           // 性别
+            'sign' => 'string',          // 签名
+            'birthday' => 'date_format:Y-m-d', // 生日
+            'location' => 'string',            // 地址
+            'avatar' => 'exists:uploadfiles,path' // 头像
         ]);
         $self = JWTAuth::parseToken()->authenticate();
         $self->checkAccess($user->id);
         $avatar = $request->input('avatar');
         if ($avatar) {
             $uploadFile = Uploadfile::where('path', $avatar)->first();
+            // 当前用户对该文件是否有访问权限
             $uploadFile->makeSureAccess($self);
             $uploadFile->replace($user->avatar);
         }

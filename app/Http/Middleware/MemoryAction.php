@@ -18,8 +18,10 @@ class MemoryAction
      */
     public function handle($request, Closure $next)
     {
+        // 将处理放在控制器后
         $response = $next($request);
         if ($response->getStatusCode() == 200) {
+            // 请求成功，记录该请求
             $self = JWTAuth::parseToken()->authenticate();
             $data = [
                 'ip' => $request->ip(),

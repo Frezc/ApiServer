@@ -30,7 +30,8 @@ class SmsMiddleware
       $curl->setHeader('X-LC-Id', env('SMS_APPID', ''));
       $curl->setHeader('X-LC-Key', env('SMS_APPKEY', ''));
       $curl->post('https://api.leancloud.cn/1.1/verifySmsCode/'
-          .$request->input('verification_code').'?mobilePhoneNumber='.$request->input('phone'));
+          .$request->input('verification_code')
+          .'?mobilePhoneNumber='.$request->input('phone'));
       if (isset($curl->response->code)) {
         return response()->json(['error' => '无效的验证码'], 430);
       }

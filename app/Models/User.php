@@ -63,8 +63,8 @@ class User extends Model implements AuthenticatableContract,
      * @throws MsgException
      */
     public function checkAccess($owner_id) {
-        if ($this->id != $owner_id) {
-            if ($this->isAdmin()) {
+        if ($this->id != $owner_id) { // 是否为同一个用户
+            if ($this->isAdmin()) {   // 是否为管理员
                 return true;
             }
             throw new MsgException('You have no access to this user.', 401);
