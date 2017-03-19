@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateEmailVerificationsTalbe extends Migration
+class CreateSmsCodeVerificationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -12,13 +12,11 @@ class CreateEmailVerificationsTalbe extends Migration
      */
     public function up()
     {
-        Schema::create('verification_code', function (Blueprint $table) {
+        Schema::create('sms_code_verifications', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('email');
-            $table->date('send_at');
-            $table->string('token');
+            $table->string('phone', 20)->nullable();
+            $table->integer('code');
             $table->timestamps();
-            $table->unique('email');
         });
     }
 
@@ -29,6 +27,6 @@ class CreateEmailVerificationsTalbe extends Migration
      */
     public function down()
     {
-        Schema::drop('email_verifications');
+        Schema::drop('sms_code_virifications');//
     }
 }

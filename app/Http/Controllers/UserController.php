@@ -21,7 +21,7 @@ use Validator;
 class UserController extends Controller {
 
     public function __construct() {
-        $this->middleware('jwt.auth', ['except' => ['show', 'mainPage']]);
+        $this->middleware('jwt.auth', ['except' => ['show', 'mainPage','getAllResume']]);
         $this->middleware('log', ['only' => ['update', 'createRealNameApplies', 'deleteRealNameApply', 'updateEvaluate']]);
     }
 
@@ -74,26 +74,6 @@ class UserController extends Controller {
 }
 
 
-    public function idCardVerify(Request $request) {
-        $this->validate($request, [
-            'name' => 'require',
-            'idcard' => 'require'
-        ]);
-        $idcard = $request->input('idcard');
-        $name = $request->input('name');
-        $AppKey = "32df1901c543487dbd900e027dbc919b";
-        $url = "http://api.avatardata.cn/IdCardCertificate/Verify?" . "key=" . $AppKey . "&realname=" . $name . "&idcard=" . $idcard;
-        $result = json_decode(file_get_contents($url), true);
-        $result = $result['result'];
-        if (!$result && $result == "一致") {
-            $user = JWTAuth::parseToken()->authenticate();
-            $user->idcard = $idcard;
-            $user->idcard_verify = 1;
-            return 'Success';
-        } else {
-            echo $result['reason'];
-        }
-    }
 
     // refactor
     public function getJobApply(Request $request) {
@@ -111,7 +91,7 @@ class UserController extends Controller {
         $user = JWTAuth::parseToken()->authenticate();
         $builder = $user->jobApplies();
 
-        //筛选
+
         if ($request->has('status')) {
             $status = $request->input('status');
             if (in_array($status, [0, 1, 2])) {
@@ -131,12 +111,8 @@ class UserController extends Controller {
 
         $job_applies = $builder->get();
 
-        //参数中添加job_name和resume_name
-        foreach ($job_applies as $job_apply) {
 
-            // 会直接将对应的对象赋值给$job_apply
-            // $job_apply->job_name = $job_apply->job->name;
-            // $job_apply->resume_name = $job_apply->resume->name;
+        foreach ($job_applies as $job_apply) {
 
             $job_apply->job_name = Job::find($job_apply->job_id)->name;
             $job_apply->resume_name = Resume::find($job_apply->resume_id)->name;
@@ -144,6 +120,7 @@ class UserController extends Controller {
 
         return response()->json(['total' => $total, 'list' => $job_applies]);
     }
+
 
     // refactor
     public function getJobCompleted(Request $request) {
@@ -308,10 +285,10 @@ class UserController extends Controller {
      * [GET] users/{id}/realNameApplies
      */
     public function getRealNameApplies($id) {
-        $user = User::findOrFail($id);
+//        $user = User::findOrFail($id);
         $self = JWTAuth::parseToken()->authenticate();
-        $self->checkAccess($user->id);
-        $rnvs = RealNameVerification::where('user_id', $user->id)
+//        $self->checkAccess($user->id);
+        $rnvs = RealNameVerification::where('user_id', $self->id)
             ->orderBy('updated_at', 'desc')
             ->get();
         return response()->json($rnvs);
@@ -407,5 +384,20 @@ class UserController extends Controller {
 
         $evaluate->update(array_only($request->all(), ['score', 'comment', 'pictures']));
         return response()->json($evaluate);
+    }
+    public function getAllResume(Request $request){
+        $resume=Resume::query();
+        $resume->orderBy(
+            $request->input('orderBytime', 'created_at'),
+
+            $request->input('order', 'desc')
+
+        );
+        $total =$resume->count();
+        if ($request->has('offset')) {
+            $resume->skip($request->input('offset'));
+        }
+        $resume->limit($request->input('limit'));
+        return response()->json(['list'=> $resume->get(), 'total'=>  $total]);
     }
 }

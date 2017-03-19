@@ -16,8 +16,8 @@ class EmailController extends Controller {
 
     public function __construct() {
         $this->middleware('jwt.auth', ['only' => ['bindEmail']]);
-        $this->middleware('email', ['only' => ['verifyEmail', 'bindEmail']]);
-        $this->middleware('log', ['only' => ['sendVerifyEmail', 'verifyEmail', 'bindEmail']]);
+//        $this->middleware('email', ['only' => ['verifyEmail', 'bindEmail']]);
+     //   $this->middleware('log', ['only' => ['sendVerifyEmail', 'verifyEmail', 'bindEmail']]);
     }
 
     /*
@@ -39,13 +39,13 @@ class EmailController extends Controller {
         $token = $this->generateToken($email);
         $send_time = time();
         $send_at = strftime('%Y-%m-%d %X', $send_time);
-
+        $url='http://localhost/waibao/public/verifyEmail?email='.$email.'&verification_code='.$token;
         // 		一个小时后过期
         $avalible_before = strftime('%Y-%m-%d %X', $send_time + 3600);
 
         // 		发送邮件
         Mail::send('emails.verification',
-            ['token' => $token, 'avalible_before' => $avalible_before],
+            ['token' => $url, 'avalible_before' => $avalible_before],
             function ($message) use ($email) {
                 $message->to($email, 'dear')->subject('淘兼职邮箱验证');
             }
@@ -63,9 +63,15 @@ class EmailController extends Controller {
      */
     public function verifyEmail(Request $request) {
         /* validate at middleware */
+        $email = $request->input('email');
+        $code = $request->input('verification_code');
+
+        $verify = DB::table('verification_code')->where('email',$email)->get();
+      if($verify->code ==  $code){
         $user = User::where('email', $request->input('email'))->firstOrFail();
         $user->email_verified = 1;
         $user->save();
+      }
         return 'success';
     }
 

@@ -79,6 +79,21 @@ class User extends Model implements AuthenticatableContract,
         }
         return false;
     }
+    public function isCompanyUser(){
+        $role=Role::find($this->role_id);
+        if($role->name == 'company'){
+            return true;
+        }
+        return false;
+
+    }
+    public function isUser(){
+        $role = Role::find($this->role_id);
+        if ($role && $role->name == 'user') {
+            return true;
+        }
+        return false;
+    }
 
     public function getRealNameVerification() {
         return RealNameVerification::where('user_id', $this->id)->first();

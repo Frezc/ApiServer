@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SmsCodeVerification;
 use App\Models\User;
 use Curl\Curl;
 use Hash;
+use DB;
 use Illuminate\Http\Request;
 use JWTAuth;
 use Validator;
@@ -12,53 +14,98 @@ use Validator;
 class SmsController extends Controller {
     public function __construct() {
         $this->middleware('jwt.auth', ['only' => ['bindPhone']]);
-        $this->middleware('sms', ['only' => ['getSmsCode', 'bindPhone', 'resetPassword']]);
+        $this->middleware('sms', ['only' => [ 'bindPhone', 'resetPassword','']]);
     }
 
     /*
      * [GET] getSmsCode
      */
     public function getSmsCode(Request $request) {
-        $this->validate($request, [
-            'phone' => 'required|regex:/[0-9]+/'  // 验证输入的手机号
+        $this->validate($request,[
+            'phone'=>'required |regex:/[0-9]+/|'
         ]);
-        $phoneNumber = $request->input('phone');  // 获取手机号
-        $curl = new Curl();
-        $curl->setHeader('Content-Type', 'application/json');
-        $curl->setHeader('X-LC-Id', env('SMS_APPID', ''));
-        $curl->setHeader('X-LC-Key', env('SMS_APPKEY', ''));
-        $body = json_encode([
-            'mobilePhoneNumber' => $phoneNumber,
-            'ttl' => 60
-        ]);
-        // 向第三方接口发送请求
-        $curl->post('https://api.leancloud.cn/1.1/requestSmsCode', $body);
-        return response()->json($curl->response);
+        $phone=$request->input('phone');
+        $smgcode=rand(99999,999999);
+        $verify= DB::table('sms_code_verifications')->where('phone',$phone)->get();
+        if(count($verify) > 0){
+            $this->clearVerification($phone);
+        }
+        $ch=curl_init();
+        $url='http://106.ihuyi.cn/webservice/sms.php?method=Submit&account=C17975840&password=5b3d938c8f8a49e5e5cf7474f0ddd2a3';
+        $url=$url.'&mobile='.$phone.'&content=您的验证码是：'.$smgcode.'。请不要把验证码泄露给其他人。';
+
+        curl_setopt($ch,CURLOPT_URL,$url);
+        curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
+        curl_setopt($ch,CURLOPT_HEADER,0);
+        $xmlstr= curl_exec($ch);
+        curl_close($ch);
+        $xml= simplexml_load_string($xmlstr);
+        $json=json_encode($xml);
+        $json_Array=json_decode($json, true);
+        if( $json_Array['code']==2){
+            $smsVerification = new SmsCodeVerification;
+            $smsVerification->phone=$phone;
+            $smsVerification->code=$smgcode;
+            $smsVerification->save();
+            return $json_Array['code'];
+        }else{
+            echo '发送失败';
+        }
     }
+
+
 
     /*
      * [POST] registerByPhone
      */
-    public function registerByPhone(Request $request) {
+    public function userRegisterByPhone(Request $request) {
         $this->validate($request, [
             'phone' => 'required|regex:/[0-9]+/|unique:users,phone',
             'password' => 'required|between:6,32',
             'nickname' => 'required|between:1,16'
         ]);
-
+        $smscode=$request->input('code');
         $nickname = $request->input('nickname');
         $password = $request->input('password');
         $phone = $request->input('phone');
-
-        $user = new User;
-        $user->phone = $phone;
-        $user->nickname = $nickname;
-        $user->password = Hash::make($password);
-        $user->save();
-
-        return 'success';
+        $code=DB::table('sms_code_virifications')->where('phone', $phone )->value('code');
+        if($smscode==$code){
+            $user = new User;
+            $user->phone = $phone;
+            $user->role_id = 1;
+            $user->nickname = $nickname;
+            $user->password = Hash::make($password);
+            $user->save();
+            return 'success';
+        }else{
+            return '验证码不对';
+        }
     }
 
+
+    public function companyRegisterByPhone(Request $request) {
+        $this->validate($request, [
+            'phone' => 'required|regex:/[0-9]+/|unique:users,phone',
+            'password' => 'required|between:6,32',
+            'nickname' => 'required|between:1,16'
+        ]);
+        $smscode=$request->input('code');
+        $nickname = $request->input('nickname');
+        $password = $request->input('password');
+        $phone = $request->input('phone');
+        $code=DB::table('sms_code_virifications')->where('phone', $phone )->value('code');
+        if($smscode==$code){
+            $user = new User;
+            $user->phone = $phone;
+            $user->role_id = 3;
+            $user->nickname = $nickname;
+            $user->password = Hash::make($password);
+            $user->save();
+            return 'success';
+        }else{
+            return '验证码不对';
+        }
+    }
     /*
      * [POST] bindPhone
      */

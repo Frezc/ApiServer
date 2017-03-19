@@ -19,9 +19,9 @@ class CompanyController extends Controller {
 
     function __construct(){
 
-        $this->middleware('jwt.auth',['only'=>['releaseJob', 'getApply', 'postApply', 'update', 'addUser', 'unlink']]);
-        $this->middleware('log', ['only' => ['postApply', 'update', 'releaseJob', 'addUser', 'unlink']]);
-        $this->middleware('role:user', ['only' => ['releaseJob', 'postApply', 'update', 'addUser', 'unlink']]);
+        $this->middleware('jwt.auth',['only'=>[ 'getApply', 'postApply', 'update', 'addUser', 'unlink']]);
+        $this->middleware('log', ['only' => ['postApply', 'update',  'addUser', 'unlink']]);
+        $this->middleware('role:user', ['only' => [ 'postApply', 'update', 'addUser', 'unlink']]);
     }
 
     /*
@@ -34,41 +34,6 @@ class CompanyController extends Controller {
     /*
      * [GET] releaseJob
      */
-    public function releaseJob(Request $request){
-
-        $this->validate($request, [
-            'name'=>'string',
-            'pay_way'=>'integer|min:0|max:2',
-            'salary_type'=>'integer|min:0|max:2',
-            'salary'=>'integer|min:0',
-            'demanded_number'=>'integer|min:0'
-        ]);
-
-          $job=new Job;
-          $jobstime =new JobTime;
-          $job->name=$request->input('name');
-          $job->description=$request->input('description');
-          $job->pay_way=$request->input('pay_way');
-          $job->salary=$request->input('salary');
-          $job->salary_type=$request->input('salary_type');
-          $user=JWTAuth::parseToken()->authenticate();
-          $job->creator_id=$user->id;
-          $company_id=$user->company_id;
-          $company=Company::find($company_id);
-          $job->company_id=$company_id;
-          $job->company_name=$company->name;
-          $job->creator_name=$company->contact_person;
-          $job->contact=$company->contact;
-          $job->job_type=$request->input('job_type');
-          $jobstime->start_at=$request->input('start_at');
-          $jobstime->end_at=$request->input('end_at') ;
-          $jobstime->number=$request->input('demanded_number');
-          $job->save();
-          $jobstime->job_id=$job->id;
-          $jobstime->save();
-      return  response()->json($job);
-
-    }
 
     /*
      * [GET] companies
@@ -87,7 +52,6 @@ class CompanyController extends Controller {
         $orderby = $request->input('orderby', 'id');
         $direction = $request->input('dir', 'asc');
         $offset = $request->input('off', 0);
-
         $builder = Company::search($keywords);
 
         $total = $builder->count();
@@ -174,7 +138,6 @@ class CompanyController extends Controller {
 
         $self = JWTAuth::parseToken()->authenticate();
         $company->makeSureAccess($self);
-
         $company->update(array_only($request->all(), ['url', 'address', 'logo', 'description', 'contact_person', 'contact']));
         return response()->json($company);
     }
@@ -220,4 +183,6 @@ class CompanyController extends Controller {
 
         return '移除成功';
     }
+
+
 }

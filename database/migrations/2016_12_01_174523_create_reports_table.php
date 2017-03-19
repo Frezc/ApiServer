@@ -21,7 +21,7 @@ class CreateReportsTable extends Migration
             // 'order': 订单, 'user': 用户, 'company': 企业, 'job': 岗位, 'expect_job': 公开简历
             $table->string('target_type', 12);
             $table->integer('target_id');
-
+           $table->tinyInteger('is_public');
             // 处理状态 1：未处理，2：已处理，3：搁置
             $table->tinyInteger('status')->default(1);
             // 处理时间

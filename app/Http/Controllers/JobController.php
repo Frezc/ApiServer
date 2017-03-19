@@ -42,11 +42,76 @@ class JobController extends Controller {
         $job->visited++;
         $job->save();
         // 绑定岗位的工作时间段
-        $job->bindTime();
+        $job->bindJobWelfaer();
         // 返回json数据
         return response()->json($job);
     }
 
+
+    public function mainPage(Request $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+        if($user){
+            $resume = Resume::query()->where('user_id',$user->id)->get(1);
+            $q=$resume->flag;
+        }
+        $this->validate($request, [
+
+            'limit' => 'integer|min:0', // 最多数量
+            'orderby' => 'in:id,created_at,average_score', // 排序方式
+            'company_id' => 'integer', // 发布者为企业时的id筛选
+            'user_id' => 'integer',    // 发布者的id筛选
+            'dir' => 'in:asc,desc',    // 排序方向
+            'offset' => 'integer|min:0',  // 跳过多少数据
+            'exist' => 'integer|in:1,2', // （管理员权限）是否显示删除项
+            'job_type' => 'exists:job_types,name', // 岗位类型
+            'city' => 'string',        // 所在城市
+        ]);
+
+        // 获取传入参数，或者设为默认值
+
+        $orderby = $request->input('orderby', 'id');
+        $direction = $request->input('dir', 'desc');
+        $company_id = $request->input('company_id');
+        $user_id = $request->input('user_id');
+        $exist = $request->input('exist');
+        $type = $request->input('job_type');
+        $city = $request->input('city');
+        // 关键字搜索
+        $builder = Job::search($q);
+        // 筛选
+        $user_id && $builder->where('creator_id', $user_id);
+        $company_id && $builder->where('company_id', $company_id);
+        $type && $builder->where('job_type', $type);
+        $city && $builder->where('city', $city);
+
+        // 判断是否为管理员，如果是则包括删除的数据
+        if ($user = $this->getAuthenticatedUser()) {
+            // 是否为管理员
+            if ($user->isAdmin()) {
+                // 显示数据类型【只显示删除的、只显示存在的、全部显示】
+                if ($exist == 2) {
+                    $builder->onlyTrashed();
+                } else if (!$exist) {
+                    $builder->withTrashed();
+                }
+            }
+        }
+
+        // 得到数量
+        $total = $builder->count();
+        // 排序以及分页
+        if($request->has('offset'))
+            $builder ->skip($request->input('offset'));
+        if ($request->has('limit'))
+            $builder->limit($request->input('limit'));
+
+        $builder->orderBy($orderby, $direction);
+
+        $jobs = $builder->get();
+        // 返回json数据
+        return response()->json(['total' => $total, 'list' => $jobs]);
+    }
     /*
      * [POST] jobs
      */
@@ -60,28 +125,21 @@ class JobController extends Controller {
             'type' => 'required|exists:job_types,name', // 岗位类型
             'city' => 'required|string',              // 城市
             'address' => 'string',                    // 地址
-            'by_company' => 'in:0,1'                  // 是否由企业发布
         ]);
 
-        $byCompany = $request->input('by_company');
         $self = JWTAuth::parseToken()->authenticate();
-
+        if($self->isCompanyUser()){
         // 筛选传入的参数
         $params = array_only($request->all(),
             ['name', 'pay_way', 'description', 'contact', 'contact_person', 'type', 'city', 'address']);
-        if ($byCompany) {
-            if ($self->company_id) {
-                $params['company_id'] = $self->company_id;
-                $params['company_name'] = $self->company_name;
-            } else {
-                throw new MsgException('There is no company belongs to you.', 400);
-            }
-        }
+
 
         // 表中插入岗位
         $job = Job::create($params);
         // 返回创建成功的json数据
         return response()->json($job);
+        }else return "you are not company";
+
     }
 
     /*
@@ -240,7 +298,6 @@ class JobController extends Controller {
         $by_company = $request->input('by_company');
         $time_s = $request->input('time_s');
         $time_e = $request->input('time_e');
-
         // 关键字搜索
         $builder = Job::search($q);
         // 筛选

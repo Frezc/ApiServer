@@ -23,6 +23,7 @@ class CreateResumesTable extends Migration
             $table->string('school')->nullable();
             $table->date('birthday')->nullable();
             $table->string('contact')->nullable();
+            $table->string('flag')->nullable();//作为个人标签
             // 性别 0 为男 1为女
             $table->tinyInteger('sex')->default(0);
             // 期望工作城市
