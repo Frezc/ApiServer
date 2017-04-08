@@ -15,6 +15,7 @@ class CreateJobApplyTable extends Migration
         Schema::create('job_apply', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id')->unsigned();
+            $table->integer('creator_id')->unsigned();
             $table->integer('job_id')->unsigned();
             $table->integer('resume_id')->unsigned();
             $table->string('description')->nullable();

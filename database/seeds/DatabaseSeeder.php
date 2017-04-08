@@ -243,6 +243,7 @@ class DatabaseSeeder extends Seeder {
                 'user_id' => $resume->user_id,
                 'job_id' => $faker->numberBetween($min = 1, $max = $this->jobNum),
                 'resume_id' => $resume->id,
+                'resume_id' => $resume->id,
                 'description' => $faker->sentence(4, false),
                 'status' => $faker->numberBetween($min = 0, $max = 1),
             ]);
