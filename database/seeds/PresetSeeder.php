@@ -17,17 +17,21 @@ class PresetSeeder extends Seeder
             'mode' => '1',
             'public' => 1
         ]);
-
+        Role::create([
+            'name' => 'company',
+            'mode' => '2',
+            'public' => 1
+        ]);
         Role::create([
             'name' => 'admin',
-            'mode' => '11',
+            'mode' => '3',
             'public' => 1,
             'admin' => 1
         ]);
 
         Role::create([
             'name' => 'banned',
-            'mode' => ''
+            'mode' => '2'
         ]);
 
         User::create([
@@ -51,7 +55,7 @@ class PresetSeeder extends Seeder
         User::create([
             'id' => 1001,
             'avatar' => null,
-            'email' => '504021398@qq.com',
+            'email' => '244774907@qq.com',
             'phone' => '17777777777',
             'password' => Hash::make('secret'),
             'nickname' => 'frezc',
