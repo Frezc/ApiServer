@@ -18,7 +18,7 @@ class CreateEmailVerificationsTable extends Migration
             $table->date('send_at');
             $table->string('token');
             $table->timestamps();
-            $table->unique('email');
+
         });
     }
 
