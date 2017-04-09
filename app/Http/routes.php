@@ -5,9 +5,15 @@ Route::post('resetPassword', 'SmsController@resetPassword');//重置密码
 Route::post('bindPhone', 'SmsController@bindPhone');//手机绑定
 Route::get('getAllJob', 'UserController@mainPage');//主页获取所有工作，可根据自己的简历筛选出相应的工作直接从后台推
 Route::post('users/{id}', 'UserController@update');//更新用户信息
+
+
 Route::get('users/{id}/resumes', 'ResumeController@get');//获取某份简历
 Route::post('users/{id}/resumes/{resumeId}', 'ResumeController@update');//更新某份简历
-Route::delete('users/{id}/resumes/{resumeId}', 'ResumeController@delete');//删除
+Route::post('users/{id}/resumes/{resumeId}', 'ResumeController@delete');//删除
+Route::get('users/getOneAllResume', 'ResumeController@getOneAllResume');//删除
+
+
+
 Route::post('jobs', 'JobController@create');//创建工作
 Route::post('jobs/{id}', 'JobController@update')->where('id', '[0-9]+');//对现在有的工作进行更新
 Route::post('users/{id}/resumes', 'ResumeController@add');//添加简历
@@ -25,6 +31,20 @@ Route::group(['middleware' => 'throttle:3'], function ($api) {
 
 
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Route::get('users/{id}/realNameApplies', 'UserController@getRealNameApplies');//获取实名认证信息
 Route::post('users/{id}/realNameApplies', 'UserController@createRealNameApplies');//创建实名认证信息

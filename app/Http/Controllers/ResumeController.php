@@ -14,7 +14,7 @@ class ResumeController extends Controller {
 
     public function __construct() {
         $this->middleware('jwt.auth');
-        $this->middleware('user.access');
+        $this->middleware('user.access',['only' => ['delete', 'add', 'update']]);
         $this->middleware('log', ['only' => ['delete', 'add', 'update']]);
     }
 
@@ -27,6 +27,7 @@ class ResumeController extends Controller {
         $builder = $user->resumes();
         $total = $builder->count();
         $resumes = $builder->get();
+
         return response()->json(['total' => $total, 'list' => $resumes]);
     }
 
@@ -118,5 +119,13 @@ class ResumeController extends Controller {
             'birthday', 'contact', 'expect_location', 'photo', 'sex']));
 
         return response()->json($resume);
+    }
+
+    public function getOneAllResume(Request $request){
+        $user = JWTAuth::parseToken()->authenticate();
+
+        $resumes = \DB::table('resumes')->where('user_id',$user->id);
+        $total = $resumes->count();
+        return response()->json(['total' => $total, 'list' => $resumes->get()]);
     }
 }
