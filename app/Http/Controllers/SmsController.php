@@ -68,7 +68,7 @@ class SmsController extends Controller {
         $nickname = $request->input('nickname');
         $password = $request->input('password');
         $phone = $request->input('phone');
-        $code=DB::table('sms_code_virifications')->where('phone', $phone )->value('code');
+        $code=DB::table('sms_code_verifications')->where('phone', $phone )->value('code');
         if($smscode==$code){
             $user = new User;
             $user->phone = $phone;
@@ -93,7 +93,7 @@ class SmsController extends Controller {
         $nickname = $request->input('nickname');
         $password = $request->input('password');
         $phone = $request->input('phone');
-        $code=DB::table('sms_code_virifications')->where('phone', $phone )->value('code');
+        $code=DB::table('sms_code_verifications')->where('phone', $phone )->value('code');
         if($smscode==$code){
             $user = new User;
             $user->phone = $phone;
