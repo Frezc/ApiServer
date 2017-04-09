@@ -27,6 +27,6 @@ class CreateSmsCodeVerificationsTable extends Migration
      */
     public function down()
     {
-        Schema::drop('sms_code_virifications');//
+        Schema::drop('sms_code_verifications');//
     }
 }
