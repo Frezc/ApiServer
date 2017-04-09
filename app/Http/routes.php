@@ -7,7 +7,7 @@ Route::get('getAllJob', 'UserController@mainPage');//主页获取所有工作，
 Route::post('users/{id}', 'UserController@update');//更新用户信息
 Route::get('users/{id}/resumes', 'ResumeController@get');//获取某份简历
 Route::post('users/{id}/resumes/{resumeId}', 'ResumeController@update');//更新某份简历
-Route::delete('users/{id}/resumes/{resumeId}', 'ResumeController@delete');//建立删除
+Route::delete('users/{id}/resumes/{resumeId}', 'ResumeController@delete');//删除
 Route::post('jobs', 'JobController@create');//创建工作
 Route::post('jobs/{id}', 'JobController@update')->where('id', '[0-9]+');//对现在有的工作进行更新
 Route::post('users/{id}/resumes', 'ResumeController@add');//添加简历
@@ -15,14 +15,14 @@ Route::group(['middleware' => 'throttle:3'], function ($api) {
     Route::get('getSmsCode', 'SmsController@getSmsCode');
 });
 Route::group(['middleware' => 'throttle:3'], function ($api) {
-//    Route::post('auth', 'AuthenticateController@emailAuth');
+
 
     Route::post('authPhone', 'AuthenticateController@phoneAuth');
     Route::get('refresh', 'AuthenticateController@refreshToken');
     Route::post('userRegisterByPhone', 'SmsController@userRegisterByPhone');//用户手机注册
     Route::post('companyRegisterByPhone', 'SmsController@companyRegisterByPhone');//企业手机注册
 
-//    Route::post('register', 'AuthenticateController@register');
+
 
 });
 

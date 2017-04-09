@@ -56,7 +56,7 @@ class PresetSeeder extends Seeder
             'id' => 1001,
             'avatar' => null,
             'email' => '244774907@qq.com',
-            'phone' => '17777777777',
+            'phone' => '17774012927',
             'password' => Hash::make('secret'),
             'nickname' => 'frezc',
             'sign' => 'You can contact me.',

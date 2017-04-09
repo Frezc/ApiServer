@@ -80,11 +80,10 @@ class ResumeController extends Controller {
         }
 
         $array = array_only($request->all(), ['title', 'name', 'school', 'introduction',
-            'birthday', 'contact', 'expect_location', 'photo', 'sex']);
+            'birthday', 'contact', 'expect_location', 'sex']);
         $array['user_id'] = $user->id;
-        $resume = Resume::create($array);
-
-        return response()->json($resume);
+        Resume::create($array);
+        return 'success';
     }
 
     /*
