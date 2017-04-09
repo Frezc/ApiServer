@@ -29,10 +29,6 @@ class PresetSeeder extends Seeder
             'admin' => 1
         ]);
 
-        Role::create([
-            'name' => 'banned',
-            'mode' => '2'
-        ]);
 
         User::create([
             'avatar' => null,
