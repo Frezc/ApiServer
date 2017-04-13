@@ -25,15 +25,15 @@ class DatabaseSeeder extends Seeder {
     private $userNum = 30;
     private $companyNum = 10;
     private $jobNum = 50;
-    private $jobTimeNum = 100;
+    private $jobTimeNum = 50;
     private $resumeNum = 10;
     private $jobCompletedNum = 60;
     private $jobApplyNum = 60;
     private $jobEvaluate = 20;
     private $userEvaluate = 20;
     private $expectJobNum = 50;
-    private $expectTimeNum = 100;
-    private $userCompanyNum = 20;
+    private $expectTimeNum = 50;
+    private $userCompanyNum = 10;
     private $orderNum = 100;
     private $rnaNum = 30;
     private $caNum = 25;
@@ -75,9 +75,9 @@ class DatabaseSeeder extends Seeder {
 
         foreach (range(3, $this->userNum) as $index) {
             $company = null;
-            if ($index < 20) {
+            if ($index < 13) {
                 $company = Company::find($index % $this->companyNum + 1);
-            }
+            }else  $company=null;
 
             User::create([
                 'avatar' => Storage::url('images/test.jpg'),
@@ -97,29 +97,28 @@ class DatabaseSeeder extends Seeder {
         }
 
         foreach (range(1, $this->userCompanyNum) as $i) {
-            $user = User::find($faker->numberBetween($min = 1001, $max = 1000 + $this->userNum));
-            $company = Company::find($faker->numberBetween($min = 1, $max = $this->companyNum));
+            $user = User::find(1002+$i);
             UserCompany::create([
                 'user_id' => $user->id,
                 'user_name' => $user->nickname,
-                'company_id' => $company->id,
-                'company_name' => $company->name
+                'company_id' => $user->company_id,
+                'company_name' => $user->company_name,
             ]);
         }
 
+
         foreach (range(1, $this->jobNum) as $index) {
-            $company = Company::findOrNew($faker->numberBetween($min = 1, $max = $this->companyNum));
-            $user = User::find($faker->numberBetween($min = 1001, $max = 1000 + $this->userNum));
-            $hasCom = $faker->boolean;
+            $user = User::find($faker->numberBetween($min = 1003, $max = 1012));
+            $company = Company::find($user->company_id);
             $type = \App\Models\JobType::find($faker->numberBetween($min = 1, $max = 24));
             Job::create([
                 'salary_type' => $faker->numberBetween($min = 1, $max = 2),
-                'salary' => '100',
+                'salary' => rand(100,200),
                 'description' => $faker->catchPhrase,
                 'visited' => $faker->numberBetween($min = 0, $max = 1000),
-                'name' => $faker->jobTitle,
-                'company_id' => $hasCom ? $company->id : null,
-                'company_name' => $hasCom ? $company->name : null,
+                'name' => $faker->jobName,
+                'company_id' =>$company->id,
+                'company_name' =>  $company->name,
                 'creator_id' => $user->id,
                 'creator_name' => $user->nickname,
                 'contact' => $faker->phoneNumber,
@@ -139,7 +138,7 @@ class DatabaseSeeder extends Seeder {
             $st = $faker->numberBetween($min = 1, $max = 2);
             $salary = $st == 2 ? $faker->numberBetween($min = 1, $max = 1000) : 0;
             JobTime::create([
-                'job_id' => $faker->numberBetween($min = 1, $max = $this->jobNum),
+                'job_id' => $i,
                 'number' => $number,
                 'number_applied' => $faker->numberBetween($min = 0, $max = $number),
                 'salary_type' => $st,
@@ -149,6 +148,7 @@ class DatabaseSeeder extends Seeder {
                 'end_at' => $start_at->addDays($faker->numberBetween($min = 1, $max = 3))->toDateTimeString()
             ]);
         }
+
 
         foreach (range(1, $this->expectJobNum) as $index) {
             $user = User::findOrFail($faker->numberBetween($min = 1001, $max = 1000 + $this->userNum));

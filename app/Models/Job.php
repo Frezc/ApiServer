@@ -22,10 +22,8 @@ class Job extends Model
     }
 
     public function bindTime() {
-        $this->time = JobTime::where('job_id', $this->id)
-            ->where('apply_end_at', '>', Carbon::now()->toDateTimeString())
-            ->orderBy('id', 'desc')
-            ->get();
+        $this->time = JobTime::where('job_id', $this->id)->first();
+
     }
 
     public function checkAccess(User $user) {

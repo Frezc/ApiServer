@@ -34,18 +34,6 @@ Route::group(['middleware' => 'throttle:3'], function ($api) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 Route::get('users/{id}/realNameApplies', 'UserController@getRealNameApplies');//获取实名认证信息
 Route::post('users/{id}/realNameApplies', 'UserController@createRealNameApplies');//创建实名认证信息
 Route::delete('users/{id}/realNameApplies/{rnaid}', 'UserController@deleteRealNameApply');//取消实名认证

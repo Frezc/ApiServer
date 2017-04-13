@@ -7,6 +7,7 @@ use App\Models\Uploadfile;
 use App\Models\User;
 use Illuminate\Http\Request;
 use JWTAuth;
+use Namshi\JOSE\JWT;
 use Response;
 use Storage;
 
@@ -21,14 +22,12 @@ class ResumeController extends Controller {
     /*
      * [GET] users/{id}/resumes
      */
-    public function get() {
+    public function get($id) {
         $user = JWTAuth::parseToken()->authenticate();
-
-        $builder = $user->resumes();
-        $total = $builder->count();
-        $resumes = $builder->get();
-
-        return response()->json(['total' => $total, 'list' => $resumes]);
+        if ($user)  {
+           $resumes= \DB::table('resumes')->where('id',$id)->first();
+        }
+        return response()->json($resumes);
     }
 
     /*
@@ -48,12 +47,9 @@ class ResumeController extends Controller {
             $file->used--;
             $file->save();
         }
-        // 删除简历
         $resume->delete();
-        // 返回删除的简历
-        return response()->json($resume);
+        return  'success';
     }
-
     /*
      * [POST] users/{id}/resumes
      */

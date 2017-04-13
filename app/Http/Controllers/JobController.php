@@ -42,7 +42,7 @@ class JobController extends Controller {
         $job->visited++;
         $job->save();
         // 绑定岗位的工作时间段
-        $job->bindJobWelfaer();
+        $job->bindTime();
         // 返回json数据
         return response()->json($job);
     }
