@@ -128,17 +128,15 @@ class JobController extends Controller {
         ]);
 
         $self = JWTAuth::parseToken()->authenticate();
-        if($self->isCompanyUser()){
+        if($self){
         // 筛选传入的参数
         $params = array_only($request->all(),
             ['name', 'pay_way', 'description', 'contact', 'contact_person', 'type', 'city', 'address']);
-
-
         // 表中插入岗位
         $job = Job::create($params);
         // 返回创建成功的json数据
         return response()->json($job);
-        }else return "you are not company";
+        }
 
     }
 

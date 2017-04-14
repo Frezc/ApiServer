@@ -25,10 +25,7 @@ Route::group(['middleware' => 'throttle:3'], function ($api) {
 
     Route::post('authPhone', 'AuthenticateController@phoneAuth');
     Route::get('refresh', 'AuthenticateController@refreshToken');
-    Route::post('userRegisterByPhone', 'SmsController@userRegisterByPhone');//用户手机注册
-    Route::post('companyRegisterByPhone', 'SmsController@companyRegisterByPhone');//企业手机注册
-
-
+    Route::post('registerByPhone', 'SmsController@userRegisterByPhone');//用户手机注册
 
 });
 

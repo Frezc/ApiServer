@@ -58,7 +58,7 @@ class SmsController extends Controller {
     /*
      * [POST] registerByPhone
      */
-    public function userRegisterByPhone(Request $request) {
+    public function registerByPhone(Request $request) {
         $this->validate($request, [
             'phone' => 'required|regex:/[0-9]+/|unique:users,phone',
             'password' => 'required|between:6,32',
@@ -83,29 +83,7 @@ class SmsController extends Controller {
     }
 
 
-    public function companyRegisterByPhone(Request $request) {
-        $this->validate($request, [
-            'phone' => 'required|regex:/[0-9]+/|unique:users,phone',
-            'password' => 'required|between:6,32',
-            'nickname' => 'required|between:1,16'
-        ]);
-        $smscode=$request->input('code');
-        $nickname = $request->input('nickname');
-        $password = $request->input('password');
-        $phone = $request->input('phone');
-        $code=DB::table('sms_code_verifications')->where('phone', $phone )->value('code');
-        if($smscode==$code){
-            $user = new User;
-            $user->phone = $phone;
-            $user->role_id = 3;
-            $user->nickname = $nickname;
-            $user->password = Hash::make($password);
-            $user->save();
-            return 'success';
-        }else{
-            return '验证码不对';
-        }
-    }
+
     /*
      * [POST] bindPhone
      */
