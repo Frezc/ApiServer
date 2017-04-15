@@ -23,7 +23,9 @@ class JobController extends Controller {
         $this->middleware('log', ['only' => ['apply', 'update', 'delete', 'create', 'addTime']]);
         $this->middleware('role:user', ['only' => ['apply', 'update', 'delete', 'create', 'addTime']]);
     }
-
+  public function i(){
+        
+  }
     /*
      * [GET] jobs/{id}
      */
