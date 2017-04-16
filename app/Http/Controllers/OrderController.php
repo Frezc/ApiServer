@@ -342,4 +342,11 @@ class OrderController extends Controller
         $order->save();
         return response()->json($order);
     }
+    public function getOrderStatus(Request $request){
+        $user = JWTAuth::parseToken()->authenticate();
+        $jobs = \DB::table('orders')->where('applicant_id',$user->id)->where('status',$request->input('status'));
+        $jobs->orderBy('created_at','desc');
+        $total = $jobs->count();
+        return response()->json(['list'=>$jobs->get(),'total'=>$total]);
+    }
 }

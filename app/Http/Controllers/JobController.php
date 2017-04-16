@@ -23,9 +23,7 @@ class JobController extends Controller {
         $this->middleware('log', ['only' => ['apply', 'update', 'delete', 'create', 'addTime']]);
         $this->middleware('role:user', ['only' => ['apply', 'update', 'delete', 'create', 'addTime']]);
     }
-  public function i(){
-        
-  }
+
     /*
      * [GET] jobs/{id}
      */
@@ -369,12 +367,10 @@ class JobController extends Controller {
         $job = Job::findOrFail($id);
 
         $this->validate($request, [
-            'job_time_id' => 'required|integer',  // 工作时间的id
             'resume_id' => 'required|integer'     // 简历id
         ]);
         // 获取工作时间
-        $jobTime = JobTime::where('job_id', $job->id)
-            ->findOrFail($request->input('job_time_id'));
+        $jobTime = JobTime::where('job_id', $job->id)->first();
         // 获取简历
         $resume = Resume::findOrFail($request->input('resume_id'));
 
@@ -411,13 +407,13 @@ class JobController extends Controller {
             $to = Company::getUserIds($job->company_id);
         }
         // 发送消息
-        $this->dispatch(new PushNotifications(
-            Message::getSender(Message::$WORK_HELPER),
-            $to,
-            $self->nickname . ' 申请了岗位 ' . $job->name . '。'
-        ));
-        // 返回创建的订单信息
-        return response()->json($order);
+//        $this->dispatch(new PushNotifications(
+//            Message::getSender(Message::$WORK_HELPER),
+//            $to,
+//            $self->nickname . ' 申请了岗位 ' . $job->name . '。'
+//        ));
+//        // 返回创建的订单信息
+        return 'success';
     }
 
     /*
