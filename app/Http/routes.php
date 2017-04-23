@@ -87,7 +87,7 @@ Route::post('companies/apply', 'CompanyController@postApply');
 Route::post('unlink_company', 'CompanyController@unlink');
 
 Route::get('getResumes', 'UserController@getAllResume');
-Route::delete('orders/{id}', 'OrderController@close')->where('id', '[0-9]+');
+Route::get('ordersDelete/{id}', 'OrderController@close')->where('id', '[0-9]+');
 Route::get('orders/{id}', 'OrderController@get')->where('id', '[0-9]+');
 Route::get('orders/{id}/evaluate', 'OrderController@getEvaluate')->where('id', '[0-9]+');
 Route::post('orders/{id}/evaluate', 'OrderController@postEvaluate')->where('id', '[0-9]+');
