@@ -16,6 +16,7 @@ use App\Models\UserCompany;
 use App\Models\UserEvaluate;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use JWTAuth;
 
 class OrderController extends Controller
@@ -110,7 +111,8 @@ class OrderController extends Controller
     public function close(Request $request, $id) {
         $order = Order::findOrFail($id);
         $self = JWTAuth::parseToken()->authenticate();
-
+        $status = $request->input('status');
+        if ($status==3){
         if ($order->applicant_id == $self->id) {
             // 当前用户为求职者时
             $close_type = 1;
@@ -140,20 +142,22 @@ class OrderController extends Controller
                 $user->money += $jobTime->salary;
                 $user->save();
             }
-        }
+          }
+            $order->close_type = $close_type;
+            $order->close_reason = $request->input('reason');
         // 向该订单的相关人员发送消息
         $this->dispatch(new PushNotifications(
             Message::getSender(Message::$WORK_HELPER), array_merge([$order->applicant_id], $order->getRecruiterIds()),
             '订单 ' . $order->id . ' 已被' . Order::closeTypeText($close_type) . '关闭。'
-        ));
+          ));
+        }
         // 保存订单
-        $order->close_type = $close_type;
-        $order->close_reason = $request->input('reason');
-        $order->status = 3;
+
+
+        $order->status = $status;
         $order->save();
         // 返回更新的订单
         return  'success';
-        
     }
 
 
@@ -350,5 +354,11 @@ class OrderController extends Controller
         $jobs->orderBy('created_at','desc');
         $total = $jobs->count();
         return response()->json(['list'=>$jobs->get(),'total'=>$total]);
+    }
+    public function delete($id){
+      
+        \DB::table('orders')->where('id',$id)->delete();
+
+       return 'success';
     }
 }
