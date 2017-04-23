@@ -152,7 +152,8 @@ class OrderController extends Controller
         $order->status = 3;
         $order->save();
         // 返回更新的订单
-        return  response()->json($order);
+        return  'success';
+        
     }
 
 
