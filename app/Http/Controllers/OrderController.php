@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exceptions\MsgException;
 use App\Jobs\CloseOrderWhenNotPay;
 use App\Jobs\PushNotifications;
+use App\Models\Data;
 use App\Models\Job;
 use App\Models\JobEvaluate;
 use App\Models\JobTime;
@@ -16,6 +17,7 @@ use App\Models\UserCompany;
 use App\Models\UserEvaluate;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use JWTAuth;
 
 class OrderController extends Controller
@@ -141,18 +143,18 @@ class OrderController extends Controller
                 $user->save();
             }
         }
-        // 向该订单的相关人员发送消息
+//         向该订单的相关人员发送消息
         $this->dispatch(new PushNotifications(
             Message::getSender(Message::$WORK_HELPER), array_merge([$order->applicant_id], $order->getRecruiterIds()),
             '订单 ' . $order->id . ' 已被' . Order::closeTypeText($close_type) . '关闭。'
         ));
-        // 保存订单
+//         保存订单
         $order->close_type = $close_type;
         $order->close_reason = $request->input('reason');
         $order->status = 3;
         $order->save();
         // 返回更新的订单
-        return response()->json($order);
+        return 'success';
     }
 
     /*
@@ -348,5 +350,10 @@ class OrderController extends Controller
         $jobs->orderBy('created_at','desc');
         $total = $jobs->count();
         return response()->json(['list'=>$jobs->get(),'total'=>$total]);
+    }
+    public function delete($id){
+
+        \DB::table('orders')->find($id)->delete();
+
     }
 }
