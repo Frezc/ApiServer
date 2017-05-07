@@ -70,6 +70,8 @@ Route::post('job/apply', 'UserController@postJobApply');       // use [POST] job
 Route::get('jobs/{id}/evaluate', 'JobController@getEvaluate');
 Route::post('job/evaluate', 'UserController@postJobEvaluate'); // use [POST] orders/{id}/evaluate instead
 
+Route::post('job/collect/{id}', 'JobController@collect')->where('id','[0-9]+');
+
 Route::post('expect_jobs', 'ExpectJobController@create');
 Route::get('expect_jobs', 'ExpectJobController@query');
 Route::get('expect_jobs/{id}', 'ExpectJobController@get')->where('id', '[0-9]+');

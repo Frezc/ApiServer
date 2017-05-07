@@ -15,11 +15,12 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use JWTAuth;
-
+use App\Models\JobCollection;
 class JobController extends Controller {
 
     public function __construct() {
         $this->middleware('jwt.auth', ['only' => ['apply', 'update', 'delete', 'create', 'addTime']]);
+        $this->middleware('jwt.auth', ['only' => ['apply', 'update', 'delete', 'create', 'addTime','collect']]);
         $this->middleware('log', ['only' => ['apply', 'update', 'delete', 'create', 'addTime']]);
         $this->middleware('role:user', ['only' => ['apply', 'update', 'delete', 'create', 'addTime']]);
     }
@@ -359,6 +360,22 @@ class JobController extends Controller {
         // 返回json数据
         return response()->json(['total' => $total, 'list' => $jobs]);
     }
+
+
+
+    public function collect(Request $request,$id){
+        $self =JWTAuth::parseToken()->authenticate();
+        if($self->isUser()){
+            $user_id = $self->id;
+            $coll = new JobCollection;
+            $coll->user_id = $user_id;
+            $coll->job_id = $id;
+            $coll->save();
+            return 'success';
+        }
+        else echo 'false';
+    }
+
 
     /*
      * [POST] jobs/{id}/apply
