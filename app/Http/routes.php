@@ -108,8 +108,7 @@ Route::post('feedbacks', 'MessageController@postFeedback');
 Route::get('banners', 'DataController@getBanners');
 Route::get('job_types', 'DataController@getJobTypes');
 Route::post('reports', 'MessageController@createReport');
-
-
+Route::get('orders/getCompanyOrderStatus', 'OrderController@getCompanyOrderStatus');
 
 
 Route::post('upload/image', 'UploadController@uploadImage');

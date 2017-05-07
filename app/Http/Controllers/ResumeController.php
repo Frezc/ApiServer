@@ -124,4 +124,6 @@ class ResumeController extends Controller {
         $total = $resumes->count();
         return response()->json(['total' => $total, 'list' => $resumes->get()]);
     }
+
+
 }
