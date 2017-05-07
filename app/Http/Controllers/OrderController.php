@@ -355,6 +355,13 @@ class OrderController extends Controller
         $total = $jobs->count();
         return response()->json(['list'=>$jobs->get(),'total'=>$total]);
     }
+    public function getCompanyOrderStatus(Request $request){
+        $user = JWTAuth::parseToken()->authenticate();
+        $jobs = \DB::table('orders')->where('recruiter_id',$user->company_id)->where('status',$request->input('status'));
+        $jobs->orderBy('created_at','desc');
+        $total = $jobs->count();
+        return response()->json(['list'=>$jobs->get(),'total'=>$total]);
+    }
     public function delete($id){
       
         \DB::table('orders')->where('id',$id)->delete();
