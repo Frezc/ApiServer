@@ -15,22 +15,12 @@ class CreateJobTimesTable extends Migration
         Schema::create('job_times', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('job_id')->unsigned();
-            // 人数限制（null为无限制）
-            $table->mediumInteger('number')->unsigned()->nullable();
-            // 已经申请成功的人数
-            $table->mediumInteger('number_applied')->unsigned()->default(0);
-            // 工资类型，1：面议, 2：固定数值
-            $table->tinyInteger('salary_type')->default(1);
-            // 工资
-            $table->integer('salary')->unsigned()->default(0);
             // 申请截止时间（默认为开始时间）
-            $table->dateTime('apply_end_at')->nullable();
+            $table->string('apply_end_at')->nullable();
             // 开始时间
-            $table->dateTime('start_at')->nullable();
+            $table->string('start_at')->nullable();
             // 结束时间
-
-            $table->dateTime('end_at')->nullable();
-        
+            $table->string('end_at')->nullable();
 //            $table->smallInteger('year')->unsigned();
 //            $table->tinyInteger('month')->unsigned();
 //            $table->tinyInteger('dayS')->unsigned();

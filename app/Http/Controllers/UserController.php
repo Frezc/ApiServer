@@ -42,17 +42,6 @@ class UserController extends Controller {
         $user = User::findOrFail($id);
         return response()->json($user);
     }
-  public  function  user_get_order(Request $request){
-
-         $user=JWTAuth::parseToken()->authenticate();
-         $builder=Order::orderBy('created_at','desc')->get()->where('applicant_id',$user->id);
-         return response()->json($builder);
-}
-    public  function  company_get_order(Request $request){
-        $user=JWTAuth::parseToken()->authenticate();
-        $builder=Order::orderBy('created_at','desc')->get()->where('recruiter_id',$user->id);
-        return response()->json($builder);
-    }
 
     public function mainPage(Request $request)
     {
@@ -72,8 +61,6 @@ class UserController extends Controller {
 
 
 }
-
-
 
     // refactor
     public function getJobApply(Request $request) {
@@ -385,19 +372,5 @@ class UserController extends Controller {
         $evaluate->update(array_only($request->all(), ['score', 'comment', 'pictures']));
         return response()->json($evaluate);
     }
-    public function getAllResume(Request $request){
-        $resume=Resume::query();
-        $resume->orderBy(
-            $request->input('orderBytime', 'created_at'),
 
-            $request->input('order', 'desc')
-
-        );
-        $total =$resume->count();
-        if ($request->has('offset')) {
-            $resume->skip($request->input('offset'));
-        }
-        $resume->limit($request->input('limit'));
-        return response()->json(['list'=> $resume->get(), 'total'=>  $total]);
-    }
 }

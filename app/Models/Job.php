@@ -52,6 +52,7 @@ class Job extends Model
                         ->orWhere('creator_name', 'like', '%' . $qi . '%')
                         ->orWhere('company_name', 'like', '%' . $qi . '%')
                         ->orWhere('city', 'like', '%' . $qi . '%')
+                        ->orWhere('active',1)
                         ->orWhere('address', 'like', '%' . $qi . '%');
                 });
             }
@@ -66,5 +67,9 @@ class Job extends Model
             'number_evaluate' => $builder->count(),
             'average_score' => $builder->avg('score')
         ]);
+    }
+    public function checkSelfJob(User $user){
+        if ($this->creator_id == $user->id)
+            return true;
     }
 }

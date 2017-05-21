@@ -123,28 +123,29 @@ class DatabaseSeeder extends Seeder {
                 'company_name' =>  $company->name,
                 'creator_id' => $user->id,
                 'creator_name' => $user->nickname,
+                'salary_pay_way' => $faker->randomElement($array = array('周结算','月结算','天结算','小时结算')),
                 'contact' => $faker->phoneNumber,
                 'contact_person' => $faker->name,
                 'active' => 1,
-                'number_evaluate' => $faker->numberBetween($min = 1, $max = 100),
-                'average_score' => 4.2,
+//                'number_evaluate' => $faker->numberBetween($min = 1, $max = 100),
+//                'average_score' => 4.2,
                 'type' => $type->name,
                 'city' => $faker->city,
                 'address' => $faker->address
             ]);
         }
 
-        foreach (range(1, $this->jobTimeNum) as $i) {
-            $number = $faker->numberBetween($min = 1, $max = 100);
+        foreach (range(1, 50) as $i) {
+//            $number = $faker->numberBetween($min = 1, $max = 100);
             $start_at = Carbon::now()->addDays($faker->numberBetween($min = 1, $max = 180));
-            $st = $faker->numberBetween($min = 1, $max = 2);
-            $salary = $st == 2 ? $faker->numberBetween($min = 1, $max = 1000) : 0;
+//            $st = $faker->numberBetween($min = 1, $max = 2);
+//            $salary = $st == 2 ? $faker->numberBetween($min = 1, $max = 1000) : 0;
             JobTime::create([
                 'job_id' => $i,
-                'number' => $number,
-                'number_applied' => $faker->numberBetween($min = 0, $max = $number),
-                'salary_type' => $st,
-                'salary' => $salary,
+//                'number' => $number,
+//                'number_applied' => $faker->numberBetween($min = 0, $max = $number),
+//                'salary_type' => $st,
+//                'salary' => $salary,
                 'apply_end_at' => $start_at->subDays($faker->numberBetween($min = 0, $max = 2))->toDateTimeString(),
                 'start_at' => $start_at->toDateTimeString(),
                 'end_at' => $start_at->addDays($faker->numberBetween($min = 1, $max = 3))->toDateTimeString()
@@ -152,8 +153,8 @@ class DatabaseSeeder extends Seeder {
         }
 
 
-        foreach (range(1, $this->expectJobNum) as $index) {
-            $user = User::findOrFail($faker->numberBetween($min = 1001, $max = 1000 + $this->userNum));
+        foreach (range(1, 18) as $index) {
+            $user = User::findOrFail(1012+$index);
             ExpectJob::create([
                 'user_id' => $user->id,
                 'user_name' => $user->nickname,
@@ -170,10 +171,10 @@ class DatabaseSeeder extends Seeder {
             ]);
         }
 
-        foreach (range(1, $this->expectTimeNum) as $i) {
+        foreach (range(1, 18) as $i) {
             $start_at = Carbon::now()->addDays($faker->numberBetween($min = 1, $max = 180));
             ExpectTime::create([
-                'expect_job_id' => $faker->numberBetween($min = 1, $max = $this->expectJobNum),
+                'expect_job_id' => $i,
                 'start_at' => $start_at,
                 'end_at' => (new Carbon($start_at))->addDays(3)->toDateString()
 //                'year' => date('Y', $time),
@@ -202,10 +203,12 @@ class DatabaseSeeder extends Seeder {
         }
 
         foreach (range(1, $this->orderNum) as $i) {
-            $jobTime = JobTime::find($faker->numberBetween($min = 1, $max = $this->jobTimeNum));
-            $job = Job::find($jobTime->job_id);
-            $expectJob = ExpectJob::find($faker->numberBetween($min = 1, $max = $this->expectJobNum));
 
+            $jobTime = JobTime::find($faker->numberBetween($min = 1, $max = 18));
+
+            $job = Job::find($jobTime->job_id);
+
+            $expectJob = ExpectJob::find($faker->numberBetween($min = 1, $max = 18));
             $status = $faker->numberBetween($min = 0, $max = 3);
             $closeType = null;
             if ($status == 3) $closeType = $faker->numberBetween($min = 1, $max = 3);

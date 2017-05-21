@@ -113,6 +113,7 @@ class OrderController extends Controller
         $self = JWTAuth::parseToken()->authenticate();
         $status = $request->input('status');
         if ($status==3){
+
         if ($order->applicant_id == $self->id) {
             // 当前用户为求职者时
             $close_type = 1;
@@ -133,16 +134,16 @@ class OrderController extends Controller
             throw new MsgException('You cannot close this order.', 400);
         }
 
-        if ($order->has_paid) {
-            // 订单已支付，要将金额返还
-            $log = Log::where('method', 'post')->where('orders/' . $order->id . '/payment')->first();
-            if ($log) {
-                $user = User::find($log->user_id);
-                $jobTime = JobTime::find($order->job_time_id);
-                $user->money += $jobTime->salary;
-                $user->save();
-            }
-          }
+//        if ($order->has_paid) {
+//            // 订单已支付，要将金额返还
+//            $log = Log::where('method', 'post')->where('orders/' . $order->id . '/payment')->first();
+//            if ($log) {
+//                $user = User::find($log->user_id);
+//                $jobTime = JobTime::find($order->job_time_id);
+//                $user->money += $jobTime->salary;
+//                $user->save();
+//            }
+//          }
             $order->close_type = $close_type;
             $order->close_reason = $request->input('reason');
         // 向该订单的相关人员发送消息
@@ -152,8 +153,6 @@ class OrderController extends Controller
           ));
         }
         // 保存订单
-
-
         $order->status = $status;
         $order->save();
         // 返回更新的订单
@@ -348,6 +347,9 @@ class OrderController extends Controller
         $order->save();
         return response()->json($order);
     }
+    /*
+     * 用户获取申请详情
+     */
     public function getOrderStatus(Request $request){
         $user = JWTAuth::parseToken()->authenticate();
         $jobs = \DB::table('orders')->where('applicant_id',$user->id)->where('status',$request->input('status'));
@@ -355,17 +357,30 @@ class OrderController extends Controller
         $total = $jobs->count();
         return response()->json(['list'=>$jobs->get(),'total'=>$total]);
     }
+    /*
+     * 企业所有相应状态的岗位
+     */
     public function getCompanyOrderStatus(Request $request){
         $user = JWTAuth::parseToken()->authenticate();
-        $jobs = \DB::table('orders')->where('recruiter_id',$user->company_id)->where('status',$request->input('status'));
-        $jobs->orderBy('created_at','desc');
+        $jobs = \DB::table('orders')->join('tjz_jobs','tjz_jobs.id','=','orders.job_id')
+                                      ->join('job_times','job_times.job_id','=','orders.job_id')
+                                      ->where('recruiter_id',$user->company_id)->where('status',$request->input('status'));
+        $jobs->select('orders.id','orders.job_id','job_name','salary','address','start_at','end_at');
+        $jobs->orderBy('orders.created_at','desc');
         $total = $jobs->count();
         return response()->json(['list'=>$jobs->get(),'total'=>$total]);
     }
+   /*
+    * 用户删除订单
+    */
     public function delete($id){
-      
+        $self = JWTAuth::parseToken()->authenticate();
+        $order = Order::findOrFail($id);
+        if ( $order->makeSureAccess($self))
         \DB::table('orders')->where('id',$id)->delete();
+       else return 'fail';
 
        return 'success';
     }
+
 }

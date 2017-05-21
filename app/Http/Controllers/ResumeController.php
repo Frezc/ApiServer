@@ -125,5 +125,19 @@ class ResumeController extends Controller {
         return response()->json(['total' => $total, 'list' => $resumes->get()]);
     }
 
+    public function getAllResume(Request $request){
+        $resume=\DB::table('resumes')->join();
+        $resume->orderBy(
+            $request->input('orderBytime', 'created_at'),
 
+            $request->input('order', 'desc')
+
+        );
+        $total =$resume->count();
+        if ($request->has('offset')) {
+            $resume->skip($request->input('offset'));
+        }
+        $resume->limit($request->input('limit'));
+        return response()->json(['list'=> $resume->get(), 'total'=>  $total]);
+    }
 }

@@ -16,6 +16,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use JWTAuth;
 use App\Models\JobCollection;
+use PhpParser\Node\Stmt\Throw_;
+
 class JobController extends Controller {
 
     public function __construct() {
@@ -119,24 +121,44 @@ class JobController extends Controller {
     public function create(Request $request) {
         $this->validate($request, [
             'name' => 'required|string|between:1,250', // 名称
+            'salary' => 'required' ,                     //工资
+            'salary_type' =>'required' ,               //工资单位
             'pay_way' => 'required|integer|in:1,2',    // 支付方式
+            'salary_pay_way' =>'required',          //结算方式
             'description' => 'string',                 // 描述
             'contact' => 'required|string|max:250',    // 联系方式
             'contact_person' => 'required|string|max:16', // 联系人
             'type' => 'required|exists:job_types,name', // 岗位类型
-            'city' => 'required|string',              // 城市
-            'address' => 'string',                    // 地址
+            'city' => 'string',              // 城市
+            'address' => 'required|string',                    // 地址
+            'start_at' => 'required',
+            'end_at' => 'required',
+            'required_number' => 'required' ,        // 总人数
         ]);
 
         $self = JWTAuth::parseToken()->authenticate();
         if($self){
         // 筛选传入的参数
         $params = array_only($request->all(),
-            ['name', 'pay_way', 'description', 'contact', 'contact_person', 'type', 'city', 'address']);
+            ['name','salary', 'pay_way', 'salary_type', 'description', 'contact', 'contact_person', 'type', 'city', 'address','required_number','salary_pay_way']);
+        if ($self->role_id ==2){
+            $params['company_id'] = $self->company_id;
+            $params['company_name'] = $self->company_name;
+        }
+        $params['creator_id'] = $self->id;
+        $params['creator_name'] = $self->nickname;
+
+         $time = array_only($request->all(),
+                ['start_at', 'end_at','apply_end_at']);
+         $job = Job::create($params);
+         $time['job_id'] = $job->id;
+
+        //工作时间插入时间表中
+        JobTime::create($time);
         // 表中插入岗位
-        $job = Job::create($params);
+
         // 返回创建成功的json数据
-        return response()->json($job);
+        return 'success';
         }
 
     }
@@ -150,6 +172,7 @@ class JobController extends Controller {
             $job = Job::withTrashed()->findOrFail($id);
         } else {
             $job = Job::findOrFail($id);
+            $jobTime = JobTime::query()->where('job_id',$id)->first();
         }
         $this->validate($request, [
             'name' => 'string|between:1,250',
@@ -161,12 +184,15 @@ class JobController extends Controller {
             'contact_person' => 'string|max:16',
             'type' => 'exists:job_types,name',
             'city' => 'string',
-            'address' => 'string'
+            'address' => 'string',
+            'salary_pay_way' => 'string'
         ]);
 
         $job->checkAccess($self);
 
-        $job->update(array_only($request->all(), ['name', 'pay_way', 'salary_type', 'description', 'active', 'contact', 'contact_person', 'type', 'city', 'address']));
+        $job->update(array_only($request->all(),
+            ['name','salary', 'pay_way', 'salary_type', 'description', 'contact', 'contact_person', 'type', 'city', 'address','required_number','salary_pay_way']));
+        $jobTime->update(array_only($request->all(),['start_at', 'end_at','apply_end_at']));
         return response()->json($job);
     }
 
@@ -206,7 +232,21 @@ class JobController extends Controller {
         $jobTime = JobTime::withTrashed()->where('job_id', $job->id)->orderBy('apply_end_at', 'desc')->get();
         return response()->json($jobTime);
     }
-
+    /*
+     *
+     */
+    public function closeJob(Request $request ,$id){
+        $user = JWTAuth::parseToken()->authenticate();
+//        验证是不是自己发布的岗位
+        $job = Job::findOrFail($id);
+        if ($job->active==0){
+           Throw new MsgException('you had close the job');
+        }
+        $job->checkAccess($user);
+         $job->active = 0;
+         $job->save();
+         return 'success';
+    }
     /*
      * [DELETE] jobs/{id}/time
      */
@@ -229,7 +269,6 @@ class JobController extends Controller {
         $jobTime = JobTime::withTrashed()->where('job_id', $job->id)->orderBy('apply_end_at', 'desc')->get();
         return response()->json($jobTime);
     }
-
 
     /*
      * [GET] jobs/{id}/evaluate
@@ -375,6 +414,7 @@ class JobController extends Controller {
         }
         else echo 'false';
     }
+
 
 
     /*

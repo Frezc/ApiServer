@@ -39,7 +39,8 @@ class CreateUsersTable extends Migration
             $table->tinyInteger('email_verified')->default(0);
             // 角色的id
             $table->tinyInteger('role_id')->default(1);
-
+            //发布者的职位
+            $table->string('position')->default('招聘者');
             // 是否通过实名验证
             $table->tinyInteger('real_name_verified')->default(0);
 

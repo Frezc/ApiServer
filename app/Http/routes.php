@@ -1,46 +1,72 @@
 <?php
 
-
+/*
+ * 账户相关
+ */
 Route::post('resetPassword', 'SmsController@resetPassword');//重置密码
 Route::post('bindPhone', 'SmsController@bindPhone');//手机绑定
-Route::get('getAllJob', 'UserController@mainPage');//主页获取所有工作，可根据自己的简历筛选出相应的工作直接从后台推
-Route::post('users/{id}', 'UserController@update');//更新用户信息
+Route::post('authPhone', 'AuthenticateController@phoneAuth');//手机号码登录
 
-
-Route::get('users/{id}/resumes', 'ResumeController@get');//获取某份简历
-Route::post('users/{id}/resumes/{resumeId}', 'ResumeController@update');//更新某份简历
-Route::post('users/{id}/resumes/{resumeId}', 'ResumeController@delete');//删除
-Route::get('users/getOneAllResume', 'ResumeController@getOneAllResume');//删除
-
-
-
-Route::post('jobs', 'JobController@create');//创建工作
-Route::post('jobs/{id}', 'JobController@update')->where('id', '[0-9]+');//对现在有的工作进行更新
-Route::post('users/{id}/resumes', 'ResumeController@add');//添加简历
 Route::group(['middleware' => 'throttle:3'], function ($api) {
     Route::get('getSmsCode', 'SmsController@getSmsCode');
 });
 Route::group(['middleware' => 'throttle:3'], function ($api) {
 
 
-    Route::post('authPhone', 'AuthenticateController@phoneAuth');
-    Route::get('refresh', 'AuthenticateController@refreshToken');
+
+    Route::get('refresh', 'AuthenticateController@refreshToken');//更新token
     Route::post('registerByPhone', 'SmsController@registerByPhone');//用户手机注册
 
 });
+/*
+ * 订单相关
+ */
+Route::get('ordersDelete/{id}', 'OrderController@delete')->where('id', '[0-9]+');//删除某个订单
+Route::get('ordersCancel/{id}', 'OrderController@close')->where('id', '[0-9]+');//关闭某个订单
+/*
+ * 用户相关
+ */
+
+Route::post('users/{id}', 'UserController@update');//更新用户信息
+/*
+ * 简历相关
+ */
+Route::get('users/{id}/resumes', 'ResumeController@get');//获取某份简历
+Route::post('users/{id}/resumes/{resumeId}', 'ResumeController@update');//更新某份简历
+Route::post('users/{id}/resumes/{resumeId}', 'ResumeController@delete');//删除谋一份简历
+Route::get('users/getOneAllResume', 'ResumeController@getOneAllResume');//获取某人的全部简历
+Route::post('users/{id}/resumes', 'ResumeController@add');//添加简历
+/*
+ * 工作相关
+ */
+Route::get('getAllJob', 'UserController@mainPage');//主页获取所有工作，可根据自己的简历筛选出相应的工作直接从后台推
+Route::post('jobs/create', 'JobController@create');//创建工作
+Route::post('jobs/update/{id}', 'JobController@update')->where('id', '[0-9]+');//对某一个的工作进行更新
+Route::post('job/apply', 'UserController@postJobApply');//用户申请某一个工作
+Route::get('jobs/{id}', 'JobController@get')->where('id', '[0-9]+');//获取某一个工作的详情
+Route::get('jobs/close/{id}', 'JobController@closeJob')->where('id', '[0-9]+');//关闭某一个工作
 
 
+/*
+ * 公司相关
+ */
 
+/*
+ * 认证相关
+ */
 Route::get('users/{id}/realNameApplies', 'UserController@getRealNameApplies');//获取实名认证信息
 Route::post('users/{id}/realNameApplies', 'UserController@createRealNameApplies');//创建实名认证信息
 Route::delete('users/{id}/realNameApplies/{rnaid}', 'UserController@deleteRealNameApply');//取消实名认证
-Route::post('job/apply', 'UserController@postJobApply');
 Route::post('verifyEmail', 'EmailController@verifyEmail');//邮件验证
 Route::post('bindEmail', 'EmailController@bindEmail');//邮箱绑定
 
 
-Route::get('self', 'UserController@self');
 
+
+
+
+
+Route::get('self', 'UserController@self');
 Route::get('users/{id}', 'UserController@show');
 // Route::post('user', 'UserController@store');
 
@@ -60,7 +86,7 @@ Route::get('jobsQuery', 'JobController@query');
 
 Route::get('job/apply', 'UserController@getJobApply');         // use [GET] users/{id}/orders instead
 Route::get('job/completed', 'UserController@getJobCompleted'); // use [GET] users/{id}/orders instead
-Route::get('jobs/{id}', 'JobController@get')->where('id', '[0-9]+');
+
 
 Route::delete('jobs/{id}', 'JobController@delete')->where('id', '[0-9]+');
 Route::post('jobs/{id}/time', 'JobController@addTime')->where('id', '[0-9]+');
@@ -88,15 +114,16 @@ Route::get('companies/apply', 'CompanyController@getApply');
 Route::post('companies/apply', 'CompanyController@postApply');
 Route::post('unlink_company', 'CompanyController@unlink');
 
-Route::get('getResumes', 'UserController@getAllResume');
-Route::get('ordersCancel/{id}', 'OrderController@close')->where('id', '[0-9]+');
-Route::get('ordersDelete/{id}', 'OrderController@delete')->where('id', '[0-9]+');
+Route::get('getResumes', 'ResumeController@getAllResume');
+
+
 Route::get('orders/{id}', 'OrderController@get')->where('id', '[0-9]+');
 Route::get('orders/{id}/evaluate', 'OrderController@getEvaluate')->where('id', '[0-9]+');
 Route::post('orders/{id}/evaluate', 'OrderController@postEvaluate')->where('id', '[0-9]+');
 Route::post('orders/{id}/check', 'OrderController@check')->where('id', '[0-9]+');
 Route::post('orders/{id}/payment', 'OrderController@pay')->where('id', '[0-9]+');
 Route::post('orders/{id}/completed', 'OrderController@completed')->where('id', '[0-9]+');
+
 Route::get('orders/getOrderStatus', 'OrderController@getOrderStatus');
 
 Route::get('umsg', 'MessageController@getUpdate');
@@ -109,8 +136,6 @@ Route::get('banners', 'DataController@getBanners');
 Route::get('job_types', 'DataController@getJobTypes');
 Route::post('reports', 'MessageController@createReport');
 Route::get('orders/getCompanyOrderStatus', 'OrderController@getCompanyOrderStatus');
-
-
 Route::post('upload/image', 'UploadController@uploadImage');
 
 

@@ -14,6 +14,7 @@ class CreateCompanysTable extends Migration
     {
         Schema::create('companys', function (Blueprint $table) {
             $table->increments('id');
+            //公司名字
             $table->string('name');
             // 公司主页
             $table->string('url')->nullable();
@@ -29,6 +30,9 @@ class CreateCompanysTable extends Migration
             $table->string('contact')->nullable();
             // 营业执照
             $table->string('business_license');
+            //公司的评分初始值都是五
+            $table->string('average_score','1')->default(5);
+
             $table->timestamps();
 
             $table->index('name');
