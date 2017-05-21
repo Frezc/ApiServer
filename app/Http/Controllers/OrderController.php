@@ -367,7 +367,7 @@ class OrderController extends Controller
                                       ->where('recruiter_id',$user->company_id)
                                       ->where('status',$request->input('status'))
                                       ->where('active',1);
-        $jobs->select('orders.id','orders.job_id','job_name','salary','address','start_at','end_at','apply_number','required_number','salary_type');
+        $jobs->select('orders.id','tjz_jobs.pay_way','orders.job_id','job_name','salary','address','start_at','end_at','apply_number','required_number','salary_type');
         $jobs->orderBy('orders.created_at','desc');
         $total = $jobs->count();
         return response()->json(['list'=>$jobs->get(),'total'=>$total]);
