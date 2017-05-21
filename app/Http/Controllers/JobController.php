@@ -193,7 +193,7 @@ class JobController extends Controller {
         $job->update(array_only($request->all(),
             ['name','salary', 'pay_way', 'salary_type', 'description', 'contact', 'contact_person', 'type', 'city', 'address','required_number','salary_pay_way']));
         $jobTime->update(array_only($request->all(),['start_at', 'end_at','apply_end_at']));
-        return response()->json($job);
+        return 'success';
     }
 
     /*
