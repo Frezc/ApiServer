@@ -13,7 +13,7 @@ Route::group(['middleware' => 'throttle:3'], function ($api) {
 Route::group(['middleware' => 'throttle:3'], function ($api) {
 
 
-
+    Route::post('authPhone', 'AuthenticateController@phoneAuth');//手机号码登录
     Route::get('refresh', 'AuthenticateController@refreshToken');//更新token
     Route::post('registerByPhone', 'SmsController@registerByPhone');//用户手机注册
 
@@ -26,7 +26,7 @@ Route::get('ordersCancel/{id}', 'OrderController@close')->where('id', '[0-9]+');
 /*
  * 用户相关
  */
-
+Route::get('users/{id}', 'UserController@show');
 Route::post('users/{id}', 'UserController@update');//更新用户信息
 /*
  * 简历相关
@@ -67,7 +67,7 @@ Route::post('bindEmail', 'EmailController@bindEmail');//邮箱绑定
 
 
 Route::get('self', 'UserController@self');
-Route::get('users/{id}', 'UserController@show');
+
 // Route::post('user', 'UserController@store');
 
 //Route::get('resume/photo', 'ResumeController@photo');

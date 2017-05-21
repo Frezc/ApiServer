@@ -92,6 +92,7 @@ class DatabaseSeeder extends Seeder {
                 'email_verified' => $faker->numberBetween($min = 0, $max = 1),
                 'company_id' => $company ? $company->id : null,
                 'company_name' => $company ? $company->name : null,
+                'role_id'=> $company ?  2 : 1,
                 'money' => $faker->numberBetween($min = 0, $max = 100000)
             ]);
         }
@@ -112,7 +113,7 @@ class DatabaseSeeder extends Seeder {
             $company = Company::find($user->company_id);
             $type = \App\Models\JobType::find($faker->numberBetween($min = 1, $max = 24));
             Job::create([
-                'salary_type' => $faker->numberBetween($min = 1, $max = 2),
+                'salary_type' => $faker->randomElement($array = array('/天','/周','/小时','/月')),
                 'salary' => rand(100,200),
                 'description' => $faker->catchPhrase,
                 'visited' => $faker->numberBetween($min = 0, $max = 1000),
@@ -125,7 +126,9 @@ class DatabaseSeeder extends Seeder {
                 'creator_name' => $user->nickname,
                 'salary_pay_way' => $faker->randomElement($array = array('周结算','月结算','天结算','小时结算')),
                 'contact' => $faker->phoneNumber,
+                'required_number' =>rand(2,10),
                 'contact_person' => $faker->name,
+                'pay_way' => $faker->randomElement($array = array('现金','支付宝','微信','钱包支付')),
                 'active' => 1,
 //                'number_evaluate' => $faker->numberBetween($min = 1, $max = 100),
 //                'average_score' => 4.2,

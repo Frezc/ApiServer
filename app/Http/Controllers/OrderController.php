@@ -364,8 +364,10 @@ class OrderController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
         $jobs = \DB::table('orders')->join('tjz_jobs','tjz_jobs.id','=','orders.job_id')
                                       ->join('job_times','job_times.job_id','=','orders.job_id')
-                                      ->where('recruiter_id',$user->company_id)->where('status',$request->input('status'));
-        $jobs->select('orders.id','orders.job_id','job_name','salary','address','start_at','end_at');
+                                      ->where('recruiter_id',$user->company_id)
+                                      ->where('status',$request->input('status'))
+                                      ->where('active',1);
+        $jobs->select('orders.id','orders.job_id','job_name','salary','address','start_at','end_at','apply_number','required_number','salary_type');
         $jobs->orderBy('orders.created_at','desc');
         $total = $jobs->count();
         return response()->json(['list'=>$jobs->get(),'total'=>$total]);
