@@ -176,8 +176,8 @@ class JobController extends Controller {
         }
         $this->validate($request, [
             'name' => 'string|between:1,250',
-            'pay_way' => 'integer|in:1,2',
-            'salary_type' => 'integer|in:1,2',
+            'pay_way' => 'string',
+            'salary_type' => 'string',
             'description' => 'string',
             'active' => 'integer|in:0,1',
             'contact' => 'string|max:250',
