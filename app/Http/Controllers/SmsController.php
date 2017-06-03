@@ -20,16 +20,13 @@ class SmsController extends Controller {
     /*
      * [GET] getSmsCode
      */
-    public function getSmsCode(Request $request) {
+    public function  getSmsCode(Request $request){
         $this->validate($request,[
             'phone'=>'required |regex:/[0-9]+/|'
         ]);
         $phone=$request->input('phone');
         $smgcode=rand(99999,999999);
-        $verify= DB::table('sms_code_verifications')->where('phone',$phone)->get();
-        if(count($verify) > 0){
-            $this->clearVerification($phone);
-        }
+        DB::table('sms_code_verifications')->where('phone','like', '%' . $phone . '%')->delete();
         $ch=curl_init();
         $url='http://106.ihuyi.cn/webservice/sms.php?method=Submit&account=C17975840&password=5b3d938c8f8a49e5e5cf7474f0ddd2a3';
         $url=$url.'&mobile='.$phone.'&content=您的验证码是：'.$smgcode.'。请不要把验证码泄露给其他人。';
@@ -42,11 +39,11 @@ class SmsController extends Controller {
         $json=json_encode($xml);
         $json_Array=json_decode($json, true);
         if( $json_Array['code']==2){
-            $smsVerification = new SmsCodeVerification;
-            $smsVerification->phone=$phone;
-            $smsVerification->code=$smgcode;
-            $smsVerification->save();
-            return $json_Array['code'];
+            $smsVirification = new SmsCodeVerification();
+            $smsVirification->phone=$phone;
+            $smsVirification->code=$smgcode;
+            $smsVirification->save();
+            return 'success';
         }else{
             echo '发送失败';
         }
