@@ -46,7 +46,10 @@ Route::post('job/apply', 'UserController@postJobApply');//用户申请某一个�
 Route::get('jobs/{id}', 'JobController@get')->where('id', '[0-9]+');//获取某一个工作的详情
 Route::get('jobs/close/{id}', 'JobController@closeJob')->where('id', '[0-9]+');//关闭某一个工作
 
-
+/*
+ * 邮件相关
+ */
+Route::post('companySendWorkMail/{id}', 'EmailController@companySendWorkMail')->where('id', '[0-9]+');//发送工作邀请邮箱
 /*
  * 公司相关
  */

@@ -33,7 +33,6 @@ class SmsController extends Controller {
         $ch=curl_init();
         $url='http://106.ihuyi.cn/webservice/sms.php?method=Submit&account=C17975840&password=5b3d938c8f8a49e5e5cf7474f0ddd2a3';
         $url=$url.'&mobile='.$phone.'&content=您的验证码是：'.$smgcode.'。请不要把验证码泄露给其他人。';
-
         curl_setopt($ch,CURLOPT_URL,$url);
         curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
         curl_setopt($ch,CURLOPT_HEADER,0);

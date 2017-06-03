@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use JWTAuth;
 use App\Models\JobCollection;
 use PhpParser\Node\Stmt\Throw_;
+use Symfony\Component\DomCrawler\Form;
 
 class JobController extends Controller {
 
@@ -119,6 +120,7 @@ class JobController extends Controller {
      * [POST] jobs
      */
     public function create(Request $request) {
+
         $this->validate($request, [
             'name' => 'required|string|between:1,250', // 名称
             'salary' => 'required' ,                     //工资

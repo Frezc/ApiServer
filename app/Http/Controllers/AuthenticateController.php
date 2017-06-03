@@ -93,6 +93,7 @@ class AuthenticateController extends Controller {
             // attempt to verify the credentials and create a token for the user
             if (!$token = JWTAuth::attempt($credentials)) {
                 throw new AuthorizationException();
+
             }
         } catch (JWTException $e) {
             // something went wrong whilst attempting to encode the token

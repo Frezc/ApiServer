@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\MsgException;
+use App\Jobs\Job;
+use App\Models\Company;
 use App\Models\User;
 use DB;
 use Hash;
@@ -91,11 +93,53 @@ class EmailController extends Controller {
         }
     }
 
+    /**
+     * @param Request $request
+     * @param $id
+     * @return string
+     */
+    public function companySendWorkMail(Request $request,$id){
+        $user = User::findOrFail($id);
+//        $email = $user->email;
+        $email = '244774097@qq.com';
+        $job_id=$request->input("job_id");
+        $job = \App\Models\Job::find($job_id);
+        $company_user= JWTAuth::parseToken()->authenticate();
+
+        $company = Company::findOrfail($company_user->company_id);
+        $data['job_name'] = $job->name;
+        $data['contact_person'] = $job->contact_person;
+        $data['phone'] = $job->contact;
+        $data['company_name'] = $company->name;
+        $data['addr']  = $company->address;
+        $data['time'] = date('y-m-d',time());
+       $flag = Mail::send('emails.work',$data,function ($msg)use($email){
+
+           $msg->to($email)->subject('淘兼职邀请邮箱');
+       });
+
+       if ($flag){
+           return 'sucess';
+       }else
+       {
+           return 'fail';
+       }
+
+
+   }
+
+    /**
+     * @param $email
+     * @return string
+     */
     private function generateToken($email) {
         // 		return Hash::make($email.date('Ymd').str_random(16));
         return str_random(6);
     }
 
+    /**
+     * @param $email
+     */
     private function clearVerification($email) {
         DB::delete('delete from email_verifications where email = ?', [$email]);
     }
@@ -103,7 +147,7 @@ class EmailController extends Controller {
     /**    *  测试用方法    */
     public function emailSend(Request $request) {
         $email = $request->input('email');
-        Mail::send('emails.verification', ['token' => 'ftTf43', 'avalible_before' => '2014-5-13 13:00:22'], function ($message) use ($email) {
+        Mail::send('emails.work', ['company' => 'ftTf43', 'avalible_before' => '2014-5-13 13:00:22'], function ($message) use ($email) {
             $message->to($email, 'dear')->subject('淘兼职邮箱验证');
         });
     }
