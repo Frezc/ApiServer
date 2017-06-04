@@ -7,7 +7,7 @@
 <div class="container">
     < class="content">
         <p>
-            {{$company_name}}} 通过了你对该公司发布的{$job_name}}的职位申请
+            {{$company_name}}} 通过了你对该公司发布的{{$job_name}}的职位申请
         </p>
         <p style="font-weight: bold; font-size: 24px;">
             请在{{$time}}}前到{{$addr}}参加面试

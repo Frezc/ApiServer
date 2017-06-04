@@ -7,14 +7,14 @@ Route::post('resetPassword', 'SmsController@resetPassword');//重置密码
 Route::post('bindPhone', 'SmsController@bindPhone');//手机绑定
 Route::post('authPhone', 'AuthenticateController@phoneAuth');//手机号码登录
 Route::get('getSmsCode', 'SmsController@getSmsCode');
-
+Route::post('authPhone', 'AuthenticateController@phoneAuth');//手机号码登录
 Route::group(['middleware' => 'throttle:3'], function ($api) {
 
 });
 Route::group(['middleware' => 'throttle:3'], function ($api) {
 
 
-    Route::post('authPhone', 'AuthenticateController@phoneAuth');//手机号码登录
+//    Route::post('authPhone', 'AuthenticateController@phoneAuth');//手机号码登录
     Route::get('refresh', 'AuthenticateController@refreshToken');//更新token
     Route::post('registerByPhone', 'SmsController@registerByPhone');//用户手机注册
 
@@ -24,6 +24,9 @@ Route::group(['middleware' => 'throttle:3'], function ($api) {
  */
 Route::get('ordersDelete/{id}', 'OrderController@delete')->where('id', '[0-9]+');//删除某个订单
 Route::get('ordersCancel/{id}', 'OrderController@close')->where('id', '[0-9]+');//关闭某个订单
+Route::get('passApply', 'OrderController@passApply');//通过某一个申请
+Route::get('refuJob', 'OrderController@refuJob');//拒绝某一个申请
+
 /*
  * 用户相关
  */

@@ -6,6 +6,7 @@ use App\Exceptions\MsgException;
 use App\Jobs\CloseOrderWhenNotPay;
 use App\Jobs\PushNotifications;
 use App\Models\Job;
+use App\Models\JobApply;
 use App\Models\JobEvaluate;
 use App\Models\JobTime;
 use App\Models\Log;
@@ -285,6 +286,57 @@ class OrderController extends Controller
         throw new MsgException('你已经确认过该订单了。', 400);
     }
 
+    /**
+     * @param Request $request
+     * @return string
+     * @throws MsgException
+     */
+    public function passApply(Request $request) {
+        $job_id=$request->input('job_id');
+        $user_id=$request->input('user_id');
+        $order = Order::query()->where('job_id',$job_id)->where('applicant_id',$user_id)->first();
+        $apply = JobApply::query()->where('job_id',$job_id)->where('user_id',$user_id)->first();
+        $self = JWTAuth::parseToken()->authenticate();
+        // 检查权限
+        $order->makeSureAccess($self);
+        if ($order->isRecruiter($self) && !$order->recruiter_check) {
+            // 当前用户所属招聘方且未确认
+            $order->recruiter_check = 1;
+            $order->status = 1;//0 申请中 1成功 2失败
+            $apply->status = 1;//0 申请中 1成功 2失败
+            $order->save();
+            $apply->save();
+            return '你已通过该申请';
+        }
+
+        throw new MsgException('处理过该申请', 400);
+    }
+
+    /**
+     * @param Request $request
+     * @return string
+     * @throws MsgException
+     */
+    public function refuJob(Request $request) {
+        $job_id=$request->input('job_id');
+        $user_id=$request->input('user_id');
+        $order = Order::query()->where('job_id',$job_id)->where('applicant_id',$user_id);
+        $apply = JobApply::query()->where('job_id',$job_id)->where('user_id',$user_id);
+        $self = JWTAuth::parseToken()->authenticate();
+        // 检查权限
+        $order->makeSureAccess($self);
+        if ($order->isRecruiter($self) && !$order->recruiter_check) {
+            // 当前用户所属招聘方且未确认
+            $order->recruiter_check = 1;
+            $order->status = 2;//0 申请中 1成功 2失败
+            $apply->status = 2;//0 申请中 1成功 2失败
+            $order->save();
+            $apply->save();
+            return '成功拒绝';
+        }
+
+        throw new MsgException('你已经处理过该申请。', 400);
+    }
     /*
      * [POST] orders/{id}/payment
      */
@@ -365,10 +417,11 @@ class OrderController extends Controller
         $user = JWTAuth::parseToken()->authenticate();
         $jobs = \DB::table('orders')->join('tjz_jobs','tjz_jobs.id','=','orders.job_id')
                                       ->join('job_times','job_times.job_id','=','orders.job_id')
+                                      ->join('users','users.id','=','orders.applicant_id')
                                       ->where('recruiter_id',$user->company_id)
                                       ->where('status',$request->input('status'))
                                       ->where('active',1);
-        $jobs->select('orders.id','tjz_jobs.pay_way','applicant_id','orders.job_id','job_name','salary','address','start_at','end_at','apply_number','required_number','salary_type');
+        $jobs->select('orders.id','tjz_jobs.pay_way','applicant_id','orders.job_id','phone','job_name','salary','address','start_at','end_at','apply_number','required_number','salary_type');
         $jobs->orderBy('orders.created_at','desc');
         $total = $jobs->count();
         return response()->json(['list'=>$jobs->get(),'total'=>$total]);

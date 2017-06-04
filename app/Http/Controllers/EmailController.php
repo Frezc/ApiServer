@@ -105,7 +105,6 @@ class EmailController extends Controller {
         $job_id=$request->input("job_id");
         $job = \App\Models\Job::find($job_id);
         $company_user= JWTAuth::parseToken()->authenticate();
-
         $company = Company::findOrfail($company_user->company_id);
         $data['job_name'] = $job->name;
         $data['contact_person'] = $job->contact_person;

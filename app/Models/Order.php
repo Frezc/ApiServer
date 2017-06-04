@@ -57,4 +57,8 @@ class Order extends Model
         }
         return '';
     }
+    public function bindPhone($id){
+        $user=\DB::table('users')->where('id',$id);
+        $this->phone =$user->phone;
+    }
 }
