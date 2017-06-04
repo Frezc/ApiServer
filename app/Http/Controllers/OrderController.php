@@ -320,8 +320,8 @@ class OrderController extends Controller
     public function refuJob(Request $request) {
         $job_id=$request->input('job_id');
         $user_id=$request->input('user_id');
-        $order = Order::query()->where('job_id',$job_id)->where('applicant_id',$user_id);
-        $apply = JobApply::query()->where('job_id',$job_id)->where('user_id',$user_id);
+        $order = Order::query()->where('job_id',$job_id)->where('applicant_id',$user_id)->first();
+        $apply = JobApply::query()->where('job_id',$job_id)->where('user_id',$user_id)->first();
         $self = JWTAuth::parseToken()->authenticate();
         // 检查权限
         $order->makeSureAccess($self);
@@ -332,10 +332,10 @@ class OrderController extends Controller
             $apply->status = 2;//0 申请中 1成功 2失败
             $order->save();
             $apply->save();
-            return '成功拒绝';
+            return '你已经拒绝该申请';
         }
 
-        throw new MsgException('你已经处理过该申请。', 400);
+        throw new MsgException('拒绝', 400);
     }
     /*
      * [POST] orders/{id}/payment
