@@ -7,7 +7,6 @@ Route::post('resetPassword', 'SmsController@resetPassword');//重置密码
 Route::post('bindPhone', 'SmsController@bindPhone');//手机绑定
 Route::post('authPhone', 'AuthenticateController@phoneAuth');//手机号码登录
 Route::get('getSmsCode', 'SmsController@getSmsCode');
-Route::post('authPhone', 'AuthenticateController@phoneAuth');//手机号码登录
 Route::group(['middleware' => 'throttle:3'], function ($api) {
 
 });

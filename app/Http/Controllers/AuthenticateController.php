@@ -99,9 +99,10 @@ class AuthenticateController extends Controller {
             // something went wrong whilst attempting to encode the token
             return response()->json(['error' => 'could_not_create_token'], 500);
         }
-        $user = \DB::table('users')->where('phone', $request->input('phone'))->select('nickname', 'phone')->get();
-//        $user = User::where('phone', $request->input('phone'))->firstOrFail();
-//        $user->bindRoleName();
+
+        $user = User::where('phone', $request->input('phone'))->firstOrFail();
+        $user->bindRoleName();
+
         return response()->json([
             'user' => $user,
             'token' => $token
