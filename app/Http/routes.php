@@ -40,6 +40,7 @@ Route::post('users/{id}/resumes/{resumeId}', 'ResumeController@update');//更新
 Route::post('users/{id}/resumes/{resumeId}', 'ResumeController@delete');//删除谋一份简历
 Route::get('users/getOneAllResume', 'ResumeController@getOneAllResume');//获取某人的全部简历
 Route::post('users/{id}/resumes', 'ResumeController@add');//添加简历
+Route::get('getOneResumeByUserId/{id}', 'ResumeController@getOneResumeByUserId')->where('id', '[0-9]+');//获取简历
 /*
  * 工作相关
  */

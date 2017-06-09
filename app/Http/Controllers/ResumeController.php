@@ -140,4 +140,13 @@ class ResumeController extends Controller {
         $resume->limit($request->input('limit'));
         return response()->json(['list'=> $resume->get(), 'total'=>  $total]);
     }
+
+    public function getOneResumeByUserId($id){
+        if (JWTAuth::authenticate()){
+        $resumes = new Resume;
+        $resume = $resumes->where('user_id',$id)->first();
+       return response()->json($resume);
+        }
+   }
+
 }
