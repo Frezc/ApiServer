@@ -101,7 +101,7 @@ class AuthenticateController extends Controller {
         }
         $user = \DB::table('users')->where('phone', $request->input('phone'))->select('nickname', 'phone')->get();
 //        $user = User::where('phone', $request->input('phone'))->firstOrFail();
-        $user->bindRoleName();
+//        $user->bindRoleName();
         return response()->json([
             'user' => $user,
             'token' => $token
