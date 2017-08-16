@@ -125,8 +125,4 @@ class User extends Model implements AuthenticatableContract,
 
         return $builder;
     }
-  public  function getKeyVel($model,$key){
-        $this->g;
-    }
-
 }
