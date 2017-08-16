@@ -49,7 +49,7 @@ Route::post('jobs/create', 'JobController@create');//创建工作
 Route::post('jobs/update/{id}', 'JobController@update')->where('id', '[0-9]+');//对某一个的工作进行更新
 Route::post('job/apply', 'UserController@postJobApply');//用户申请某一个工作ute::get('jobs/{id}', 'JobController@get')->where('id', '[0-9]+');//获取某一个工作的详情
 Route::get('jobs/close/{id}', 'JobController@closeJob')->where('id', '[0-9]+');//关闭某一个工作
-
+Route::get('jobs/{id}', 'JobController@get')->where('id', '[0-9]+');//获取某一个的工作的详情
 /*
  * 邮件相关
  */
@@ -66,11 +66,6 @@ Route::post('users/{id}/realNameApplies', 'UserController@createRealNameApplies'
 Route::delete('users/{id}/realNameApplies/{rnaid}', 'UserController@deleteRealNameApply');//取消实名认证
 Route::post('verifyEmail', 'EmailController@verifyEmail');//邮件验证
 Route::post('bindEmail', 'EmailController@bindEmail');//邮箱绑定
-
-
-
-
-
 
 
 Route::get('self', 'UserController@self');
@@ -96,6 +91,7 @@ Route::get('job/completed', 'UserController@getJobCompleted'); // use [GET] user
 
 
 Route::delete('jobs/{id}', 'JobController@delete')->where('id', '[0-9]+');
+
 Route::post('jobs/{id}/time', 'JobController@addTime')->where('id', '[0-9]+');
 Route::delete('jobs/{id}/time', 'JobController@closeTime')->where('id', '[0-9]+');
 Route::post('jobs/{id}/apply', 'JobController@apply')->where('id', '[0-9]+');
