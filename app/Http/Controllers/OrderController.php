@@ -334,8 +334,8 @@ class OrderController extends Controller
             $apply->save();
             return '你已经拒绝该申请';
         }
-
         throw new MsgException('拒绝', 400);
+
     }
     /*
      * [POST] orders/{id}/payment
@@ -415,18 +415,36 @@ class OrderController extends Controller
      */
     public function getCompanyOrderStatus(Request $request){
         $user = JWTAuth::parseToken()->authenticate();
+        $status = $request->input('status');
+        if ($status == 0){
+            $jobs = \DB::table('orders')->join('tjz_jobs','tjz_jobs.id','=','orders.job_id')
+                ->join('job_times','job_times.job_id','=','orders.job_id')
+                ->join('users','users.id','=','orders.applicant_id')
+                ->where('recruiter_id',$user->company_id)
+                ->where('active',1);
+        }
+        if ($status == 1){
         $jobs = \DB::table('orders')->join('tjz_jobs','tjz_jobs.id','=','orders.job_id')
-                                      ->join('job_times','job_times.job_id','=','orders.job_id')
-                                      ->join('users','users.id','=','orders.applicant_id')
-                                      ->where('recruiter_id',$user->company_id)
-                                      ->where('status',$request->input('status'))
-                                      ->where('active',1);
+           ->join('job_times','job_times.job_id','=','orders.job_id')
+           ->join('users','users.id','=','orders.applicant_id')
+           ->where('recruiter_id',$user->company_id)
+            ->where('active',1)
+           ->where('status',$status);
+       }
+       if ($status == 3)
+       {
+           $jobs = \DB::table('orders')->join('tjz_jobs','tjz_jobs.id','=','orders.job_id')
+               ->join('job_times','job_times.job_id','=','orders.job_id')
+               ->join('users','users.id','=','orders.applicant_id')
+               ->where('recruiter_id',$user->company_id)
+               ->where('status',$status);
+       }
         $jobs->select('orders.id','tjz_jobs.pay_way','applicant_id','orders.job_id','phone','job_name','salary','address','start_at','end_at','apply_number','required_number','salary_type');
         $jobs->orderBy('orders.created_at','desc');
         $total = $jobs->count();
         return response()->json(['list'=>$jobs->get(),'total'=>$total]);
     }
-   /*
+    /*
     * 用户删除订单
     */
     public function delete($id){
@@ -434,10 +452,10 @@ class OrderController extends Controller
         $self = JWTAuth::parseToken()->authenticate();
         $order = Order::findOrFail($id);
         if ( $order->makeSureAccess($self))
-        \DB::table('orders')->where('id',$id)->delete();
-       else return 'fail';
+            \DB::table('orders')->where('id',$id)->delete();
+        else return 'fail';
 
-       return 'success';
+        return 'success';
     }
 
 }

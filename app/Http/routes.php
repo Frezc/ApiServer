@@ -25,19 +25,20 @@ Route::get('ordersDelete/{id}', 'OrderController@delete')->where('id', '[0-9]+')
 Route::get('ordersCancel/{id}', 'OrderController@close')->where('id', '[0-9]+');//关闭某个订单
 Route::get('passApply', 'OrderController@passApply');//通过某一个申请
 Route::get('refuJob', 'OrderController@refuJob');//拒绝某一个申请
+Route::get('orders/getCompanyOrderStatus', 'OrderController@getCompanyOrderStatus');//获取某种状态的订单
 
 /*
  * 用户相关
  */
 Route::get('users/{id}', 'UserController@show');
 Route::post('users/{id}', 'UserController@update');//更新用户信息
+Route::post('test', 'UserController@test');//更新用户信息
 /*
  * 简历相关
  */
 Route::get('users/{id}/resumes', 'ResumeController@get');//获取某份简历
 Route::post('users/{id}/resumes/{resumeId}', 'ResumeController@update');//更新某份简历
 Route::post('users/{id}/resumes/{resumeId}', 'ResumeController@delete');//删除谋一份简历
-Route::get('users/getOneAllResume', 'ResumeController@getOneAllResume');//获取某人的全部简历
 Route::post('users/{id}/resumes', 'ResumeController@add');//添加简历
 Route::get('getOneResumeByUserId/{id}', 'ResumeController@getOneResumeByUserId')->where('id', '[0-9]+');//获取简历
 /*
@@ -46,8 +47,7 @@ Route::get('getOneResumeByUserId/{id}', 'ResumeController@getOneResumeByUserId')
 Route::get('getAllJob', 'UserController@mainPage');//主页获取所有工作，可根据自己的简历筛选出相应的工作直接从后台推
 Route::post('jobs/create', 'JobController@create');//创建工作
 Route::post('jobs/update/{id}', 'JobController@update')->where('id', '[0-9]+');//对某一个的工作进行更新
-Route::post('job/apply', 'UserController@postJobApply');//用户申请某一个工作
-Route::get('jobs/{id}', 'JobController@get')->where('id', '[0-9]+');//获取某一个工作的详情
+Route::post('job/apply', 'UserController@postJobApply');//用户申请某一个工作ute::get('jobs/{id}', 'JobController@get')->where('id', '[0-9]+');//获取某一个工作的详情
 Route::get('jobs/close/{id}', 'JobController@closeJob')->where('id', '[0-9]+');//关闭某一个工作
 
 /*
@@ -142,7 +142,7 @@ Route::post('feedbacks', 'MessageController@postFeedback');
 Route::get('banners', 'DataController@getBanners');
 Route::get('job_types', 'DataController@getJobTypes');
 Route::post('reports', 'MessageController@createReport');
-Route::get('orders/getCompanyOrderStatus', 'OrderController@getCompanyOrderStatus');
+
 Route::post('upload/image', 'UploadController@uploadImage');
 
 

@@ -21,8 +21,8 @@ use Validator;
 class UserController extends Controller {
 
     public function __construct() {
-        $this->middleware('jwt.auth', ['except' => ['show', 'mainPage','getAllResume']]);
-        $this->middleware('log', ['only' => ['update', 'createRealNameApplies', 'deleteRealNameApply', 'updateEvaluate']]);
+//        $this->middleware('jwt.auth', ['except' => ['show', 'mainPage','getAllResume']]);
+//        $this->middleware('log', ['only' => ['update', 'createRealNameApplies', 'deleteRealNameApply', 'updateEvaluate']]);
     }
 
     /*
@@ -372,5 +372,11 @@ class UserController extends Controller {
         $evaluate->update(array_only($request->all(), ['score', 'comment', 'pictures']));
         return response()->json($evaluate);
     }
+  public function  test(){
+        $user = User::find(1010);
+        $key = ['nickname'];
+        $ss = getKeyVel($user,$key);
+        return json_encode($ss);
 
+  }
 }
