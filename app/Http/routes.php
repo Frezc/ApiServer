@@ -68,6 +68,11 @@ Route::post('verifyEmail', 'EmailController@verifyEmail');//邮件验证
 Route::post('bindEmail', 'EmailController@bindEmail');//邮箱绑定
 
 
+
+
+
+
+
 Route::get('self', 'UserController@self');
 
 // Route::post('user', 'UserController@store');
@@ -91,7 +96,6 @@ Route::get('job/completed', 'UserController@getJobCompleted'); // use [GET] user
 
 
 Route::delete('jobs/{id}', 'JobController@delete')->where('id', '[0-9]+');
-
 Route::post('jobs/{id}/time', 'JobController@addTime')->where('id', '[0-9]+');
 Route::delete('jobs/{id}/time', 'JobController@closeTime')->where('id', '[0-9]+');
 Route::post('jobs/{id}/apply', 'JobController@apply')->where('id', '[0-9]+');
