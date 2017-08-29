@@ -32,12 +32,13 @@ Route::get('orders/getCompanyOrderStatus', 'OrderController@getCompanyOrderStatu
  */
 Route::get('users/{id}', 'UserController@show');
 Route::post('users/{id}', 'UserController@update');//更新用户信息
-Route::post('test', 'UserController@test');//更新用户信息
+Route::get('self', 'UserController@self');//获取用户信息
+
 /*
  * 简历相关
  */
-Route::get('users/{id}/resumes', 'ResumeController@get');//获取某份简历
-Route::post('users/{id}/resumes/{resumeId}', 'ResumeController@update');//更新某份简历
+Route::get('resume', 'ResumeController@get');//获取某份简历
+Route::post('users/resumes/update', 'ResumeController@update');//更新某份简历
 Route::post('users/{id}/resumes/{resumeId}', 'ResumeController@delete');//删除谋一份简历
 Route::post('users/{id}/resumes', 'ResumeController@add');//添加简历
 Route::get('getOneResumeByUserId/{id}', 'ResumeController@getOneResumeByUserId')->where('id', '[0-9]+');//获取简历
@@ -49,7 +50,7 @@ Route::post('jobs/create', 'JobController@create');//创建工作
 Route::post('jobs/update/{id}', 'JobController@update')->where('id', '[0-9]+');//对某一个的工作进行更新
 Route::post('job/apply', 'UserController@postJobApply');//用户申请某一个工作ute::get('jobs/{id}', 'JobController@get')->where('id', '[0-9]+');//获取某一个工作的详情
 Route::get('jobs/close/{id}', 'JobController@closeJob')->where('id', '[0-9]+');//关闭某一个工作
-Route::get('jobs/{id}', 'JobController@get')->where('id', '[0-9]+');//获取某一个的工作的详情
+Route::post('jobs/{id}/apply', 'JobController@apply')->where('id', '[0-9]+');
 /*
  * 邮件相关
  */
@@ -73,7 +74,6 @@ Route::post('bindEmail', 'EmailController@bindEmail');//邮箱绑定
 
 
 
-Route::get('self', 'UserController@self');
 
 // Route::post('user', 'UserController@store');
 
@@ -98,7 +98,7 @@ Route::get('job/completed', 'UserController@getJobCompleted'); // use [GET] user
 Route::delete('jobs/{id}', 'JobController@delete')->where('id', '[0-9]+');
 Route::post('jobs/{id}/time', 'JobController@addTime')->where('id', '[0-9]+');
 Route::delete('jobs/{id}/time', 'JobController@closeTime')->where('id', '[0-9]+');
-Route::post('jobs/{id}/apply', 'JobController@apply')->where('id', '[0-9]+');
+
 Route::post('job/apply', 'UserController@postJobApply');       // use [POST] jobs/{id}/apply instead
 Route::get('jobs/{id}/evaluate', 'JobController@getEvaluate');
 Route::post('job/evaluate', 'UserController@postJobEvaluate'); // use [POST] orders/{id}/evaluate instead

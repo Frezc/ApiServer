@@ -35,7 +35,6 @@ class User extends Model implements AuthenticatableContract,
 
     public function resumes() {
         return Resume::where('user_id', $this->id);
-//        return $this->hasMany('App\Resume');
     }
 
     public function jobApplies() {

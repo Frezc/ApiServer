@@ -425,26 +425,19 @@ class JobController extends Controller {
     public function apply(Request $request, $id) {
         $job = Job::findOrFail($id);
 
-        $this->validate($request, [
-            'resume_id' => 'required|integer'     // 简历id
-        ]);
         // 获取工作时间
         $jobTime = JobTime::where('job_id', $job->id)->first();
         // 获取简历
-        $resume = Resume::findOrFail($request->input('resume_id'));
-
         $self = JWTAuth::parseToken()->authenticate();
+        $resume = Resume::where('user_id',$self->id)->first();
         // 验证权限
         $self->checkAccess($resume->user_id);
-        // 将简历转为求职资料
-        $expectJob = $resume->convertToExpectJob();
         // 创建订单
         $order = Order::create([
             'job_id' => $job->id,      // 岗位id
             'job_name' => $job->name,  // 岗位名称
             'job_time_id' => $jobTime->id, // 工作时间id
             'pay_way' => $job->pay_way,    // 支付方式
-            'expect_job_id' => $expectJob->id, // 求职资料id
             'applicant_id' => $resume->user_id, // 申请者Id
             'applicant_name' => $self->nickname, // 申请者名称
             'recruiter_type' => $job->company_id ? 1 : 0, // 招聘者类型
@@ -457,7 +450,6 @@ class JobController extends Controller {
             'recruiter_check' => 0            // 招聘方是否确认
         ]);
 
-        $order->expect_job = $expectJob;
         $order->job_time = $jobTime;
 
         // 得到招聘方的id，如果是企业的话会得到企业下的所有人id

@@ -17,6 +17,7 @@ class CreateResumesTable extends Migration
             $table->integer('user_id')->unsigned();
             // 简历标题
             $table->string('title');
+
             $table->string('name', 16);
             // 照片的url
             $table->string('photo')->nullable();
@@ -32,6 +33,8 @@ class CreateResumesTable extends Migration
             $table->tinyInteger('sex')->default(0);
             // 期望工作城市
             $table->string('city');
+             // 体重
+            $table->string('weight');
             // 期望工作地点
             $table->string('expect_location')->nullable();
             // 自我介绍

@@ -85,10 +85,6 @@ class DatabaseSeeder extends Seeder {
                 'phone' => $faker->unique()->phoneNumber,
                 'password' => Hash::make('secret'),
                 'nickname' => $faker->name,
-                'sign' => $faker->sentence(6, false),
-                'birthday' => $faker->date($format = 'Y-m-d', $max = 'now'),
-                'location' => $faker->address,
-                'sex' => $faker->numberBetween($min = 0, $max = 1),
                 'email_verified' => $faker->numberBetween($min = 0, $max = 1),
                 'company_id' => $company ? $company->id : null,
                 'company_name' => $company ? $company->name : null,
@@ -180,13 +176,6 @@ class DatabaseSeeder extends Seeder {
                 'expect_job_id' => $i,
                 'start_at' => $start_at,
                 'end_at' => (new Carbon($start_at))->addDays(3)->toDateString()
-//                'year' => date('Y', $time),
-//                'month' => date('n', $time),
-//                'dayS' => date('j', $time),
-//                'dayE' => date('j', $time + 60 * 60 * 24 * 7),
-//                'hourS' => 8,
-//                'hourE' => 20,
-//                'minuteS' => 30
             ]);
         }
 
@@ -200,18 +189,17 @@ class DatabaseSeeder extends Seeder {
                 'birthday' => $faker->date($format = 'Y-m-d', $max = 'now'),
                 'sex' => $faker->numberBetween($min = 0, $max = 1),
                 'city' => $faker->city,
+                'weight' => 50,
+                'flag' => 'php',
                 'expect_location' => $faker->address,
                 'introduction' => $faker->sentence(4, false),
             ]);
         }
 
         foreach (range(1, $this->orderNum) as $i) {
-
             $jobTime = JobTime::find($faker->numberBetween($min = 1, $max = 18));
-
+             $user = User::find($faker->numberBetween($min=1010,$max=1027));
             $job = Job::find($jobTime->job_id);
-
-            $expectJob = ExpectJob::find($faker->numberBetween($min = 1, $max = 18));
             $status = $faker->numberBetween($min = 0, $max = 3);
             $closeType = null;
             if ($status == 3) $closeType = $faker->numberBetween($min = 1, $max = 3);
@@ -220,9 +208,8 @@ class DatabaseSeeder extends Seeder {
                 'job_name' => $job->name,
                 'job_time_id' => $jobTime->id,
                 'pay_way' => $job->pay_way,
-                'expect_job_id' => $expectJob->id,
-                'applicant_id' => $expectJob->user_id,
-                'applicant_name' => $expectJob->user_name,
+                'applicant_id' => $user->id,
+                'applicant_name' => $user->nickname,
                 'recruiter_type' => $job->company_id ? 1 : 0,
                 'recruiter_id' => $job->company_id ? $job->company_id : $job->creator_id,
                 'recruiter_name' => $job->company_id ? $job->company_name : $job->creator_name,

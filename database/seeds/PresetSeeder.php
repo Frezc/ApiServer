@@ -35,7 +35,6 @@ class PresetSeeder extends Seeder
             'email' => 'work-helper@tjz.com',
             'password' => Hash::make('secret'),
             'nickname' => '工作助手',
-            'sign' => '关于工作的消息会第一时间通知哦。',
             'email_verified' => 1,
         ]);
 
@@ -55,13 +54,9 @@ class PresetSeeder extends Seeder
             'phone' => '17774012927',
             'password' => Hash::make('secret'),
             'nickname' => 'frezc',
-            'sign' => 'You can contact me.',
-            'birthday' => '1995-02-14',
-            'location' => '杭电',
-            'sex' => 0,
             'email_verified' => 1,
             'role_id' => 2,
-            'money' => 99999999
+            'money' => 9999
         ]);
 
         User::create([
@@ -70,13 +65,9 @@ class PresetSeeder extends Seeder
             'phone' => '18888888888',
             'password' => Hash::make('secret'),
             'nickname' => 'admin',
-            'sign' => '我是管理员',
-            'birthday' => '1999-09-09',
-            'location' => 'no pos',
-            'sex' => 1,
             'email_verified' => 1,
             'role_id' => 2,
-            'money' => 99999999
+            'money' => 9999
         ]);
 
         \App\Models\Data::create([

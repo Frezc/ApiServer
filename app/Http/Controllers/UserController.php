@@ -39,8 +39,10 @@ class UserController extends Controller {
      * [GET] users/{id}
      */
     public function show($id) {
-        $user = User::findOrFail($id);
-        return response()->json($user);
+        $self = JWTAuth::parseToken()->authenticate();
+        $self->setHidden(['password']);
+        return response()->json($self);
+
     }
 
     public function mainPage(Request $request)
@@ -372,5 +374,9 @@ class UserController extends Controller {
         $evaluate->update(array_only($request->all(), ['score', 'comment', 'pictures']));
         return response()->json($evaluate);
     }
-
+    public function getUser(){
+        $self = JWTAuth::parseToken()->authenticate();
+        $self->setHidden(['password']);
+        return response()->json($self);
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Resume;
 use App\Models\SmsCodeVerification;
 use App\Models\User;
 use Curl\Curl;
@@ -72,13 +73,25 @@ class SmsController extends Controller {
             $user->nickname = $nickname;
             $user->password = Hash::make($password);
             $user->save();
+            $this->createResume($user);
             return 'success';
         }else{
             return '验证码不对';
         }
     }
 
-
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|string
+     */
+  public function createResume($user){
+      $resume = new Resume;
+      $resume->user_id = $user->id;
+      $resume->title = '我的简历';
+      $resume->contact = $user->phone;
+      $resume->name = $user->nickname;
+      $resume->save();
+  }
 
     /*
      * [POST] bindPhone

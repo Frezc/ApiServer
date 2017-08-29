@@ -120,13 +120,10 @@ class AuthenticateController extends Controller {
         ]);
 
         $user = new User;
-        
         $user->email = $request->input('email');
         $user->nickname = $request->input('nickname');
         $user->password = Hash::make($request->input('password'));
         $user->save();
-
-        //todo 发邮件验证
 
         return 'success';
     }

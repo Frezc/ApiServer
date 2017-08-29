@@ -22,8 +22,6 @@ class CreateOrdersTable extends Migration
             $table->integer('job_time_id')->unsigned()->nullable();
             // 支付方式 1：线下支付，2：在线支付
             $table->tinyInteger('pay_way')->default(1)->nullable();
-            // 用户申请所提供的数据
-            $table->integer('expect_job_id')->unsigned();
             // 应聘者id
             $table->integer('applicant_id')->unsigned();
             //应聘者名字
