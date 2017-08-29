@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder {
     private $companyNum = 10;
     private $jobNum = 50;
     private $jobTimeNum = 50;
-    private $resumeNum = 10;
+    private $resumeNum = 30;
     private $jobCompletedNum = 60;
     private $jobApplyNum = 60;
     private $jobEvaluate = 20;
@@ -91,6 +91,7 @@ class DatabaseSeeder extends Seeder {
                 'role_id'=> $company ?  2 : 1,
                 'money' => $faker->numberBetween($min = 0, $max = 100000)
             ]);
+
         }
 
         foreach (range(1, $this->userCompanyNum) as $i) {
@@ -181,7 +182,7 @@ class DatabaseSeeder extends Seeder {
 
         foreach (range(1, $this->resumeNum) as $index) {
             Resume::create([
-                'user_id' => $faker->numberBetween($min = 1001, $max = 1000 + $this->userNum),
+                'user_id' => 1000+$index,
                 'title' => $faker->jobTitle,
                 'name' => $faker->name,
                 'photo' => Storage::url('images/test.jpg'),

@@ -35,6 +35,8 @@ class CreateResumesTable extends Migration
             $table->string('city');
              // 体重
             $table->string('weight');
+            // 升高
+            $table->string('height')->default(160);
             // 期望工作地点
             $table->string('expect_location')->nullable();
             // 自我介绍
