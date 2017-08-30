@@ -17,6 +17,7 @@ class CreateJobEvaluateTable extends Migration
             $table->increments('id');
             // 评价者
             $table->integer('user_id')->unsigned();
+
             $table->string('user_name');
             // 对应订单的id
             $table->integer('order_id')->unsigned();

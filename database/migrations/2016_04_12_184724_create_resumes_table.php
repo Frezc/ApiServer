@@ -23,6 +23,8 @@ class CreateResumesTable extends Migration
             $table->string('photo')->nullable();
             //学校
             $table->string('school')->nullable();
+            //专业
+            $table->string('major')->default('计算机科学与技术');
             //生日
             $table->date('birthday')->nullable();
             //联系方式
@@ -30,18 +32,17 @@ class CreateResumesTable extends Migration
             //作为个人标签
             $table->string('flag')->nullable();
             // 性别 0 为男 1为女
-            $table->tinyInteger('sex')->default(0);
+            $table->tinyInteger('sex')->default(1);
             // 期望工作城市
             $table->string('city');
              // 体重
             $table->string('weight');
             // 升高
-            $table->string('height')->default(160);
+            $table->string('height')->default('160');
             // 期望工作地点
             $table->string('expect_location')->nullable();
             // 自我介绍
-            $table->string('introduction')->nullable();
-
+            $table->string('introduction')->default('我要找工作');
             $table->timestamps();
 
             $table->index(['user_id', 'title']);

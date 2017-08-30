@@ -22,7 +22,7 @@ class ResumeController extends Controller {
     public function get(Request $request) {
         $resumes_id  = $request->get('resume_id');
         $user = JWTAuth::parseToken()->authenticate();
-        if (empty($resumes_id)){
+        if ($resumes_id == 0){
                 $resumes= \DB::table('resumes')->where('user_id',$user->id)->first();
                 $resumes->email = $user->email;
         }else{
@@ -39,9 +39,8 @@ class ResumeController extends Controller {
         $self->checkAccess($user->id);
         $this->validate($request, [
             'title' => 'string',
-            'name' => 'string',
             'school' => 'string',
-            'introduction' => 'string',
+            'flag' => 'string',
             'photo' => 'exists:uploadfiles,path',
             'birthday' => 'string',
             'contact' => 'string',
@@ -57,8 +56,8 @@ class ResumeController extends Controller {
             $uploadFile->makeSureAccess($self);
             $uploadFile->replace($resume->photo);
         }
-        $result =$resume->update(array_only($request->all(), ['title', 'name', 'school', 'introduction',
-            'birthday', 'contact', 'expect_location', 'photo', 'sex','weight']));
+        $result =$resume->update(array_only($request->all(), ['title', 'school', 'introduction',
+            'birthday', 'contact', 'expect_location', 'sex','weight','height']));
         return response()->json($result);
     }
 

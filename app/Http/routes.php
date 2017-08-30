@@ -45,6 +45,8 @@ Route::get('getOneResumeByUserId/{id}', 'ResumeController@getOneResumeByUserId')
 /*
  * 工作相关
  */
+
+Route::get('jobs/{id}', 'JobController@delete')->where('id', '[0-9]+');
 Route::get('getAllJob', 'UserController@mainPage');//主页获取所有工作，可根据自己的简历筛选出相应的工作直接从后台推
 Route::post('jobs/create', 'JobController@create');//创建工作
 Route::post('jobs/update/{id}', 'JobController@update')->where('id', '[0-9]+');//对某一个的工作进行更新
@@ -95,7 +97,6 @@ Route::get('job/apply', 'UserController@getJobApply');         // use [GET] user
 Route::get('job/completed', 'UserController@getJobCompleted'); // use [GET] users/{id}/orders instead
 
 
-Route::delete('jobs/{id}', 'JobController@delete')->where('id', '[0-9]+');
 Route::post('jobs/{id}/time', 'JobController@addTime')->where('id', '[0-9]+');
 Route::delete('jobs/{id}/time', 'JobController@closeTime')->where('id', '[0-9]+');
 

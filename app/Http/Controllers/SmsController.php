@@ -59,7 +59,8 @@ class SmsController extends Controller {
         $this->validate($request, [
             'phone' => 'required|regex:/[0-9]+/|unique:users,phone',
             'password' => 'required|between:6,32',
-            'nickname' => 'required|between:1,16'
+            'nickname' => 'required|between:1,16',
+            'code' => 'required'
         ]);
         $smscode=$request->input('code');
         $nickname = $request->input('nickname');
@@ -69,6 +70,7 @@ class SmsController extends Controller {
         if($smscode==$code){
             $user = new User;
             $user->phone = $phone;
+
             $user->role_id = 1;
             $user->nickname = $nickname;
             $user->password = Hash::make($password);

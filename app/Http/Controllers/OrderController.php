@@ -404,7 +404,6 @@ class OrderController extends Controller
      */
     public function getOrderStatus(Request $request){
         $user = JWTAuth::parseToken()->authenticate();
-
         $jobs = \DB::table('orders')->where('applicant_id',$user->id)->where('status',$request->input('status'));
         $jobs->orderBy('created_at','desc');
         $total = $jobs->count();
@@ -439,7 +438,7 @@ class OrderController extends Controller
                ->where('recruiter_id',$user->company_id)
                ->where('status',$status);
        }
-        $jobs->select('orders.id','tjz_jobs.pay_way','applicant_id','orders.job_id','phone','job_name','salary','address','start_at','end_at','apply_number','required_number','salary_type');
+        $jobs->select('orders.id','tjz_jobs.pay_way','applicant_id','orders.job_id','phone','job_name','orders.salary','address','start_at','end_at','apply_number','required_number','orders.salary_type');
         $jobs->orderBy('orders.created_at','desc');
         $total = $jobs->count();
         return response()->json(['list'=>$jobs->get(),'total'=>$total]);

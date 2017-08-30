@@ -157,17 +157,12 @@ class DatabaseSeeder extends Seeder {
             $user = User::findOrFail(1012+$index);
             ExpectJob::create([
                 'user_id' => $user->id,
-                'user_name' => $user->nickname,
-                'title' => $faker->catchPhrase,
-                'name' => $faker->name,
-                'photo' => Storage::url('images/test.jpg'),
-                'school' => $faker->randomElement($array = array('杭州电子科技大学', '春田花花幼稚园', '断罪小学')),
-                'birthday' => $faker->date($format = 'Y-m-d', $max = 'now'),
-                'sex' => $faker->numberBetween($min = 0, $max = 1),
+                'type' => $faker->catchPhrase,
+                'salary' => '50',
+                'salary_type' => '/小时',
+                'time' => '2015/8/9',
                 'city' => $faker->city,
                 'expect_location' => $faker->address,
-                'introduction' => $faker->sentence(4, false),
-                'is_public' => 1
             ]);
         }
 

@@ -21,14 +21,7 @@ class CreateJobTimesTable extends Migration
             $table->string('start_at')->nullable();
             // 结束时间
             $table->string('end_at')->nullable();
-//            $table->smallInteger('year')->unsigned();
-//            $table->tinyInteger('month')->unsigned();
-//            $table->tinyInteger('dayS')->unsigned();
-//            $table->tinyInteger('dayE')->nullable()->unsigned();
-//            $table->tinyInteger('hourS')->nullable()->unsigned();
-//            $table->tinyInteger('hourE')->nullable()->unsigned();
-//            $table->tinyInteger('minuteS')->nullable()->unsigned();
-//            $table->tinyInteger('minuteE')->nullable()->unsigned();
+
             $table->softDeletes();
             $table->timestamps();
 

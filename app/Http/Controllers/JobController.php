@@ -424,7 +424,6 @@ class JobController extends Controller {
      */
     public function apply(Request $request, $id) {
         $job = Job::findOrFail($id);
-
         // 获取工作时间
         $jobTime = JobTime::where('job_id', $job->id)->first();
         // 获取简历
@@ -436,6 +435,8 @@ class JobController extends Controller {
         $order = Order::create([
             'job_id' => $job->id,      // 岗位id
             'job_name' => $job->name,  // 岗位名称
+            'salary' => $job->salary,  // 岗位薪资
+            'salary_type' => $job->salary_type,  // 岗位薪资
             'job_time_id' => $jobTime->id, // 工作时间id
             'pay_way' => $job->pay_way,    // 支付方式
             'applicant_id' => $resume->user_id, // 申请者Id
@@ -478,4 +479,7 @@ class JobController extends Controller {
         $job->delete();
         return response()->json($job);
     }
+
+
+
 }
