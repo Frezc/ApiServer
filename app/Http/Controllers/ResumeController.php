@@ -61,8 +61,9 @@ class ResumeController extends Controller {
         return response()->json($result);
     }
 
-    public function getAllResume(Request $request){
-        $resume=\DB::table('resumes')->join();
+    public function getResumeList(Request $request){
+
+        $resume=\DB::table('resumes')->where('public',1);
         $resume->orderBy(
             $request->input('orderBytime', 'created_at'),
             $request->input('order', 'desc')
@@ -72,7 +73,13 @@ class ResumeController extends Controller {
             $resume->skip($request->input('offset'));
         }
         $resume->limit($request->input('limit'));
-        return response()->json(['list'=> $resume->get(), 'total'=>  $total]);
+        $datas =  $resume->get();
+        foreach ($datas as $key => $value){
+            $datas[$key]->score = getAvgScore($datas[$key]->user_id)?getAvgScore($datas[$key]->user_id):5;
+            $datas[$key]->number = getLogNunber('orders',['applicant_id'=>$datas[$key]->user_id,'status'=>7]);
+        }
+
+        return response()->json(['list'=> $datas, 'total'=>  $total]);
     }
 
 }

@@ -43,6 +43,8 @@ class CreateResumesTable extends Migration
             $table->string('expect_location')->nullable();
             // 自我介绍
             $table->string('introduction')->default('我要找工作');
+            //是否公开
+            $table->tinyInteger('public')->default(1);
             $table->timestamps();
 
             $table->index(['user_id', 'title']);

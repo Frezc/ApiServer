@@ -72,3 +72,7 @@ function getAvgScore($user_id){
     $avg = DB::table('job_evaluate')->where('pingjia_user_id',$user_id)->average('score');
     return $avg;
 }
+function getLogNunber($tablename,$where){
+    $result = DB::table($tablename)->where($where)->count();
+    return $result;
+}

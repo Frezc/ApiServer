@@ -37,11 +37,9 @@ Route::get('self', 'UserController@self');//获取用户信息
 /*
  * 简历相关
  */
+Route::get('getResumesList', 'ResumeController@getResumeList');
 Route::get('resume', 'ResumeController@get');//获取某份简历
 Route::post('users/resumes/update', 'ResumeController@update');//更新某份简历
-Route::post('users/{id}/resumes/{resumeId}', 'ResumeController@delete');//删除谋一份简历
-Route::post('users/{id}/resumes', 'ResumeController@add');//添加简历
-Route::get('getOneResumeByUserId/{id}', 'ResumeController@getOneResumeByUserId')->where('id', '[0-9]+');//获取简历
 /*
  * 工作相关
  */
@@ -124,7 +122,7 @@ Route::get('companies/apply', 'CompanyController@getApply');
 Route::post('companies/apply', 'CompanyController@postApply');
 Route::post('unlink_company', 'CompanyController@unlink');
 
-Route::get('getResumes', 'ResumeController@getAllResume');
+
 
 
 Route::get('orders/{id}', 'OrderController@get')->where('id', '[0-9]+');
