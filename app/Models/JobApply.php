@@ -10,7 +10,7 @@ class JobApply extends Model
     protected $table = 'job_apply';
 
     protected $guarded = ['id'];
-
+    protected $hidden = ['updated_at'];
     public function user(){
         return $this->belongsTo('App\User');
     }
@@ -22,4 +22,5 @@ class JobApply extends Model
     public function resume(){
         return $this->belongsTo('App\Resume');
     }
+
 }

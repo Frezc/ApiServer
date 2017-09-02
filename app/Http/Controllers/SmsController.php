@@ -62,6 +62,7 @@ class SmsController extends Controller {
             'nickname' => 'required|between:1,16',
             'code' => 'required'
         ]);
+        $role = $request->input('role');
         $smscode=$request->input('code');
         $nickname = $request->input('nickname');
         $password = $request->input('password');
@@ -70,11 +71,11 @@ class SmsController extends Controller {
         if($smscode==$code){
             $user = new User;
             $user->phone = $phone;
-
-            $user->role_id = 1;
+            $user->role_id = $role+1;
             $user->nickname = $nickname;
             $user->password = Hash::make($password);
             $user->save();
+            if ($role==0)
             $this->createResume($user);
             return 'success';
         }else{

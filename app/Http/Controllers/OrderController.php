@@ -135,16 +135,6 @@ class OrderController extends Controller
             throw new MsgException('You cannot close this order.', 400);
         }
 
-//        if ($order->has_paid) {
-//            // 订单已支付，要将金额返还
-//            $log = Log::where('method', 'post')->where('orders/' . $order->id . '/payment')->first();
-//            if ($log) {
-//                $user = User::find($log->user_id);
-//                $jobTime = JobTime::find($order->job_time_id);
-//                $user->money += $jobTime->salary;
-//                $user->save();
-//            }
-//          }
             $order->close_type = $close_type;
             $order->close_reason = $request->input('reason');
         // 向该订单的相关人员发送消息
@@ -158,21 +148,6 @@ class OrderController extends Controller
         $order->save();
         // 返回更新的订单
         return  'success';
-    }
-
-
-    /*
-     * [GET] orders/{id}/evaluate
-     */
-    public function getEvaluate($id) {
-        $order = Order::findOrFail($id);
-        $self = JWTAuth::parseToken()->authenticate();
-        $order->makeSureAccess($self);
-
-        $jobEvaluate = JobEvaluate::where('order_id', $order->id)->first();
-        $userEvaluate = UserEvaluate::where('order_id', $order->id)->first();
-
-        return response()->json(['job_evaluate' => $jobEvaluate, 'user_evaluate' => $userEvaluate]);
     }
 
     /*
@@ -290,53 +265,75 @@ class OrderController extends Controller
      * @param Request $request
      * @return string
      * @throws MsgException
+     * 允许面试    // 订单状态 0：创建，1：允许面试，2：面试成功，3：面试失败 4 工作完成 5订单关闭(面试陈功以后)
      */
-    public function passApply(Request $request) {
-        $job_id=$request->input('job_id');
-        $user_id=$request->input('user_id');
-        $order = Order::query()->where('job_id',$job_id)->where('applicant_id',$user_id)->first();
-        $apply = JobApply::query()->where('job_id',$job_id)->where('user_id',$user_id)->first();
+    public function allowedInterview(Request $request)
+    {
+        $service = new MyService();
+        $order = new Order();
+        $apply = new JobApply;
         $self = JWTAuth::parseToken()->authenticate();
-        // 检查权限
-        $order->makeSureAccess($self);
-        if ($order->isRecruiter($self) && !$order->recruiter_check) {
-            // 当前用户所属招聘方且未确认
-            $order->recruiter_check = 1;
-            $order->status = 1;//0 申请中 1成功 2失败
-            $apply->status = 1;//0 申请中 1成功 2失败
-            $order->save();
-            $apply->save();
-            return '你已通过该申请';
+        $order_id = $request->get('order_id');
+        $where = array('id' => $order_id);
+
+        if (!checkTableData($order, $where, 'recruiter_id', $self->id)) {
+            return sucesss('没有权限操作这订单');
+        }
+        if (checkTableData($order, $where, 'status', 2)) {
+            return sucesss('你已经录用此人');
         }
 
-        throw new MsgException('处理过该申请', 400);
+        $result = updateTable($order, $where, ['status' => 2]);
+        $data = getTableField('orders', $where, ['applicant_id', 'job_id']);
+        $where1 = ['user_id' => $data['applicant_id'], 'job_id' => $data['job_id']];
+        $apply = JobApply::query()->where($where1)->first();
+        $apply->status = 2;
+        $result1 = $apply->save();
+
+        if ($result === false || $result1 == false) {
+            return sucesss('发送失败');
+        }
+        //发送邮件
+        $service->companySendWorkMail($data['applicant_id'], $where1['job_id']);
+
     }
 
     /**
      * @param Request $request
-     * @return string
-     * @throws MsgException
+     * @return \Illuminate\Http\JsonResponse
+     * 允许面试    // 订单状态 0：创建，1：允许面试，2：拒绝面试成功，3：面试成功 4 面试失败 5面成功并接受 6 工作完成先下付款 7工作完成已付款 8订单关闭(面试陈功以后)
      */
-    public function refuJob(Request $request) {
-        $job_id=$request->input('job_id');
-        $user_id=$request->input('user_id');
-        $order = Order::query()->where('job_id',$job_id)->where('applicant_id',$user_id)->first();
-        $apply = JobApply::query()->where('job_id',$job_id)->where('user_id',$user_id)->first();
+    public function orderHandle(Request $request)
+    {
+        $order = new Order();
+        $service = new MyService();
         $self = JWTAuth::parseToken()->authenticate();
-        // 检查权限
-        $order->makeSureAccess($self);
-        if ($order->isRecruiter($self) && !$order->recruiter_check) {
-            // 当前用户所属招聘方且未确认
-            $order->recruiter_check = 1;
-            $order->status = 2;//0 申请中 1成功 2失败
-            $apply->status = 2;//0 申请中 1成功 2失败
-            $order->save();
-            $apply->save();
-            return '你已经拒绝该申请';
+        $order_id = $request->get('order_id');
+        $status = $request->get('status');
+        $where = array('id' => $order_id);
+        if (!checkTableData($order, $where, 'recruiter_id', $self->id)||!checkTableData($order, $where, 'applicant_id', $self->id)) {
+            return sucesss('没有权限操作这订单');
         }
-        throw new MsgException('拒绝', 400);
-
+        if (checkTableData($order, $where, 'status', $status)) {
+            return sucesss('已经处理申请');
+        }
+        $result = updateTable($order, $where, ['status' => $status]);
+        if ($result === false) {
+            return sucesss('发送失败');
+        }
+        $data = getTableField($order, $where, ['applicant_id']);
+        //发送邮件
+        $email = getTableClumnValue('users', ['id' => getTableClumnValue('orders', $where, 'applicant_id')], 'email');
+        $data['phone'] = getTableClumnValue('users', ['id' => getTableClumnValue('orders', $where, 'recruiter_id')], 'phone');
+        $data['company_name'] = getTableClumnValue('tjz_job', ['id' => getTableClumnValue('orders', $where, 'job_id')], 'company_name');
+        $data['addr'] = getTableClumnValue('tjz_job', ['id' => getTableClumnValue('orders', $where, 'job_id')], 'address');
+        $data['job_name'] = getTableClumnValue('orders', $where, 'job_name');
+        $data['time'] = getTableClumnValue('job_times', ['id' => getTableClumnValue('order', $where, 'job_id')], 'start_at');
+        $data['$contact_person'] = getTableClumnValue('orders', $where, 'recruiter_name');
+        $service->emailSend($email, 'emails.interview', $data);
     }
+
+
     /*
      * [POST] orders/{id}/payment
      */
@@ -348,57 +345,36 @@ class OrderController extends Controller
         if ($order->has_paid)
             throw new MsgException('您已经支付过了。', 400);
         // 已关闭
-        if ($order->status == 3)
+        if ($order->status == Status::$guangbi)
             throw new MsgException('订单已过期。', 400);
         // 线下支付
-        if ($order->pay_way == 1)
-            throw new MsgException('您无须支付该订单。', 400);
-        // 当前用户不是招聘方
-        if (!$order->isRecruiter($self))
-            throw new MsgException('您无法支付该订单', 400);
+        if ($order->pay_way == 1){
+            $order->status = Status::$gongzuowanchengxianxiafukuan;
+            $order->save();
+            return sucesss('你已在下线付款，请等待对方确认');
+        }
 
-        $jobTime = JobTime::findOrFail($order->job_time_id);
-        if ($self->money > $jobTime->salary) {
+        // 当前用户不是招聘方
+        if ($order->recruiter_id != $self->id)
+            return sucesss('你没有支付权限');
+
+        if ($self->money > $order->salary) {
             // 用户余额足够
-            $self->money -= $jobTime->salary;
+            $self->money -= $order->salary;
             $order->has_paid = 1;
+            $order->status = Status::$gongzuowancheng;
+            $money = getTableClumnValue('users',['id'=>$order->applicant_id],'money');
+            updateTable('users',['id'=>$order->applicant_id],['money'=>$money+$order->salary]);
             $self->save();
             $order->save();
         } else {
             // 余额不足
             throw new MsgException('您没足够的余额支付该订单。', 400);
         }
-        return response()->json($order);
+        return sucesss('支付完成');
     }
 
-    /*
-     * [POST] orders/{id}/completed
-     */
-    public function completed($id) {
-        $order = Order::findOrFail($id);
-        $self = JWTAuth::parseToken()->authenticate();
-        $order->makeSureAccess($self);
 
-        if (!$order->isRecruiter($self))
-            throw new MsgException('您没有权限操作该订单', 400);
-        if ($order->pay_way == 2 && !$order->has_paid)
-            throw new MsgException('您必须先支付该订单。', 400);
-        if ($order->status != 1)
-            throw new MsgException('您只能完成确认状态的订单。', 400);
-        $jobTime = JobTime::findOrFail($order->job_time_id);
-        if ($jobTime->end_at > Carbon::now()->toDateTimeString())
-            throw new MsgException('您必须在工作时间结束后才能完成订单', 400);
-        // 对于在线支付的订单，需要将钱转给求职者
-        if ($order->has_paid) {
-            $user = User::findOrFail($order->applicant_id);
-            $user->money += $jobTime->salary;
-            $user->save();
-        }
-
-        $order->status = 2;
-        $order->save();
-        return response()->json($order);
-    }
     /*
      * 用户获取申请详情
      */
@@ -443,18 +419,66 @@ class OrderController extends Controller
         $total = $jobs->count();
         return response()->json(['list'=>$jobs->get(),'total'=>$total]);
     }
-    /*
-    * 用户删除订单
-    */
-    public function delete($id){
+    /**
+     * @param Request $request
+     */
+    public function orderAppraisal(Request $request)
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+        $order_id = $request->get('order_id');
+        $score = $request->get('score');
+        $content = $request->get('content');
+        $order = Order::findOrFail($order_id);
 
-        $self = JWTAuth::parseToken()->authenticate();
-        $order = Order::findOrFail($id);
-        if ( $order->makeSureAccess($self))
-            \DB::table('orders')->where('id',$id)->delete();
-        else return 'fail';
+        $data['user_id'] = $user->id;
+        $data['user_name'] = $user->nickname;
+        $data['order_id'] = $order_id;
+        $data['job_id'] = $order->job_id;
+        $data['score'] = $score;
+        $data['comment'] = $content;
+        if ($order->status != Status::$gongzuowancheng){
+            return sucesss('工作没有结束');
+        }
+        /**
+         * 申请者评价
+         */
+        if ($user->id == $order->applicant_id) {
+            $order->applicant_check = 1;
+            $data['pingjia_user_id'] = $order->recruiter_id;
+        }
+        /**
+         * 发布者评价
+         */
+        if ($user->id == $order->recruiter_id) {
+            $order->recruiter_check = 1;
+            $data['pingjia_user_id'] = $order->applicant_id;
 
-        return 'success';
+        }
+
+        if (inserTable('job_evaluate',$data)) {
+            $order->save();
+            return sucesss('评价成功');
+        } else{
+            return sucesss('评价失败');
+        }
+
+    }
+
+    /**
+     * @param Request $request
+     */
+    public function getAppraisal(Request $request){
+        $user = JWTAuth::parseToken()->authenticate();
+        $order_id = $request->get('order_id');
+        $user_id = getTableClumnValue('orders',['id'=>$order_id],recruiter_id);
+        if (empty($user_id)){
+            $user_id = $user_id->id;
+        }
+        $content = \DB::table('job_evaluate')->where('pingjia_user_id',$user_id);
+        $content->orderBy('created_at');
+        $data = $content->get();
+        $total = $content->count();
+        return response()->json(['list'=>$data,'total'=>$total]);
     }
 
 }

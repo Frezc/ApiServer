@@ -3,27 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\MsgException;
-use App\Jobs\PushNotifications;
 use App\Models\Company;
 use App\Models\Job;
 use App\Models\JobEvaluate;
 use App\Models\JobTime;
-use App\Models\Message;
 use App\Models\Order;
 use App\Models\Resume;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use JWTAuth;
 use App\Models\JobCollection;
-use PhpParser\Node\Stmt\Throw_;
-use Symfony\Component\DomCrawler\Form;
 
 class JobController extends Controller {
 
     public function __construct() {
         $this->middleware('jwt.auth', ['only' => ['apply', 'update', 'delete', 'create', 'addTime']]);
-        $this->middleware('jwt.auth', ['only' => ['apply', 'update', 'delete', 'create', 'addTime','collect']]);
+        $this->middleware('jwt.auth', ['only' => ['apply', 'update', 'delete', 'create', 'addTime','collect','cancelCollect','getCollectList']]);
         $this->middleware('log', ['only' => ['apply', 'update', 'delete', 'create', 'addTime']]);
         $this->middleware('role:user', ['only' => ['apply', 'update', 'delete', 'create', 'addTime']]);
     }
@@ -45,12 +40,14 @@ class JobController extends Controller {
         // 访问次数+1
         $job->visited++;
         $job->save();
+        $job->iscollect = 0;
+        if ($user)
+        $job->iscollect = empty(getTableClumnValue('job_collection',['user_id'=>$user->id,'job_id'=>$id],'id'))?0:1;
         // 绑定岗位的工作时间段
         $job->bindTime();
         // 返回json数据
         return response()->json($job);
     }
-
 
     public function mainPage(Request $request)
     {
@@ -247,7 +244,7 @@ class JobController extends Controller {
         $job->checkAccess($user);
          $job->active = 0;
          $job->save();
-         return 'success';
+         return sucesss('下架成功');
     }
     /*
      * [DELETE] jobs/{id}/time
@@ -272,36 +269,7 @@ class JobController extends Controller {
         return response()->json($jobTime);
     }
 
-    /*
-     * [GET] jobs/{id}/evaluate
-     */
-    public function getEvaluate(Request $request, $id) {
-        $job = Job::findOrFail($id);
-        $this->validate($request, [
-            'off' => 'integer|min:0',
-            'siz' => 'min:0|integer'
-        ]);
 
-        // 第二个参数为默认值
-        $offset = $request->input('off', 0);
-        $limit = $request->input('siz', 20);
-
-        $builder = JobEvaluate::where('job_id', $job->id);
-
-        $total = $builder->count();
-
-        $evaluates = $builder
-            ->skip($offset)
-            ->limit($limit)
-            ->orderBy('id', 'desc')
-            ->get();
-
-        foreach ($evaluates as $evaluate) {
-            $evaluate->makeHidden('job_id');
-        }
-
-        return response()->json(['total' => $total, 'list' => $evaluates]);
-    }
 
     /*
      * [GET] jobs
@@ -403,21 +371,51 @@ class JobController extends Controller {
     }
 
 
-
+    /**
+     * @param Request $request
+     * @param $id 工作的id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function collect(Request $request,$id){
         $self =JWTAuth::parseToken()->authenticate();
-        if($self->isUser()){
-            $user_id = $self->id;
-            $coll = new JobCollection;
-            $coll->user_id = $user_id;
-            $coll->job_id = $id;
-            $coll->save();
-            return 'success';
+        $user_id = $self->id;
+        if(!$self->isUser()){
+           return response()->json('你不是用户');
         }
-        else echo 'false';
+        if (MyService::checkIsCollect($user_id,$id)){
+            return sucesss('已经收藏');
+        }
+        $coll = new JobCollection;
+        $coll->user_id = $user_id;
+        $coll->job_id = $id;
+        $resutl = $coll->save();
+        if ($resutl == true){
+            return sucesss('收藏成功');
+        }else {
+            return sucesss('收藏失败');
+        }
     }
-
-
+    public function cancelCollect(Request $request){
+        $service = new MyService();
+        $where = array_only($request->all(),array('user_id','job_id'));
+        if (!MyService::checkIsCollect($where['user_id'],$where['job_id'])){
+            return sucesss('还没有收藏');
+        }
+        $result = $service->delete('job_collection',$where);
+        if ($result === true){
+            return sucesss('取消成功');
+        }else
+            return sucesss('取消失败');
+    }
+    public function getCollectList(){
+        $user= JWTAuth::parseToken()->authenticate();
+        $where['job_collection.user_id'] = $user->id;
+        $select = ['job_collection.id','user_id','job_id','name','salary','salary_type','company_name','creator_id'];
+        $servic = new MyService();
+        $result = $servic->getList('job_collection','tjz_jobs','job_collection.job_id','=','tjz_jobs.id','left',$where,$select);
+        $result1 = $servic->sortPage($result,0,50,'job_collection.created_at','asc');
+        return successList($result1);
+    }
 
     /*
      * [POST] jobs/{id}/apply
@@ -442,29 +440,13 @@ class JobController extends Controller {
             'applicant_id' => $resume->user_id, // 申请者Id
             'applicant_name' => $self->nickname, // 申请者名称
             'recruiter_type' => $job->company_id ? 1 : 0, // 招聘者类型
-            'recruiter_id' => $job->company_id ?
-                $job->company_id : $job->creator_id,  // 招聘者id
-            'recruiter_name' => $job->company_id ?
-                $job->company_name : $job->creator_name, // 招聘者名称
+            'recruiter_id' =>  $job->creator_id,  // 招聘者id
+            'recruiter_name' => $job->creator_name, // 招聘者名称
             'status' => 0,                    // 状态
-            'applicant_check' => 1,           // 申请者是否确认
+            'applicant_check' => 0,           // 申请者是否确认
             'recruiter_check' => 0            // 招聘方是否确认
         ]);
 
-        $order->job_time = $jobTime;
-
-        // 得到招聘方的id，如果是企业的话会得到企业下的所有人id
-        $to = $job->creator_id;
-        if ($job->company_id) {
-            $to = Company::getUserIds($job->company_id);
-        }
-        // 发送消息
-//        $this->dispatch(new PushNotifications(
-//            Message::getSender(Message::$WORK_HELPER),
-//            $to,
-//            $self->nickname . ' 申请了岗位 ' . $job->name . '。'
-//        ));
-//        // 返回创建的订单信息
         return 'success';
     }
 

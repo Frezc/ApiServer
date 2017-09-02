@@ -47,9 +47,7 @@ class ResumeController extends Controller {
             'expect_location' => 'string',
             'sex' => 'in:0,1'
         ]);
-
         $resume = $user->resumes();
-
         $photo = $request->input('photo');
         if ($photo) {
             $uploadFile = Uploadfile::where('path', $photo)->first();
@@ -57,7 +55,9 @@ class ResumeController extends Controller {
             $uploadFile->replace($resume->photo);
         }
         $result =$resume->update(array_only($request->all(), ['title', 'school', 'introduction',
-            'birthday', 'contact', 'expect_location', 'sex','weight','height']));
+            'birthday', 'contact', 'expect_location', 'sex','weight','height','flag']));
+        $user->email=$request->get('email');
+        $user->save();
         return response()->json($result);
     }
 

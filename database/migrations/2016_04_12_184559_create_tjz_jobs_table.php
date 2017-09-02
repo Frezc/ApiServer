@@ -22,8 +22,6 @@ class CreateTjzJobsTable extends Migration
             $table->string('salary_type')->default(1)->nullable();
             //   工资
             $table->string('salary')->nullable();
-            //  工资结算方式
-            $table->string('salary_pay_way')->nullable();
             //工作描述
             $table->string('description')->nullable();
             // 访问次数

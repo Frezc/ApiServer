@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exceptions\MsgException;
 use App\Jobs\Job;
 use App\Models\Company;
+use App\Models\Order;
 use App\Models\User;
 use DB;
 use Hash;
@@ -145,9 +146,9 @@ class EmailController extends Controller {
 
     /**    *  测试用方法    */
     public function emailSend(Request $request) {
-        $email = $request->input('email');
-        Mail::send('emails.work', ['company' => 'ftTf43', 'avalible_before' => '2014-5-13 13:00:22'], function ($message) use ($email) {
-            $message->to($email, 'dear')->subject('淘兼职邮箱验证');
-        });
+        $order = new Order();
+        $where =array('id'=>1);
+        $email = getTableClumnValue('users',['id'=>getTableClumnValue('orders',$where,'applicant_id')],'email');
+        echo $email;
     }
 }

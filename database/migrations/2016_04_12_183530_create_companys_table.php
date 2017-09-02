@@ -16,6 +16,8 @@ class CreateCompanysTable extends Migration
             $table->increments('id');
             //公司名字
             $table->string('name');
+            //是否认证
+            $table->tinyInteger('verified')->default(0);
             // 公司主页
             $table->string('url')->nullable();
             // 公司地址

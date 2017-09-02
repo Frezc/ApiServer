@@ -46,16 +46,6 @@ class DatabaseSeeder extends Seeder {
      * @return void
      */
     public function run() {
-        // factory(App\Company::class,20)->create();
-        // factory(App\Job::class,20)->create();
-        // factory(App\User::class,20)->create();
-        // factory(App\Resume::class,10)->create();
-        // factory(App\JobCompleted::class,80)->create();
-        // factory(App\JobApply::class,80)->create();
-        // factory(App\JobEvaluate::class,20)->create();
-        // DB::table('resumes')->update([
-        //     'photo' => 'http://static.frezc.com/static/resume_photos/default'
-        // ]);
 
         $this->call(PresetSeeder::class);
 
@@ -136,16 +126,9 @@ class DatabaseSeeder extends Seeder {
         }
 
         foreach (range(1, 50) as $i) {
-//            $number = $faker->numberBetween($min = 1, $max = 100);
             $start_at = Carbon::now()->addDays($faker->numberBetween($min = 1, $max = 180));
-//            $st = $faker->numberBetween($min = 1, $max = 2);
-//            $salary = $st == 2 ? $faker->numberBetween($min = 1, $max = 1000) : 0;
             JobTime::create([
                 'job_id' => $i,
-//                'number' => $number,
-//                'number_applied' => $faker->numberBetween($min = 0, $max = $number),
-//                'salary_type' => $st,
-//                'salary' => $salary,
                 'apply_end_at' => $start_at->subDays($faker->numberBetween($min = 0, $max = 2))->toDateTimeString(),
                 'start_at' => $start_at->toDateTimeString(),
                 'end_at' => $start_at->addDays($faker->numberBetween($min = 1, $max = 3))->toDateTimeString()
@@ -204,11 +187,13 @@ class DatabaseSeeder extends Seeder {
                 'job_name' => $job->name,
                 'job_time_id' => $jobTime->id,
                 'pay_way' => $job->pay_way,
+                'salary' => 100,
+                'salary_type' => '元/小时',
                 'applicant_id' => $user->id,
                 'applicant_name' => $user->nickname,
                 'recruiter_type' => $job->company_id ? 1 : 0,
-                'recruiter_id' => $job->company_id ? $job->company_id : $job->creator_id,
-                'recruiter_name' => $job->company_id ? $job->company_name : $job->creator_name,
+                'recruiter_id' => $job->creator_id,
+                'recruiter_name' => $job->creator_name,
                 'status' => $status,
                 'close_type' => $closeType,
                 'applicant_check' => $status == 0 ? $faker->numberBetween($min = 0, $max = 1) : 1,
@@ -254,27 +239,6 @@ class DatabaseSeeder extends Seeder {
             ]);
         }
 
-        foreach (range(1, $this->userEvaluate) as $index) {
-            $order = Order::find($faker->numberBetween($min = 1, $max = $this->orderNum));
-            if ($order->recruiter_type == 1) {
-                $user = User::where('company_id', $order->recruiter_id)->first();
-                $user_id = $user->id;
-                $user_name = $user->nickname;
-            } else {
-                $user_id = $order->recruiter_id;
-                $user_name = $order->recruiter_name;
-            }
-
-            UserEvaluate::create([
-                'user_id' => $user_id,
-                'user_name' => $user_name,
-                'order_id' => $order->id,
-                'target_id' => $order->applicant_id,
-                'comment' => $faker->catchPhrase,
-                'score' => $faker->numberBetween($min = 1, $max = 5),
-                'pictures' => Storage::url('images/test.jpg')
-            ]);
-        }
 
         Message::create([
             'sender_id' => 1,

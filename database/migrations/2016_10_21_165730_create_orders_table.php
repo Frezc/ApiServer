@@ -35,7 +35,7 @@ class CreateOrdersTable extends Migration
             $table->integer('recruiter_id')->unsigned();
             //发布者的的名字
             $table->string('recruiter_name');
-            // 订单状态 0：创建，1：成功，2：已完成，3：已关闭  4.失败
+            // 订单状态 0：创建，1：允许面试，2：面试成功，3：面试失败 4 工作完成 5订单关闭(面试陈功以后)
             $table->tinyInteger('status')->default(0);
             // 用来区分订单是由谁关闭的 1： 应聘者 2： 招聘者 3：管理员 4：系统
             $table->tinyInteger('close_type')->nullable();

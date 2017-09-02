@@ -23,7 +23,7 @@ Route::group(['middleware' => 'throttle:3'], function ($api) {
  */
 Route::get('ordersDelete/{id}', 'OrderController@delete')->where('id', '[0-9]+');//删除某个订单
 Route::get('ordersCancel/{id}', 'OrderController@close')->where('id', '[0-9]+');//关闭某个订单
-Route::get('passApply', 'OrderController@passApply');//通过某一个申请
+Route::get('order/allowedInterview', 'OrderController@allowedInterview');//发送面试邀请
 Route::get('refuJob', 'OrderController@refuJob');//拒绝某一个申请
 Route::get('orders/getCompanyOrderStatus', 'OrderController@getCompanyOrderStatus');//获取某种状态的订单
 
@@ -46,6 +46,9 @@ Route::get('getOneResumeByUserId/{id}', 'ResumeController@getOneResumeByUserId')
  * 工作相关
  */
 
+Route::post('job/collect/{id}', 'JobController@collect')->where('id','[0-9]+');
+Route::post('job/cancelCollect', 'JobController@cancelCollect');
+Route::post('job/getCollectList', 'JobController@getCollectList');
 Route::get('jobs/{id}', 'JobController@get')->where('id', '[0-9]+');
 Route::get('getAllJob', 'UserController@mainPage');//主页获取所有工作，可根据自己的简历筛选出相应的工作直接从后台推
 Route::post('jobs/create', 'JobController@create');//创建工作
@@ -56,7 +59,7 @@ Route::post('jobs/{id}/apply', 'JobController@apply')->where('id', '[0-9]+');
 /*
  * 邮件相关
  */
-Route::post('companySendWorkMail/{id}', 'EmailController@companySendWorkMail')->where('id', '[0-9]+');//发送工作邀请邮箱
+Route::post('tt', 'EmailController@emailSend');//发送工作邀请邮箱
 /*
  * 公司相关
  */
@@ -104,7 +107,6 @@ Route::post('job/apply', 'UserController@postJobApply');       // use [POST] job
 Route::get('jobs/{id}/evaluate', 'JobController@getEvaluate');
 Route::post('job/evaluate', 'UserController@postJobEvaluate'); // use [POST] orders/{id}/evaluate instead
 
-Route::post('job/collect/{id}', 'JobController@collect')->where('id','[0-9]+');
 
 Route::post('expect_jobs', 'ExpectJobController@create');
 Route::get('expect_jobs', 'ExpectJobController@query');
