@@ -14,11 +14,13 @@ use Illuminate\Http\Request;
 use JWTAuth;
 use App\Models\JobCollection;
 
-class JobController extends Controller {
+class JobController extends Controller
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->middleware('jwt.auth', ['only' => ['apply', 'update', 'delete', 'create', 'addTime']]);
-        $this->middleware('jwt.auth', ['only' => ['apply', 'update', 'delete', 'create', 'addTime','collect','cancelCollect','getCollectList']]);
+        $this->middleware('jwt.auth', ['only' => ['apply', 'update', 'delete', 'create', 'addTime', 'collect', 'cancelCollect', 'getCollectList']]);
         $this->middleware('log', ['only' => ['apply', 'update', 'delete', 'create', 'addTime']]);
         $this->middleware('role:user', ['only' => ['apply', 'update', 'delete', 'create', 'addTime']]);
     }
@@ -26,7 +28,8 @@ class JobController extends Controller {
     /*
      * [GET] jobs/{id}
      */
-    public function get($id) {
+    public function get($id)
+    {
         // 得到当前登录的用户
         $user = $this->getAuthenticatedUser();
         // 判断是否为管理员
@@ -42,7 +45,7 @@ class JobController extends Controller {
         $job->save();
         $job->iscollect = 0;
         if ($user)
-        $job->iscollect = empty(getTableClumnValue('job_collection',['user_id'=>$user->id,'job_id'=>$id],'id'))?0:1;
+            $job->iscollect = empty(getTableClumnValue('job_collection', ['user_id' => $user->id, 'job_id' => $id], 'id')) ? 0 : 1;
         // 绑定岗位的工作时间段
         $job->bindTime();
         // 返回json数据
@@ -52,9 +55,9 @@ class JobController extends Controller {
     public function mainPage(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
-        if($user){
-            $resume = Resume::query()->where('user_id',$user->id)->get(1);
-            $q=$resume->flag;
+        if ($user) {
+            $resume = Resume::query()->where('user_id', $user->id)->get(1);
+            $q = $resume->flag;
         }
         $this->validate($request, [
 
@@ -102,8 +105,8 @@ class JobController extends Controller {
         // 得到数量
         $total = $builder->count();
         // 排序以及分页
-        if($request->has('offset'))
-            $builder ->skip($request->input('offset'));
+        if ($request->has('offset'))
+            $builder->skip($request->input('offset'));
         if ($request->has('limit'))
             $builder->limit($request->input('limit'));
 
@@ -113,51 +116,52 @@ class JobController extends Controller {
         // 返回json数据
         return response()->json(['total' => $total, 'list' => $jobs]);
     }
+
     /*
      * [POST] jobs
      */
-    public function create(Request $request) {
+    public function create(Request $request)
+    {
 
         $this->validate($request, [
             'name' => 'required|string|between:1,250', // 名称
-            'salary' => 'required' ,                     //工资
-            'salary_type' =>'required' ,               //工资单位
+            'salary' => 'required',                     //工资
+            'salary_type' => 'required|in:1,2,3,4',               //工资单位
             'pay_way' => 'required|integer|in:1,2',    // 支付方式
-            'salary_pay_way' =>'required',          //结算方式
             'description' => 'string',                 // 描述
-            'contact' => 'required|string|max:250',    // 联系方式
+            'contact' => 'required|max:16',    // 联系方式
             'contact_person' => 'required|string|max:16', // 联系人
             'type' => 'required|exists:job_types,name', // 岗位类型
             'city' => 'string',              // 城市
             'address' => 'required|string',                    // 地址
             'start_at' => 'required',
             'end_at' => 'required',
-            'required_number' => 'required' ,        // 总人数
+            'required_number' => 'required',        // 总人数
         ]);
 
         $self = JWTAuth::parseToken()->authenticate();
-        if($self){
-        // 筛选传入的参数
-        $params = array_only($request->all(),
-            ['name','salary', 'pay_way', 'salary_type', 'description', 'contact', 'contact_person', 'type', 'city', 'address','required_number','salary_pay_way']);
-        if ($self->role_id ==2){
-            $params['company_id'] = $self->company_id;
-            $params['company_name'] = $self->company_name;
-        }
-        $params['creator_id'] = $self->id;
-        $params['creator_name'] = $self->nickname;
-
-         $time = array_only($request->all(),
-                ['start_at', 'end_at','apply_end_at']);
-         $job = Job::create($params);
-         $time['job_id'] = $job->id;
-
-        //工作时间插入时间表中
-        JobTime::create($time);
-        // 表中插入岗位
-
-        // 返回创建成功的json数据
-        return 'success';
+        if ($self->role_id ==2) {
+            // 筛选传入的参数
+            $params = array_only($request->all(),
+                ['name', 'salary', 'pay_way', 'salary_type', 'description', 'contact', 'contact_person', 'type', 'city', 'address', 'required_number']);
+            $params['company_id'] = $self->company_id?$self->company_id:0;
+            $params['company_name'] = $self->company_name? $self->company_name:0;
+            $params['creator_id'] = $self->id;
+            $params['creator_name'] = $self->nickname;
+            $time = array_only($request->all(),
+                ['start_at', 'end_at', 'apply_end_at']);
+            $job = Job::create($params);
+            $time['job_id'] = $job->id;
+            $time['start_at'] = strtotime($time['start_at']);
+            $time['end_at'] = strtotime($time['end_at']);
+            $time['apply_end_at'] = strtotime($time['apply_end_at']);
+            //工作时间插入时间表中
+            JobTime::create($time);
+            // 表中插入岗位
+            // 返回创建成功的json数据
+            return 'success';
+        }else{
+            return sucesss('你没有权限');
         }
 
     }
@@ -165,13 +169,14 @@ class JobController extends Controller {
     /*
      * [POST] jobs/{id}
      */
-    public function update(Request $request, $id) {
+    public function update(Request $request, $id)
+    {
         $self = JWTAuth::parseToken()->authenticate();
         if ($self->isAdmin()) {
             $job = Job::withTrashed()->findOrFail($id);
         } else {
             $job = Job::findOrFail($id);
-            $jobTime = JobTime::query()->where('job_id',$id)->first();
+            $jobTime = JobTime::query()->where('job_id', $id)->first();
         }
         $this->validate($request, [
             'name' => 'string|between:1,250',
@@ -188,68 +193,38 @@ class JobController extends Controller {
         ]);
 
         $job->checkAccess($self);
-
         $job->update(array_only($request->all(),
-            ['name','salary', 'pay_way', 'salary_type', 'description', 'contact', 'contact_person', 'type', 'city', 'address','required_number','salary_pay_way']));
-        $jobTime->update(array_only($request->all(),['start_at', 'end_at','apply_end_at']));
+            ['name', 'salary', 'pay_way', 'salary_type', 'description', 'contact', 'contact_person', 'type', 'city', 'address', 'required_number']));
+        $time = array_only($request->all(),
+            ['start_at', 'end_at', 'apply_end_at']);
+        $time['start_at'] = strtotime($time['start_at']);
+        $time['end_at'] = strtotime($time['end_at']);
+        $time['apply_end_at'] = strtotime($time['apply_end_at']);
+        $jobTime->update(array_only($request->all(), ['start_at', 'end_at', 'apply_end_at']));
         return 'success';
     }
 
     /*
-     * [POST] jobs/{id}/time
-     */
-    public function addTime(Request $request, $id) {
-        // 找到岗位，否则返回404
-        $job = Job::findOrFail($id);
-        $self = JWTAuth::parseToken()->authenticate();
-        // 检查当前用户是否有修改权限
-        $job->checkAccess($self);
-        // json格式
-        $this->validate($request, [
-            'time' => 'required|array',         // 时间数组
-            'time.*.number' => 'integer|min:0', // 人数
-            'time.*.salary_type' => 'in:1,2',   // 工资类型
-            'time.*.salary' => 'integer|min:0', // 工资
-            'time.*.apply_end_at' => 'date',    // 申请结束时间
-            'time.*.start_at' => 'required|date', // 开始时间
-            'time.*.end_at' => 'required|date',  // 结束时间
-        ]);
-
-        $time = $request->input('time');
-
-        foreach ($time as $t) {
-            $tf = array_only($t,
-                ['number', 'salary_type', 'salary', 'apply_end_at', 'start_at', 'end_at']);
-            // 申请结束时间默认等于开始时间
-            if (!$tf['apply_end_at']) $tf['apply_end_at'] = $tf['start_at'];
-            // 保存到数据库
-            JobTime::create(array_merge($tf, ['job_id' => $job->id]));
-        }
-
-        // 绑定岗位的时间
-//        $job->bindTime();
-        $jobTime = JobTime::withTrashed()->where('job_id', $job->id)->orderBy('apply_end_at', 'desc')->get();
-        return response()->json($jobTime);
-    }
-    /*
      *
      */
-    public function closeJob(Request $request ,$id){
+    public function closeJob(Request $request, $id)
+    {
         $user = JWTAuth::parseToken()->authenticate();
 //        验证是不是自己发布的岗位
         $job = Job::findOrFail($id);
-        if ($job->active==0){
-           Throw new MsgException('you had close the job');
+        if ($job->active == 0) {
+            Throw new MsgException('you had close the job');
         }
         $job->checkAccess($user);
-         $job->active = 0;
-         $job->save();
-         return sucesss('下架成功');
+        $job->active = 0;
+        $job->save();
+        return sucesss('下架成功');
     }
+
     /*
      * [DELETE] jobs/{id}/time
      */
-    public function closeTime(Request $request, $id) {
+    public function closeTime(Request $request, $id){
         // 找到岗位，否则返回404
         $job = Job::findOrFail($id);
         $self = JWTAuth::parseToken()->authenticate();
@@ -270,11 +245,11 @@ class JobController extends Controller {
     }
 
 
-
     /*
      * [GET] jobs
      */
-    public function query(Request $request) {
+    public function query(Request $request)
+    {
         // 传入参数验证
         $this->validate($request, [
             'kw' => 'string', // 关键字
@@ -362,8 +337,8 @@ class JobController extends Controller {
 
         // 排序以及分页
         $builder->orderBy($orderby, $direction)
-                ->skip($offset)
-                ->limit($limit);
+            ->skip($offset)
+            ->limit($limit);
 
         $jobs = $builder->get();
         // 返回json数据
@@ -376,57 +351,63 @@ class JobController extends Controller {
      * @param $id 工作的id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function collect(Request $request,$id){
-        $self =JWTAuth::parseToken()->authenticate();
+    public function collect(Request $request, $id)
+    {
+        $self = JWTAuth::parseToken()->authenticate();
         $user_id = $self->id;
-        if(!$self->isUser()){
-           return response()->json('你不是用户');
+        if (!$self->isUser()) {
+            return response()->json('你不是用户');
         }
-        if (MyService::checkIsCollect($user_id,$id)){
+        if (MyService::checkIsCollect($user_id, $id)) {
             return sucesss('已经收藏');
         }
         $coll = new JobCollection;
         $coll->user_id = $user_id;
         $coll->job_id = $id;
         $resutl = $coll->save();
-        if ($resutl == true){
+        if ($resutl == true) {
             return sucesss('收藏成功');
-        }else {
+        } else {
             return sucesss('收藏失败');
         }
     }
-    public function cancelCollect(Request $request){
+
+    public function cancelCollect(Request $request)
+    {
         $service = new MyService();
-        $where = array_only($request->all(),array('user_id','job_id'));
-        if (!MyService::checkIsCollect($where['user_id'],$where['job_id'])){
+        $where = array_only($request->all(), array('user_id', 'job_id'));
+        if (!MyService::checkIsCollect($where['user_id'], $where['job_id'])) {
             return sucesss('还没有收藏');
         }
-        $result = $service->delete('job_collection',$where);
-        if ($result === true){
+        $result = $service->delete('job_collection', $where);
+        if ($result === true) {
             return sucesss('取消成功');
-        }else
+        } else
             return sucesss('取消失败');
     }
-    public function getCollectList(){
-        $user= JWTAuth::parseToken()->authenticate();
+
+    public function getCollectList()
+    {
+        $user = JWTAuth::parseToken()->authenticate();
         $where['job_collection.user_id'] = $user->id;
-        $select = ['job_collection.id','user_id','job_id','name','salary','salary_type','company_name','creator_id'];
+        $select = ['job_collection.id', 'user_id', 'job_id', 'name', 'salary', 'salary_type', 'company_name', 'creator_id'];
         $servic = new MyService();
-        $result = $servic->getList('job_collection','tjz_jobs','job_collection.job_id','=','tjz_jobs.id','left',$where,$select);
-        $result1 = $servic->sortPage($result,0,50,'job_collection.created_at','asc');
+        $result = $servic->getList('job_collection', 'tjz_jobs', 'job_collection.job_id', '=', 'tjz_jobs.id', 'left', $where, $select);
+        $result1 = $servic->sortPage($result, 0, 50, 'job_collection.created_at', 'asc');
         return successList($result1);
     }
 
     /*
      * [POST] jobs/{id}/apply
      */
-    public function apply(Request $request, $id) {
+    public function apply(Request $request, $id)
+    {
         $job = Job::findOrFail($id);
         // 获取工作时间
         $jobTime = JobTime::where('job_id', $job->id)->first();
         // 获取简历
         $self = JWTAuth::parseToken()->authenticate();
-        $resume = Resume::where('user_id',$self->id)->first();
+        $resume = Resume::where('user_id', $self->id)->first();
         // 验证权限
         $self->checkAccess($resume->user_id);
         // 创建订单
@@ -440,7 +421,7 @@ class JobController extends Controller {
             'applicant_id' => $resume->user_id, // 申请者Id
             'applicant_name' => $self->nickname, // 申请者名称
             'recruiter_type' => $job->company_id ? 1 : 0, // 招聘者类型
-            'recruiter_id' =>  $job->creator_id,  // 招聘者id
+            'recruiter_id' => $job->creator_id,  // 招聘者id
             'recruiter_name' => $job->creator_name, // 招聘者名称
             'status' => 0,                    // 状态
             'applicant_check' => 0,           // 申请者是否确认
@@ -453,7 +434,7 @@ class JobController extends Controller {
     /*
      * [DELETE] jobs/{id}
      */
-    public function delete($id) {
+    public function delete($id){
         $job = Job::findOrFail($id);
         $self = JWTAuth::parseToken()->authenticate();
         $job->checkAccess($self);
@@ -461,7 +442,6 @@ class JobController extends Controller {
         $job->delete();
         return response()->json($job);
     }
-
 
 
 }
