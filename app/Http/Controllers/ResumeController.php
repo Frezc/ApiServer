@@ -25,10 +25,14 @@ class ResumeController extends Controller {
         if ($resumes_id == 0){
                 $resumes= \DB::table('resumes')->where('user_id',$user->id)->first();
                 $resumes->email = $user->email;
+                $resumes->score = getAvgScore($user->id);
+                $resumes->number =  getLogNunber('orders',['applicant_id'=>$user->id,'status'=>Status::$gongzuowancheng]);
         }else{
             $resumes= \DB::table('resumes')->where('id',$resumes_id)->first();
             $user = User::find($resumes->user_id);
             $resumes->email = $user->email;
+            $resumes->score = getAvgScore($resumes->user_id);
+            $resumes->number =  getLogNunber('orders',['applicant_id'=>$user->id,'status'=>Status::$gongzuowancheng]);
         }
         return response()->json($resumes);
     }

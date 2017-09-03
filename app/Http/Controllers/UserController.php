@@ -18,17 +18,20 @@ use Illuminate\Http\Request;
 use JWTAuth;
 use Validator;
 
-class UserController extends Controller {
+class UserController extends Controller
+{
 
-    public function __construct() {
-        $this->middleware('jwt.auth', ['except' => ['show', 'mainPage','getAllResume']]);
+    public function __construct()
+    {
+        $this->middleware('jwt.auth', ['except' => ['show', 'mainPage', 'getAllResume']]);
         $this->middleware('log', ['only' => ['update', 'createRealNameApplies', 'deleteRealNameApply', 'updateEvaluate']]);
     }
 
     /*
      * [GET] self
      */
-    public function self() {
+    public function self()
+    {
         $self = JWTAuth::parseToken()->authenticate();
         $self->bindRoleName();
         $self->setHidden(['password']);
@@ -38,7 +41,8 @@ class UserController extends Controller {
     /*
      * [GET] users/{id}
      */
-    public function show($id) {
+    public function show($id)
+    {
         $self = JWTAuth::parseToken()->authenticate();
         $self->setHidden(['password']);
         return response()->json($self);
@@ -54,18 +58,19 @@ class UserController extends Controller {
             $request->input('order', 'desc')
 
         );
-        $total =$builder->count();
+        $total = $builder->count();
         if ($request->has('offset')) {
             $builder->skip($request->input('offset'));
         }
         $builder->limit($request->input('limit'));
-        return response()->json(['list'=> $builder->get(), 'total'=>  $total]);
+        return response()->json(['list' => $builder->get(), 'total' => $total]);
 
 
-}
+    }
 
     // refactor
-    public function getJobApply(Request $request) {
+    public function getJobApply(Request $request)
+    {
         $this->validate($request, [
             'kw' => 'required',
             'siz' => 'integer|min:0',
@@ -112,7 +117,8 @@ class UserController extends Controller {
 
 
     // refactor
-    public function getJobCompleted(Request $request) {
+    public function getJobCompleted(Request $request)
+    {
         $this->validate($request, [
             'kw' => 'required',
             'siz' => 'integer|min:0',
@@ -170,7 +176,8 @@ class UserController extends Controller {
     }
 
     // refactor
-    public function postJobApply(Request $request) {
+    public function postJobApply(Request $request)
+    {
         $this->validate($request, [
             'job_id' => 'required|integer',
             'resume_id' => 'required'
@@ -203,7 +210,8 @@ class UserController extends Controller {
     }
 
     // refactor
-    public function postJobEvaluate(Request $request) {
+    public function postJobEvaluate(Request $request)
+    {
         if (!$request->has('job_completed_id') || !$request->has('score')) {
             return $this->response->errorBadRequest();
         }
@@ -246,7 +254,8 @@ class UserController extends Controller {
     /*
      * [POST] users/{id}
      */
-    public function update(Request $request, $id) {
+    public function update(Request $request, $id)
+    {
         $user = User::findOrFail($id);
         $this->validate($request, [
             'nickname' => 'max:32',      // 昵称不能超过32位
@@ -273,7 +282,8 @@ class UserController extends Controller {
     /*
      * [GET] users/{id}/realNameApplies
      */
-    public function getRealNameApplies($id) {
+    public function getRealNameApplies($id)
+    {
 //        $user = User::findOrFail($id);
         $self = JWTAuth::parseToken()->authenticate();
 //        $self->checkAccess($user->id);
@@ -286,7 +296,8 @@ class UserController extends Controller {
     /*
      * [POST] users/{id}/realNameApplie
      */
-    public function createRealNameApplies(Request $request, $id) {
+    public function createRealNameApplies(Request $request, $id)
+    {
         $user = User::findOrFail($id);
         $this->validate($request, [
             'real_name' => 'required|string|max:16',
@@ -318,7 +329,8 @@ class UserController extends Controller {
     /*
      * [DELETE] users/{id}/realNameApplies/{rnaid}
      */
-    public function deleteRealNameApply($id, $rnaid) {
+    public function deleteRealNameApply($id, $rnaid)
+    {
         $user = User::findOrFail($id);
         $self = JWTAuth::parseToken()->authenticate();
         $self->checkAccess($user->id);
@@ -332,7 +344,8 @@ class UserController extends Controller {
     /*
      * [GET] users/{id}/logs
      */
-    public function getLogs(Request $request, $id) {
+    public function getLogs(Request $request, $id)
+    {
         $user = User::findOrFail($id);
 
         $this->validate($request, [
@@ -352,15 +365,16 @@ class UserController extends Controller {
 
         $total = $builder->count();
         $builder->orderBy('id', $direction)
-                ->skip($offset)
-                ->limit($limit);
+            ->skip($offset)
+            ->limit($limit);
         return response()->json(['total' => $total, 'list' => $builder->get()]);
     }
 
     /*
      * [POST] evaluates/{id}
      */
-    public function updateEvaluate(Request $request, $id) {
+    public function updateEvaluate(Request $request, $id)
+    {
         $evaluate = JobEvaluate::findOrFail($id);
         $this->validate($request, [
             'score' => 'required|integer|between:1,5',
@@ -374,9 +388,25 @@ class UserController extends Controller {
         $evaluate->update(array_only($request->all(), ['score', 'comment', 'pictures']));
         return response()->json($evaluate);
     }
-    public function getUser(){
+
+    public function getUser()
+    {
         $self = JWTAuth::parseToken()->authenticate();
         $self->setHidden(['password']);
         return response()->json($self);
+    }
+
+    public function TableManager(Request $request)
+    {
+        $where = array_except($request->all(), ['token']);
+        $data = getlist('migrations', $where);
+        return successList($data);
+    }
+
+    public function TableDelete(Request $request)
+    {
+        $where = array_except($request->all(), ['token']);
+        $data = delete('migrations',$where );
+        return sucesss($data);
     }
 }

@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\MsgException;
-use App\Models\Company;
 use App\Models\Job;
-use App\Models\JobEvaluate;
 use App\Models\JobTime;
 use App\Models\Order;
 use App\Models\Resume;
@@ -140,12 +138,12 @@ class JobController extends Controller
         ]);
 
         $self = JWTAuth::parseToken()->authenticate();
-        if ($self->role_id ==2) {
+        if ($self->role_id == 2) {
             // 筛选传入的参数
             $params = array_only($request->all(),
                 ['name', 'salary', 'pay_way', 'salary_type', 'description', 'contact', 'contact_person', 'type', 'city', 'address', 'required_number']);
-            $params['company_id'] = $self->company_id?$self->company_id:0;
-            $params['company_name'] = $self->company_name? $self->company_name:0;
+            $params['company_id'] = $self->company_id ? $self->company_id : 0;
+            $params['company_name'] = $self->company_name ? $self->company_name : 0;
             $params['creator_id'] = $self->id;
             $params['creator_name'] = $self->nickname;
             $time = array_only($request->all(),
@@ -160,7 +158,7 @@ class JobController extends Controller
             // 表中插入岗位
             // 返回创建成功的json数据
             return 'success';
-        }else{
+        } else {
             return sucesss('你没有权限');
         }
 
@@ -224,7 +222,8 @@ class JobController extends Controller
     /*
      * [DELETE] jobs/{id}/time
      */
-    public function closeTime(Request $request, $id){
+    public function closeTime(Request $request, $id)
+    {
         // 找到岗位，否则返回404
         $job = Job::findOrFail($id);
         $self = JWTAuth::parseToken()->authenticate();
@@ -399,6 +398,7 @@ class JobController extends Controller
 
     /*
      * [POST] jobs/{id}/apply
+     * 需要修改验证有没有重复申请
      */
     public function apply(Request $request, $id)
     {
@@ -410,6 +410,10 @@ class JobController extends Controller
         $resume = Resume::where('user_id', $self->id)->first();
         // 验证权限
         $self->checkAccess($resume->user_id);
+        //验证有没有重复申请
+         if (getLogNunber('orders',['job_id'=>$id,'applicant_id'=>$self->id])!= 0){
+             return sucesss('你已经申请过这个工作');
+         }
         // 创建订单
         $order = Order::create([
             'job_id' => $job->id,      // 岗位id
@@ -434,7 +438,8 @@ class JobController extends Controller
     /*
      * [DELETE] jobs/{id}
      */
-    public function delete($id){
+    public function delete($id)
+    {
         $job = Job::findOrFail($id);
         $self = JWTAuth::parseToken()->authenticate();
         $job->checkAccess($self);
@@ -443,5 +448,16 @@ class JobController extends Controller
         return response()->json($job);
     }
 
+    public function getJobList(Request $request)
+    {
+
+        $self = JWTAuth::parseToken()->authenticate();
+        $where = array_except($request->all(), ['token']);
+        if ($self->role_id == 2)
+            $where['creator_id'] = $self->id;
+        $data = getlist('tjz_jobs', $where);
+        $data->orderBy('created_at');
+        return successList($data);
+    }
 
 }

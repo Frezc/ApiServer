@@ -76,3 +76,21 @@ function getLogNunber($tablename,$where){
     $result = DB::table($tablename)->where($where)->count();
     return $result;
 }
+function getlist($tablename,$where){
+    $result = DB::table($tablename)->where($where);
+    return $result;
+}
+function sortPage($data,$page,$limit,$clum,$sort){
+    $data->orderBy($clum,$sort);
+    //分页
+    $data->skip($page*$limit);
+    $data->limit($limit);
+    return $data;
+}
+function delete($tablename,$where){
+    $result =  \DB::table($tablename)->where($where)->delete();
+    if ($result == true)
+        return true;
+    else
+        return false;
+}
