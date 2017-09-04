@@ -19,19 +19,19 @@ class ResumeController extends Controller {
     }
 
 
-    public function get(Request $request) {
+    public function get(Request $request) {//时间需要整理
         $resumes_id  = $request->get('resume_id');
         $user = JWTAuth::parseToken()->authenticate();
         if ($resumes_id == 0){
                 $resumes= \DB::table('resumes')->where('user_id',$user->id)->first();
                 $resumes->email = $user->email;
-                $resumes->score = getAvgScore($user->id);
+                $resumes->score =  getAvgScore($resumes->user_id)?getAvgScore($resumes->user_id):5;;
                 $resumes->number =  getLogNunber('orders',['applicant_id'=>$user->id,'status'=>Status::$gongzuowancheng]);
         }else{
             $resumes= \DB::table('resumes')->where('id',$resumes_id)->first();
             $user = User::find($resumes->user_id);
             $resumes->email = $user->email;
-            $resumes->score = getAvgScore($resumes->user_id);
+            $resumes->score = getAvgScore($resumes->user_id)?getAvgScore($resumes->user_id):5;
             $resumes->number =  getLogNunber('orders',['applicant_id'=>$user->id,'status'=>Status::$gongzuowancheng]);
         }
         return response()->json($resumes);

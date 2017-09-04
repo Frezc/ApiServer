@@ -51,10 +51,9 @@ Route::get('jobs/{id}', 'JobController@get')->where('id', '[0-9]+');
 Route::get('getAllJob', 'UserController@mainPage');//主页获取所有工作，可根据自己的简历筛选出相应的工作直接从后台推
 Route::post('jobs/create', 'JobController@create');//创建工作
 Route::post('jobs/update/{id}', 'JobController@update')->where('id', '[0-9]+');//对某一个的工作进行更新
-Route::post('job/apply', 'UserController@postJobApply');//用户申请某一个工作ute::get('jobs/{id}', 'JobController@get')->where('id', '[0-9]+');//获取某一个工作的详情
 Route::get('jobs/close/{id}', 'JobController@closeJob')->where('id', '[0-9]+');//关闭某一个工作
 Route::get('jobs/getMyList', 'JobController@getJobList');
-Route::post('jobs/{id}/apply', 'JobController@apply')->where('id', '[0-9]+');
+Route::post('jobs/apply', 'JobController@apply');
 
 /*
  * 邮件相关

@@ -7,6 +7,7 @@ use App\Models\Job;
 use App\Models\JobTime;
 use App\Models\Order;
 use App\Models\Resume;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use JWTAuth;
@@ -400,20 +401,31 @@ class JobController extends Controller
      * [POST] jobs/{id}/apply
      * 需要修改验证有没有重复申请
      */
-    public function apply(Request $request, $id)
+
+    public function apply(Request $request)
     {
-        $job = Job::findOrFail($id);
+
+        $data = array_only($request->all(), ['job_id', 'user_id']);
+
+        $job = Job::findOrFail($data['job_id']);
         // 获取工作时间
         $jobTime = JobTime::where('job_id', $job->id)->first();
+        $user = JWTAuth::parseToken()->authenticate();
         // 获取简历
-        $self = JWTAuth::parseToken()->authenticate();
-        $resume = Resume::where('user_id', $self->id)->first();
-        // 验证权限
-        $self->checkAccess($resume->user_id);
+        if (empty($data['user_id'])&& $user->role_id == 1)//用户申请
+            $self = $user;
+        else {
+            if ($user->role_id == 2 && $user->id == $job->creator_id)
+                $self = User::find($data['user_id']);
+            else
+                return sucesss('没有权限操作');
+        }
+
+
         //验证有没有重复申请
-         if (getLogNunber('orders',['job_id'=>$id,'applicant_id'=>$self->id])!= 0){
-             return sucesss('你已经申请过这个工作');
-         }
+        if (getLogNunber('orders', ['job_id' => $data['job_id'], 'applicant_id' => $self->id]) != 0) {
+            return sucesss('你已经申请过这个工作');
+        }
         // 创建订单
         $order = Order::create([
             'job_id' => $job->id,      // 岗位id
@@ -421,8 +433,8 @@ class JobController extends Controller
             'salary' => $job->salary,  // 岗位薪资
             'salary_type' => $job->salary_type,  // 岗位薪资
             'job_time_id' => $jobTime->id, // 工作时间id
-            'pay_way' => $job->pay_way,    // 支付方式
-            'applicant_id' => $resume->user_id, // 申请者Id
+            'pay_way' => $job->pay_way,    // 支付方式 1 2
+            'applicant_id' => $self->id, // 申请者Id
             'applicant_name' => $self->nickname, // 申请者名称
             'recruiter_type' => $job->company_id ? 1 : 0, // 招聘者类型
             'recruiter_id' => $job->creator_id,  // 招聘者id
@@ -447,7 +459,6 @@ class JobController extends Controller
         $job->delete();
         return response()->json($job);
     }
-
     public function getJobList(Request $request)
     {
 
