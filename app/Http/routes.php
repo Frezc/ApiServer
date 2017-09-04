@@ -46,7 +46,7 @@ Route::post('users/resumes/update', 'ResumeController@update');//更新某份简
 
 Route::post('job/collect/{id}', 'JobController@collect')->where('id','[0-9]+');
 Route::post('job/cancelCollect', 'JobController@cancelCollect');
-Route::post('job/getCollectList', 'JobController@getCollectList');
+Route::get('job/getCollectList', 'JobController@getCollectList');
 Route::get('jobs/{id}', 'JobController@get')->where('id', '[0-9]+');
 Route::get('getAllJob', 'UserController@mainPage');//主页获取所有工作，可根据自己的简历筛选出相应的工作直接从后台推
 Route::post('jobs/create', 'JobController@create');//创建工作
