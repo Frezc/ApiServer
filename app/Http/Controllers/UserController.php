@@ -27,20 +27,16 @@ class UserController extends Controller
         $this->middleware('log', ['only' => ['update', 'createRealNameApplies', 'deleteRealNameApply', 'updateEvaluate']]);
     }
 
-    /*
-     * [GET] self
-     */
     public function self()
     {
         $self = JWTAuth::parseToken()->authenticate();
         $self->bindRoleName();
         $self->setHidden(['password']);
+        $self->score = getAvgScore($self->id)?getAvgScore($self->id):5;
         return response()->json($self);
     }
 
-    /*
-     * [GET] users/{id}
-     */
+
     public function show($id)
     {
         $self = JWTAuth::parseToken()->authenticate();
