@@ -62,7 +62,7 @@ class PresetSeeder extends Seeder
         User::create([
             'avatar' => null,
             'email' => 'admin@tjz.com',
-            'phone' => '1774112927',
+            'phone' => '17774112927',
             'password' => Hash::make('secret'),
             'nickname' => 'admin',
             'email_verified' => 1,

@@ -404,8 +404,8 @@ class JobController extends Controller
 
     public function apply(Request $request)
     {
-
-        $data = array_only($request->all(), ['job_id', 'user_id']);
+        $status=0;
+        $data = array_only($request->all(), ['job_id', 'user_id','status']);
 
         $job = Job::findOrFail($data['job_id']);
         // 获取工作时间
@@ -415,8 +415,10 @@ class JobController extends Controller
         if (empty($data['user_id'])&& $user->role_id == 1)//用户申请
             $self = $user;
         else {
-            if ($user->role_id == 2 && $user->id == $job->creator_id)
+            if ($user->role_id == 2 && $user->id == $job->creator_id){
                 $self = User::find($data['user_id']);
+                $status = $data['status'];
+            }
             else
                 return sucesss('没有权限操作');
         }
@@ -439,7 +441,7 @@ class JobController extends Controller
             'recruiter_type' => $job->company_id ? 1 : 0, // 招聘者类型
             'recruiter_id' => $job->creator_id,  // 招聘者id
             'recruiter_name' => $job->creator_name, // 招聘者名称
-            'status' => 0,                    // 状态
+            'status' => $status,                    // 状态
             'applicant_check' => 0,           // 申请者是否确认
             'recruiter_check' => 0            // 招聘方是否确认
         ]);
@@ -470,5 +472,4 @@ class JobController extends Controller
         $data->orderBy('created_at');
         return successList($data);
     }
-
 }
