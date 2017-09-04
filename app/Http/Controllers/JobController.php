@@ -386,7 +386,7 @@ class JobController extends Controller
             return sucesss('取消失败');
     }
 
-    public function getCollectList()
+    public function getCollectList(Request $request)
     {
         $user = JWTAuth::parseToken()->authenticate();
         $where['job_collection.user_id'] = $user->id;
@@ -394,7 +394,13 @@ class JobController extends Controller
         $servic = new MyService();
         $result = $servic->getList('job_collection', 'tjz_jobs', 'job_collection.job_id', '=', 'tjz_jobs.id', 'left', $where, $select);
         $result1 = $servic->sortPage($result, 0, 50, 'job_collection.created_at', 'asc');
-        return successList($result1);
+        $total = $result1->count();
+        $data = $result->get();
+        foreach ($data as $key => $value){
+            $data[$key]->start_at = getTableClumnValue('job_times',['job_id'=>$value->job_id],'start_at');
+            $data[$key]->end_at =  getTableClumnValue('job_times',['job_id'=>$value->job_id],'end_at');
+        }
+        return response()->json(['list'=>$data,'total'=>$total]);
     }
 
     /*
@@ -404,22 +410,21 @@ class JobController extends Controller
 
     public function apply(Request $request)
     {
-        $status=0;
-        $data = array_only($request->all(), ['job_id', 'user_id','status']);
+        $status = 0;
+        $data = array_only($request->all(), ['job_id', 'user_id', 'status']);
 
         $job = Job::findOrFail($data['job_id']);
         // 获取工作时间
         $jobTime = JobTime::where('job_id', $job->id)->first();
         $user = JWTAuth::parseToken()->authenticate();
         // 获取简历
-        if (empty($data['user_id'])&& $user->role_id == 1)//用户申请
+        if (empty($data['user_id']) && $user->role_id == 1)//用户申请
             $self = $user;
         else {
-            if ($user->role_id == 2 && $user->id == $job->creator_id){
+            if ($user->role_id == 2 && $user->id == $job->creator_id) {
                 $self = User::find($data['user_id']);
                 $status = $data['status'];
-            }
-            else
+            } else
                 return sucesss('没有权限操作');
         }
 
@@ -449,18 +454,7 @@ class JobController extends Controller
         return 'success';
     }
 
-    /*
-     * [DELETE] jobs/{id}
-     */
-    public function delete($id)
-    {
-        $job = Job::findOrFail($id);
-        $self = JWTAuth::parseToken()->authenticate();
-        $job->checkAccess($self);
 
-        $job->delete();
-        return response()->json($job);
-    }
     public function getJobList(Request $request)
     {
 
@@ -471,5 +465,15 @@ class JobController extends Controller
         $data = getlist('tjz_jobs', $where);
         $data->orderBy('created_at');
         return successList($data);
+    }
+
+    public function delete($id)
+    {
+        $job = Job::findOrFail($id);
+        $self = JWTAuth::parseToken()->authenticate();
+        $job->checkAccess($self);
+
+        $job->delete();
+        return response()->json($job);
     }
 }
