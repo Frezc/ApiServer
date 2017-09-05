@@ -376,7 +376,7 @@ class JobController extends Controller
     {
         $service = new MyService();
         $where = array_only($request->all(), array('user_id', 'job_id'));
-        if (!MyService::checkIsCollect($where['user_id'], $where['job_id'])) {
+        if (!MyService::checkIsCollect($where['user_id'], $where['job_id'])){
             return sucesss('还没有收藏');
         }
         $result = $service->delete('job_collection', $where);
@@ -390,7 +390,7 @@ class JobController extends Controller
     {
         $user = JWTAuth::parseToken()->authenticate();
         $where['job_collection.user_id'] = $user->id;
-        $select = ['job_collection.id', 'user_id', 'job_id', 'name', 'salary', 'salary_type', 'company_name', 'creator_id'];
+        $select = ['job_collection.id', 'user_id', 'job_id', 'name', 'salary', 'salary_type', 'company_name', 'creator_id','address','type'];
         $servic = new MyService();
         $result = $servic->getList('job_collection', 'tjz_jobs', 'job_collection.job_id', '=', 'tjz_jobs.id', 'left', $where, $select);
         $result1 = $servic->sortPage($result, 0, 50, 'job_collection.created_at', 'asc');
@@ -454,7 +454,6 @@ class JobController extends Controller
         return 'success';
     }
 
-
     public function getJobList(Request $request)
     {
 
@@ -465,6 +464,20 @@ class JobController extends Controller
         $data = getlist('tjz_jobs', $where);
         $data->orderBy('created_at');
         return successList($data);
+    }
+    public function offShelfJob(Request $request){
+
+      $user = JWTAuth::parseToken()->authenticate();
+      $job = Job::findOrFail($request->input('job_id'));
+      if ($user->id != $job->creator_id){
+          return sucesss('沒有权限');
+      }
+      if ($job->active == 0){
+          return sucesss('已经下架');
+      }
+      $job->active = 0;
+      $job->save();
+      return sucesss('下架成功');
     }
 
     public function delete($id)
