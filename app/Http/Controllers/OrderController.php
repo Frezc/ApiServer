@@ -161,142 +161,62 @@ class OrderController extends Controller
 
         return response()->json($order);
     }
-
-    /*
-     * [POST] orders/{id}/evaluate
-     */
-    public function postEvaluate(Request $request, $id) {
-        $order = Order::findOrFail($id);
-
-        $this->validate($request, [
-            'score' => 'required|integer|between:1,5',  // 分数
-            'comment' => 'string',                      // 评价
-            'pictures' => 'string'                      // 附图
-        ]);
-
-        $self = JWTAuth::parseToken()->authenticate();
-        $order->makeSureAccess($self);
-        // 订单是否已完成
-        if ($order->status != 2)
-            throw new MsgException('你只能评价已完成的订单', 400);
-        if ($self->id == $order->applicant_id) {
-            // 当前用户为求职者
-            if (JobEvaluate::where('order_id', $order->id)->count() > 0) {
-                throw new MsgException('订单已经被评价.', 400);
-            } else {
-                // 保存对岗位的评价
-                JobEvaluate::create(array_merge(array_only($request->all(),
-                    ['score', 'comment', 'pictures']), [
-                    'user_id' => $self->id,
-                    'user_name' => $self->nickname,
-                    'order_id' => $order->id,
-                    'job_id' => $order->job_id
-                ]));
-                $job = Job::find($order->job_id);
-                // 需要更新岗位表里的分数
-                $job && $job->updateScore();
-                return '评价成功';
-            }
-        }
-
-        if ($order->isRecruiter($self)) {
-            // 当前用户为招聘方的人
-            if (UserEvaluate::where('order_id', $order->id)->count() > 0) {
-                throw new MsgException('Order has been evaluated.', 400);
-            } else {
-                // 保存对用户的评价
-                UserEvaluate::create(array_merge(array_only($request->all(),
-                    ['score', 'comment', 'pictures']), [
-                    'user_id' => $self->id,
-                    'user_name' => $self->nickname,
-                    'order_id' => $order->id,
-                    'target_id' => $order->applicant_id
-                ]));
-                return '评价成功';
-            }
-        }
-        // 没有权限评价
-        throw new MsgException('You cannot evaluate this order', 400);
-    }
-
-    /*
-     * [POST] orders/{id}/check
-     */
-    public function check(Request $request, $id) {
-        $order = Order::findOrFail($id);
-        $self = JWTAuth::parseToken()->authenticate();
-        // 检查权限
-        $order->makeSureAccess($self);
-        dd($order->isRecruiter($self));
-        if ($order->applicant_id == $self->id && !$order->applicant_check) {
-            // 当前用户为求职者且求职者未确认时，选择一个工作时间确认
-            $jobTimeId = $request->input('job_time_id');
-            $jobTime = JobTime::findOrFail($jobTimeId);
-            if ($jobTime->job_id != $order->job_id)
-                throw new MsgException('非法的job_time_id', 400);
-            $order->job_time_id = $jobTime->id;
-            $order->applicant_check = 1;
-            $order->status = 1;
-            $order->save();
-            // 向对方发送已确认的通知
-            $this->dispatch(new PushNotifications(Message::getSender(Message::$WORK_HELPER),
-                $order->getRecruiterIds(), '对方已经确认了订单 ' . $order->id . '。'));
-            // 一个小时内需要支付
-            $job = (new CloseOrderWhenNotPay($order->id))->delay(60 * 60);
-            $this->dispatch($job);
-            return response()->json($order);
-        } elseif ($order->isRecruiter($self) && !$order->recruiter_check) {
-            // 当前用户所属招聘方且未确认
-            $order->recruiter_check = 1;
-            $order->status = 1;
-            $order->save();
-            // 向对方发送已确认的通知
-            $this->dispatch(new PushNotifications(Message::getSender(Message::$WORK_HELPER),
-                $order->applicant_id, '对方已经确认了订单 ' . $order->id . '。'));
-            $job = (new CloseOrderWhenNotPay($order->id))->delay(60 * 60);
-            $this->dispatch($job);
-            return response()->json($order);
-        }
-        // 错误
-        throw new MsgException('你已经确认过该订单了。', 400);
-    }
-
-    /**
-     * @param Request $request
-     * @return string
-     * @throws MsgException
-     * 允许面试    // 订单状态 0：创建，1：允许面试，2：面试成功，3：面试失败 4 工作完成 5订单关闭(面试陈功以后)
-     */
-    public function allowedInterview(Request $request)
-    {
-        $service = new MyService();
-        $order = new Order();
-        $apply = new JobApply;
-        $self = JWTAuth::parseToken()->authenticate();
-        $order_id = $request->get('order_id');
-        $where = array('id' => $order_id);
-
-        if (!checkTableData($order, $where, 'recruiter_id', $self->id)) {
-            return sucesss('没有权限操作这订单');
-        }
-        if (checkTableData($order, $where, 'status', 2)) {
-            return sucesss('你已经录用此人');
-        }
-
-        $result = updateTable($order, $where, ['status' => 2]);
-        $data = getTableField('orders', $where, ['applicant_id', 'job_id']);
-        $where1 = ['user_id' => $data['applicant_id'], 'job_id' => $data['job_id']];
-        $apply = JobApply::query()->where($where1)->first();
-        $apply->status = 2;
-        $result1 = $apply->save();
-
-        if ($result === false || $result1 == false) {
-            return sucesss('发送失败');
-        }
-        //发送邮件
-        $service->companySendWorkMail($data['applicant_id'], $where1['job_id']);
-
-    }
+//    /*
+//     * [POST] orders/{id}/evaluate
+//     */
+//    public function postEvaluate(Request $request, $id) {
+//        $order = Order::findOrFail($id);
+//
+//        $this->validate($request, [
+//            'score' => 'required|integer|between:1,5',  // 分数
+//            'comment' => 'string',                      // 评价
+//            'pictures' => 'string'                      // 附图
+//        ]);
+//
+//        $self = JWTAuth::parseToken()->authenticate();
+//        $order->makeSureAccess($self);
+//        // 订单是否已完成
+//        if ($order->status != 2)
+//            throw new MsgException('你只能评价已完成的订单', 400);
+//        if ($self->id == $order->applicant_id) {
+//            // 当前用户为求职者
+//            if (JobEvaluate::where('order_id', $order->id)->count() > 0) {
+//                throw new MsgException('订单已经被评价.', 400);
+//            } else {
+//                // 保存对岗位的评价
+//                JobEvaluate::create(array_merge(array_only($request->all(),
+//                    ['score', 'comment', 'pictures']), [
+//                    'user_id' => $self->id,
+//                    'user_name' => $self->nickname,
+//                    'order_id' => $order->id,
+//                    'job_id' => $order->job_id
+//                ]));
+//                $job = Job::find($order->job_id);
+//                // 需要更新岗位表里的分数
+//                $job && $job->updateScore();
+//                return '评价成功';
+//            }
+//        }
+//
+//        if ($order->isRecruiter($self)) {
+//            // 当前用户为招聘方的人
+//            if (UserEvaluate::where('order_id', $order->id)->count() > 0) {
+//                throw new MsgException('Order has been evaluated.', 400);
+//            } else {
+//                // 保存对用户的评价
+//                UserEvaluate::create(array_merge(array_only($request->all(),
+//                    ['score', 'comment', 'pictures']), [
+//                    'user_id' => $self->id,
+//                    'user_name' => $self->nickname,
+//                    'order_id' => $order->id,
+//                    'target_id' => $order->applicant_id
+//                ]));
+//                return '评价成功';
+//            }
+//        }
+//        // 没有权限评价
+//        throw new MsgException('You cannot evaluate this order', 400);
+//    }
 
     /**
      * @param Request $request
@@ -311,7 +231,7 @@ class OrderController extends Controller
         $order_id = $request->get('order_id');
         $status = $request->get('status');
         $where = array('id' => $order_id);
-        if (!checkTableData($order, $where, 'recruiter_id', $self->id)||!checkTableData($order, $where, 'applicant_id', $self->id)) {
+        if (!checkTableData($order, $where, 'recruiter_id', $self->id)&&!checkTableData($order, $where, 'applicant_id', $self->id)) {
             return sucesss('没有权限操作这订单');
         }
         if (checkTableData($order, $where, 'status', $status)) {
@@ -321,16 +241,17 @@ class OrderController extends Controller
         if ($result === false) {
             return sucesss('发送失败');
         }
-        $data = getTableField($order, $where, ['applicant_id']);
-        //发送邮件
-        $email = getTableClumnValue('users', ['id' => getTableClumnValue('orders', $where, 'applicant_id')], 'email');
-        $data['phone'] = getTableClumnValue('users', ['id' => getTableClumnValue('orders', $where, 'recruiter_id')], 'phone');
-        $data['company_name'] = getTableClumnValue('tjz_job', ['id' => getTableClumnValue('orders', $where, 'job_id')], 'company_name');
-        $data['addr'] = getTableClumnValue('tjz_job', ['id' => getTableClumnValue('orders', $where, 'job_id')], 'address');
-        $data['job_name'] = getTableClumnValue('orders', $where, 'job_name');
-        $data['time'] = getTableClumnValue('job_times', ['id' => getTableClumnValue('order', $where, 'job_id')], 'start_at');
-        $data['$contact_person'] = getTableClumnValue('orders', $where, 'recruiter_name');
-        $service->emailSend($email, 'emails.interview', $data);
+        return sucesss('处理成功');
+//        $data = getTableField($order, $where, ['applicant_id']);
+//        //发送邮件
+//        $email = getTableClumnValue('users', ['id' => getTableClumnValue('orders', $where, 'applicant_id')], 'email');
+//        $data['phone'] = getTableClumnValue('users', ['id' => getTableClumnValue('orders', $where, 'recruiter_id')], 'phone');
+//        $data['company_name'] = getTableClumnValue('tjz_job', ['id' => getTableClumnValue('orders', $where, 'job_id')], 'company_name');
+//        $data['addr'] = getTableClumnValue('tjz_job', ['id' => getTableClumnValue('orders', $where, 'job_id')], 'address');
+//        $data['job_name'] = getTableClumnValue('orders', $where, 'job_name');
+//        $data['time'] = getTableClumnValue('job_times', ['id' => getTableClumnValue('order', $where, 'job_id')], 'start_at');
+//        $data['$contact_person'] = getTableClumnValue('orders', $where, 'recruiter_name');
+//        $service->emailSend($email, 'emails.interview', $data);
     }
 
 
@@ -378,12 +299,23 @@ class OrderController extends Controller
     /*
      * 用户获取申请详情
      */
-    public function getOrderStatus(Request $request){
+    public function UserGetOrderByStatus(Request $request){
         $user = JWTAuth::parseToken()->authenticate();
-        $jobs = \DB::table('orders')->where('applicant_id',$user->id)->where('status',$request->input('status'));
-        $jobs->orderBy('created_at','desc');
-        $total = $jobs->count();
-        return response()->json(['list'=>$jobs->get(),'total'=>$total]);
+        if ($user->role_id == 1){
+            $where =['applicant_id',$user->id];
+
+        }if ($user->role_id == 2){
+            $where =['recruiter_id',$user->id];
+        }
+        $orders = \DB::table('orders')->where($where)->where('status',$request->input('status'));
+        $orders->orderBy('created_at','desc');
+        $total = $orders->count();
+        $data = $orders->get();
+        foreach ($data as $key=>$value){
+          $data[$key]->start_at = getTableClumnValue('job_times',['job_id'=>$value->job_id],'start_at');
+          $data[$key]->end_at = getTableClumnValue('job_times',['job_id'=>$value->job_id],'end_at');
+        }
+        return response()->json(['list'=>$data,'total'=>$total]);
     }
     /*
      * 企业所有相应状态的岗位
@@ -420,7 +352,7 @@ class OrderController extends Controller
         return response()->json(['list'=>$jobs->get(),'total'=>$total]);
     }
     /**
-     * @param Request $request
+     * @param Request $request 用户评价
      */
     public function orderAppraisal(Request $request)
     {
@@ -465,8 +397,9 @@ class OrderController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param Request $request  获取所有评价
      */
+
     public function getAppraisal(Request $request){
         $user = JWTAuth::parseToken()->authenticate();
         $order_id = $request->get('order_id');

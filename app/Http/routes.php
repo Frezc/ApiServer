@@ -74,11 +74,6 @@ Route::post('bindEmail', 'EmailController@bindEmail');//邮箱绑定
 
 
 
-
-
-
-
-
 // Route::post('user', 'UserController@store');
 
 //Route::get('resume/photo', 'ResumeController@photo');
@@ -125,7 +120,7 @@ Route::post('unlink_company', 'CompanyController@unlink');
 
 
 
-
+Route::post('orders/orderHandle', 'OrderController@orderHandle');
 Route::get('orders/{id}', 'OrderController@get')->where('id', '[0-9]+');
 Route::get('orders/{id}/evaluate', 'OrderController@getEvaluate')->where('id', '[0-9]+');
 Route::post('orders/{id}/evaluate', 'OrderController@postEvaluate')->where('id', '[0-9]+');
@@ -133,7 +128,7 @@ Route::post('orders/{id}/check', 'OrderController@check')->where('id', '[0-9]+')
 Route::post('orders/{id}/payment', 'OrderController@pay')->where('id', '[0-9]+');
 Route::post('orders/{id}/completed', 'OrderController@completed')->where('id', '[0-9]+');
 
-Route::get('orders/getOrderStatus', 'OrderController@getOrderStatus');
+Route::get('orders/UserGetOrderByStatus', 'OrderController@UserGetOrderByStatus');
 
 Route::get('umsg', 'MessageController@getUpdate');
 Route::get('messages', 'MessageController@get');
